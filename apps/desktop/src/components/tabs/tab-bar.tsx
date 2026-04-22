@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { HttpMethod, Tab } from "@apiark/types";
 import { useTabStore } from "@/stores/tab-store";
-import { Plus, X, Globe, Zap, Radio, ChevronDown, Pin, Save, Terminal } from "lucide-react";
+import { useEnvironmentStore } from "@/stores/environment-store";
+import { Plus, X, Globe, Zap, Radio, ChevronDown, Pin, Save, Terminal, FlaskConical } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -255,6 +256,80 @@ function NewTabDropdown() {
   );
 }
 
+function EnvironmentDropdown() {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const { environments, activeEnvironmentName, setActiveEnvironment, activeCollectionPath } = useEnvironmentStore();
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  if (!activeCollectionPath) return null;
+
+  const label = activeEnvironmentName ?? t("environment.noEnvironment");
+
+  return (
+    <div ref={ref} className="relative flex items-center">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] transition-all hover:border-[var(--color-accent)]/40 hover:text-[var(--color-text-primary)] active:scale-95"
+        title={t("environment.title")}
+      >
+        <FlaskConical className="h-3.5 w-3.5 text-[var(--color-accent)]" />
+        <span className="max-w-[120px] truncate">{label}</span>
+        <ChevronDown className={`h-3 w-3 opacity-60 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 min-w-[180px] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] py-1 shadow-xl">
+          <p className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--color-text-dimmed)]">
+            {t("environment.title")}
+          </p>
+          <button
+            onClick={() => { setActiveEnvironment(null); setOpen(false); }}
+            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-accent-glow)] ${
+              activeEnvironmentName === null
+                ? "font-medium text-[var(--color-accent)]"
+                : "text-[var(--color-text-secondary)]"
+            }`}
+          >
+            {activeEnvironmentName === null && <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />}
+            {activeEnvironmentName !== null && <span className="h-1.5 w-1.5 rounded-full" />}
+            {t("environment.noEnvironment")}
+          </button>
+          {environments.map((env) => (
+            <button
+              key={env.name}
+              onClick={() => { setActiveEnvironment(env.name); setOpen(false); }}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-accent-glow)] ${
+                activeEnvironmentName === env.name
+                  ? "font-medium text-[var(--color-accent)]"
+                  : "text-[var(--color-text-primary)]"
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeEnvironmentName === env.name ? "bg-[var(--color-accent)]" : "bg-[var(--color-text-dimmed)]"}`} />
+              <span className="truncate">{env.name}</span>
+            </button>
+          ))}
+          {environments.length === 0 && (
+            <p className="px-3 py-2 text-xs text-[var(--color-text-dimmed)]">
+              {t("sidebar.noEnvironmentsYet")}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function TabBar() {
   const { t } = useTranslation();
   const { tabs, activeTabId, setActiveTab, closeTab, closeOtherTabs, closeAllTabs, reorderTabs, detachTab, togglePin, duplicateTab, save } = useTabStore();
@@ -338,6 +413,7 @@ export function TabBar() {
             {t("common.save")}
           </button>
         )}
+        <EnvironmentDropdown />
         <NewTabDropdown />
       </div>
     </div>
