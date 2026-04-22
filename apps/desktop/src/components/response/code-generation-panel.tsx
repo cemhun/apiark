@@ -16,7 +16,7 @@ const LANGUAGES: { value: Language; label: string }[] = [
 
 /** Replace all {{varName}} in a string with resolved values */
 function resolveVariables(str: string, vars: Record<string, string>): string {
-  return str.replace(/\{\{([\w$]+)\}\}/g, (_, name) => vars[name] ?? `{{${name}}}`);
+  return str.replace(/\{\{([^}]+)\}\}/g, (_, name) => vars[name] ?? `{{${name}}}`);
 }
 
 /** Replace :paramName path variables in a URL with their values */
