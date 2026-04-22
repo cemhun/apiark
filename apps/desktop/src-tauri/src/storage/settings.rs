@@ -57,6 +57,9 @@ pub struct AppSettings {
     /// Layout mode: "horizontal" (side-by-side) or "vertical" (stacked)
     #[serde(default = "default_layout")]
     pub layout: String,
+    /// UI font size in pixels
+    #[serde(default = "default_font_size")]
+    pub font_size: u32,
 }
 
 fn default_theme() -> String {
@@ -91,6 +94,10 @@ fn default_layout() -> String {
     "horizontal".to_string()
 }
 
+fn default_font_size() -> u32 {
+    14
+}
+
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
@@ -115,6 +122,7 @@ impl Default for AppSettings {
             ai_model: None,
             panel_ratio: default_panel_ratio(),
             layout: default_layout(),
+            font_size: default_font_size(),
         }
     }
 }

@@ -149,6 +149,26 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 />
               </div>
 
+              {/* Font Size */}
+              <div className="mb-4">
+                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                  {t("settings.fontSize")}: {settings.fontSize ?? 14}px
+                </label>
+                <input
+                  type="range"
+                  min={11}
+                  max={20}
+                  step={1}
+                  value={settings.fontSize ?? 14}
+                  onChange={(e) => update({ fontSize: Number(e.target.value) })}
+                  className="w-full accent-[var(--color-accent)]"
+                />
+                <div className="mt-1 flex justify-between text-xs text-[var(--color-text-dimmed)]">
+                  <span>11px</span>
+                  <span>20px</span>
+                </div>
+              </div>
+
               {/* Language */}
               <div>
                 <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">

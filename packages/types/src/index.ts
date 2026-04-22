@@ -320,6 +320,7 @@ export interface AppSettings {
   aiModel: string | null;
   panelRatio: number;
   layout: "horizontal" | "vertical" | "tabbed";
+  fontSize: number;
 }
 
 // ── Tab Protocol ──

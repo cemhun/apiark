@@ -233,6 +233,7 @@
     "stacked": "Stacked",
     "tabbed": "Tabbed",
     "sidebarWidth": "Sidebar Width",
+    "fontSize": "Text Size",
     "network": "Network",
     "sslVerification": "SSL Certificate Verification",
     "followRedirects": "Follow Redirects",

@@ -8,6 +8,7 @@ import { useSettingsStore } from "@/stores/settings-store";
 export function useTheme() {
   const theme = useSettingsStore((s) => s.settings.theme);
   const accent = useSettingsStore((s) => s.settings.accentColor);
+  const fontSize = useSettingsStore((s) => s.settings.fontSize);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -38,6 +39,10 @@ export function useTheme() {
       root.setAttribute("data-accent", accent);
     }
   }, [accent]);
+
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontSize ?? 14}px`;
+  }, [fontSize]);
 }
 
 /** Returns the resolved theme for components that need to know (e.g. Monaco). */
