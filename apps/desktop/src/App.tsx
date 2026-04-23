@@ -89,6 +89,11 @@ function App() {
   useEffect(() => {
     loadSettings();
 
+    // Prune collection paths that no longer exist on disk
+    import("@/stores/workspace-store").then(({ pruneStaleCollections }) => {
+      pruneStaleCollections().catch(() => {});
+    });
+
     // Check if this window was opened to receive a detached tab
     const tryConsumeTabTransfer = async () => {
       try {

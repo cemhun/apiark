@@ -4,6 +4,8 @@ import { persist } from "zustand/middleware";
 export interface Workspace {
   id: string;
   name: string;
+  /** Slug folder name under ~/ApiArk/, e.g. "default" */
+  folderName: string;
   collectionPaths: string[];
 }
 
@@ -12,16 +14,28 @@ interface WorkspaceState {
   activeWorkspaceId: string;
 
   activeWorkspace: () => Workspace;
+  /** Returns ~/ApiArk/<folderName> for a workspace */
+  workspaceDir: (workspace: Workspace) => Promise<string>;
+  /** Returns the active workspace's directory */
+  activeWorkspaceDir: () => Promise<string>;
   setActiveWorkspace: (id: string) => Promise<void>;
-  createWorkspace: (name: string) => Workspace;
+  createWorkspace: (name: string) => Promise<Workspace>;
   renameWorkspace: (id: string, name: string) => void;
   deleteWorkspace: (id: string) => void;
   addCollection: (path: string) => Promise<void>;
   removeCollection: (path: string) => void;
 }
 
+function slugify(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "workspace";
+}
+
 function defaultWorkspace(): Workspace {
-  return { id: "default", name: "Default", collectionPaths: [] };
+  return { id: "default", name: "Default", folderName: "default", collectionPaths: [] };
 }
 
 export const useWorkspaceStore = create<WorkspaceState>()(
@@ -33,6 +47,16 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       activeWorkspace: () => {
         const { workspaces, activeWorkspaceId } = get();
         return workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
+      },
+
+      workspaceDir: async (workspace: Workspace) => {
+        const { homeDir, join } = await import("@tauri-apps/api/path");
+        return join(await homeDir(), "ApiArk", workspace.folderName);
+      },
+
+      activeWorkspaceDir: async () => {
+        const ws = get().activeWorkspace();
+        return get().workspaceDir(ws);
       },
 
       setActiveWorkspace: async (id: string) => {
@@ -72,12 +96,32 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         }
       },
 
-      createWorkspace: (name: string) => {
+      createWorkspace: async (name: string) => {
+        const { workspaces } = get();
+        // Ensure unique folder name
+        let folderName = slugify(name);
+        let suffix = 2;
+        while (workspaces.some((w) => w.folderName === folderName)) {
+          folderName = `${slugify(name)}-${suffix++}`;
+        }
+
         const workspace: Workspace = {
           id: `ws-${Date.now()}`,
           name,
+          folderName,
           collectionPaths: [],
         };
+
+        // Create the workspace directory on disk
+        try {
+          const { homeDir, join } = await import("@tauri-apps/api/path");
+          const { mkdir } = await import("@tauri-apps/plugin-fs");
+          const dir = await join(await homeDir(), "ApiArk", folderName);
+          await mkdir(dir, { recursive: true });
+        } catch {
+          // Non-fatal — directory may already exist
+        }
+
         set((s) => ({ workspaces: [...s.workspaces, workspace] }));
         return workspace;
       },
@@ -90,7 +134,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
       deleteWorkspace: (id) => {
         const { workspaces, activeWorkspaceId } = get();
-        if (workspaces.length <= 1) return; // Can't delete last workspace
+        if (workspaces.length <= 1) return;
         const newWorkspaces = workspaces.filter((w) => w.id !== id);
         const newActiveId =
           activeWorkspaceId === id ? newWorkspaces[0].id : activeWorkspaceId;
@@ -121,7 +165,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           ),
         }));
 
-        // Close collection and its open tabs
         import("@/stores/collection-store").then(({ useCollectionStore }) => {
           useCollectionStore.getState().closeCollection(path);
         });
@@ -137,15 +180,39 @@ export const useWorkspaceStore = create<WorkspaceState>()(
     }),
     {
       name: "apiark-workspaces",
-      // One-time migration: seed Default workspace from persisted collections
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        const defaultWs = state.workspaces.find((w) => w.id === "default");
-        if (defaultWs && defaultWs.collectionPaths.length === 0) {
-          // Will be seeded by restoreTabs if persisted collections exist
+        // Migrate existing workspaces that don't have folderName
+        const needs = state.workspaces.some((w) => !w.folderName);
+        if (needs) {
+          state.workspaces = state.workspaces.map((w) => ({
+            ...w,
+            folderName: w.folderName ?? slugify(w.name),
+          }));
         }
       },
     },
   ),
 );
 
+/** Call this once on app startup (after Tauri is ready) to remove collection
+ *  paths that no longer exist on disk. */
+export async function pruneStaleCollections(): Promise<void> {
+  const { exists } = await import("@tauri-apps/plugin-fs");
+  const { workspaces } = useWorkspaceStore.getState();
+
+  for (const w of workspaces) {
+    const validPaths: string[] = [];
+    for (const colPath of w.collectionPaths) {
+      const ok = await exists(colPath).catch(() => false);
+      if (ok) validPaths.push(colPath);
+    }
+    if (validPaths.length !== w.collectionPaths.length) {
+      useWorkspaceStore.setState((s) => ({
+        workspaces: s.workspaces.map((ws) =>
+          ws.id === w.id ? { ...ws, collectionPaths: validPaths } : ws,
+        ),
+      }));
+    }
+  }
+}

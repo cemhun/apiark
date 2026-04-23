@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCollectionStore } from "@/stores/collection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { CollectionTree } from "./collection-tree";
 import { EnvironmentSelector } from "@/components/environment/environment-selector";
 import { HistoryPanel } from "@/components/history/history-panel";
-import { FolderOpen, FolderPlus, ChevronDown, ChevronRight, Settings, Search, X, Upload } from "lucide-react";
+import { FolderPlus, ChevronDown, ChevronRight, Settings, Search, X, Upload } from "lucide-react";
 import { EmptyState, FolderPlusIcon } from "@/components/ui/empty-state";
-import { open } from "@tauri-apps/plugin-dialog";
 import { createCollection } from "@/lib/tauri-api";
 import { useSettingsStore } from "@/stores/settings-store";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -23,7 +23,8 @@ interface CollectionSidebarProps {
 export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, onOpenImport }: CollectionSidebarProps) {
   const { t } = useTranslation();
   const sidebarWidth = useSettingsStore((s) => s.settings.sidebarWidth);
-  const { collections, openCollection } = useCollectionStore();
+  const { collections } = useCollectionStore();
+  const { addCollection } = useWorkspaceStore();
   const [expandedSections, setExpandedSections] = useState<Set<SidebarSection>>(
     new Set(["collections", "environments"]),
   );
@@ -42,19 +43,6 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
       }
       return next;
     });
-  };
-
-  const handleOpenFolder = async () => {
-    try {
-      const selected = await open({ directory: true, multiple: false });
-      if (selected) {
-        await openCollection(selected as string);
-      }
-    } catch (err) {
-      import("@/stores/toast-store").then(({ useToastStore }) =>
-        useToastStore.getState().showError(`Failed to open folder: ${err}`),
-      );
-    }
   };
 
   return (
@@ -131,13 +119,6 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
                         <FolderPlus className="h-3.5 w-3.5" />
                         {t("sidebar.newCollection")}
                       </button>
-                      <button
-                        onClick={handleOpenFolder}
-                        className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]"
-                      >
-                        <FolderOpen className="h-3.5 w-3.5" />
-                        {t("sidebar.openFolder")}
-                      </button>
                       {onOpenImport && (
                         <button
                           onClick={onOpenImport}
@@ -172,13 +153,6 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
                     >
                       <FolderPlus className="h-3 w-3" />
                       {t("sidebar.new")}
-                    </button>
-                    <button
-                      onClick={handleOpenFolder}
-                      className="flex items-center gap-1.5 rounded px-2 py-1 text-xs text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
-                    >
-                      <FolderOpen className="h-3 w-3" />
-                      {t("sidebar.open")}
                     </button>
                     {onOpenImport && (
                       <button
@@ -240,7 +214,7 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
       <NewCollectionDialog
         open={newCollectionOpen}
         onOpenChange={setNewCollectionOpen}
-        onCreated={openCollection}
+        onCreated={addCollection}
       />
     </aside>
   );
@@ -257,31 +231,24 @@ function NewCollectionDialog({
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
-  const [parentDir, setParentDir] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
   const handleOpenChange = (open: boolean) => {
     if (open) {
       setName("");
-      setParentDir("");
       setError("");
     }
     onOpenChange(open);
   };
 
-  const handlePickFolder = async () => {
-    try {
-      const selected = await open({ directory: true, multiple: false });
-      if (selected) setParentDir(selected as string);
-    } catch { /* cancelled */ }
-  };
-
   const handleCreate = async () => {
-    if (!name.trim() || !parentDir) return;
+    if (!name.trim()) return;
     setCreating(true);
     setError("");
     try {
+      const { useWorkspaceStore } = await import("@/stores/workspace-store");
+      const parentDir = await useWorkspaceStore.getState().activeWorkspaceDir();
       const path = await createCollection(parentDir, name.trim());
       await onCreated(path);
       onOpenChange(false);
@@ -292,13 +259,13 @@ function NewCollectionDialog({
     }
   };
 
-  const canCreate = name.trim() && parentDir && !creating;
+  const canCreate = name.trim() && !creating;
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
           <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
             <Dialog.Title className="text-sm font-medium text-[var(--color-text-primary)]">
               {t("sidebar.newCollection")}
@@ -308,7 +275,7 @@ function NewCollectionDialog({
             </Dialog.Close>
           </div>
 
-          <div className="space-y-4 p-4">
+          <div className="space-y-3 p-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)]">
                 {t("sidebar.collectionName")}
@@ -325,33 +292,6 @@ function NewCollectionDialog({
                 }}
               />
             </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--color-text-secondary)]">
-                {t("sidebar.location")}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={parentDir}
-                  readOnly
-                  placeholder={t("common.browse")}
-                  className="flex-1 rounded bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
-                />
-                <button
-                  onClick={handlePickFolder}
-                  className="shrink-0 rounded bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
-                >
-                  {t("common.browse")}
-                </button>
-              </div>
-              {name.trim() && parentDir && (
-                <p className="text-[11px] text-[var(--color-text-dimmed)]">
-                  Will create: {parentDir}/{name.trim().toLowerCase().replace(/\s+/g, "-")}
-                </p>
-              )}
-            </div>
-
             {error && (
               <p className="text-xs text-red-400">{error}</p>
             )}
@@ -374,3 +314,5 @@ function NewCollectionDialog({
     </Dialog.Root>
   );
 }
+
+

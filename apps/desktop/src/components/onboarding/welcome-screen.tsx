@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderOpen, Download, Plus } from "lucide-react";
-import { open } from "@tauri-apps/plugin-dialog";
+import { Download, Plus } from "lucide-react";
 import { createSampleCollection } from "@/lib/tauri-api";
-import { useCollectionStore } from "@/stores/collection-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { useTabStore } from "@/stores/tab-store";
 
@@ -21,8 +19,10 @@ export function WelcomeScreen({
   const handleStartFresh = async () => {
     setLoading(true);
     try {
-      const path = await createSampleCollection();
-      await useCollectionStore.getState().openCollection(path);
+      const { useWorkspaceStore } = await import("@/stores/workspace-store");
+      const parentDir = await useWorkspaceStore.getState().activeWorkspaceDir();
+      const path = await createSampleCollection(parentDir);
+      await useWorkspaceStore.getState().addCollection(path);
       useTabStore.getState().newTab();
       await updateSettings({ onboardingComplete: true });
       onComplete(true);
@@ -39,21 +39,6 @@ export function WelcomeScreen({
     await updateSettings({ onboardingComplete: true });
     onComplete();
     onOpenImport();
-  };
-
-  const handleOpenFolder = async () => {
-    try {
-      const selected = await open({ directory: true, multiple: false });
-      if (selected) {
-        await useCollectionStore.getState().openCollection(selected as string);
-        await updateSettings({ onboardingComplete: true });
-        onComplete();
-      }
-    } catch (err) {
-      import("@/stores/toast-store").then(({ useToastStore }) =>
-        useToastStore.getState().showError(`Failed to open folder: ${err}`),
-      );
-    }
   };
 
   return (
@@ -90,19 +75,6 @@ export function WelcomeScreen({
               <div className="text-sm font-medium">{t("onboarding.importExisting")}</div>
               <div className="text-xs text-[var(--color-text-dimmed)]">
                 {t("onboarding.importExistingDesc")}
-              </div>
-            </div>
-          </button>
-
-          <button
-            onClick={handleOpenFolder}
-            className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-4 py-3 text-left transition hover:border-blue-500/50 hover:bg-[var(--color-border)]"
-          >
-            <FolderOpen className="h-5 w-5 shrink-0 text-yellow-400" />
-            <div>
-              <div className="text-sm font-medium">{t("onboarding.openFolder")}</div>
-              <div className="text-xs text-[var(--color-text-dimmed)]">
-                {t("onboarding.openFolderDesc")}
               </div>
             </div>
           </button>

@@ -126,9 +126,14 @@ pub async fn rename_item(path: String, new_name: String) -> Result<String, Strin
 }
 
 #[tauri::command]
-pub async fn create_sample_collection() -> Result<String, String> {
-    let home = dirs::home_dir().ok_or("Could not determine home directory")?;
-    let base = home.join("ApiArk").join("getting-started");
+pub async fn create_sample_collection(parent_dir: Option<String>) -> Result<String, String> {
+    let base_parent = if let Some(dir) = parent_dir {
+        std::path::PathBuf::from(dir)
+    } else {
+        let home = dirs::home_dir().ok_or("Could not determine home directory")?;
+        home.join("ApiArk").join("default")
+    };
+    let base = base_parent.join("getting-started");
 
     if base.join(".apiark").join("apiark.yaml").exists() {
         return Ok(base.to_string_lossy().to_string());

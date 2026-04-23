@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useCollectionStore } from "@/stores/collection-store";
+import { useTabStore } from "@/stores/tab-store";
 import { CollectionTree } from "@/components/collection/collection-tree";
 import { EnvironmentSelector } from "@/components/environment/environment-selector";
 import { HistoryPanel } from "@/components/history/history-panel";
 import { FolderOpen, FolderPlus, Plus, Search, Trash2, X, Upload, FolderX, ChevronDown, ChevronRight, Folder, Globe, Pencil, Settings, Briefcase, Check } from "lucide-react";
-import { open } from "@tauri-apps/plugin-dialog";
 import { createCollection, saveEnvironment } from "@/lib/tauri-api";
 import { useEnvironmentStore } from "@/stores/environment-store";
 import { useSettingsStore } from "@/stores/settings-store";
@@ -160,7 +160,7 @@ function WorkspaceHeader() {
                   placeholder="Workspace name"
                   onKeyDown={async (e) => {
                     if (e.key === "Enter" && newName.trim()) {
-                      const created = createWorkspace(newName.trim());
+                      const created = await createWorkspace(newName.trim());
                       setNewName(""); setNewOpen(false); setMenuOpen(false);
                       await setActiveWorkspace(created.id);
                     } else if (e.key === "Escape") { setNewOpen(false); setNewName(""); }
@@ -200,18 +200,6 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
     (c) => c.type === "collection" && ws.collectionPaths.includes(c.path),
   );
 
-  const handleOpenFolder = async () => {
-    try {
-      const selected = await open({ directory: true, multiple: false });
-      if (selected) {
-        await addCollection(selected as string);
-      }
-    } catch (err) {
-      import("@/stores/toast-store").then(({ useToastStore }) =>
-        useToastStore.getState().showError(`Failed to open folder: ${err}`),
-      );
-    }
-  };
 
   return (
     <div className="flex flex-col gap-2 px-2 pt-2">
@@ -254,13 +242,6 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
           >
             <FolderPlus className="h-3.5 w-3.5" />
             {t("sidebar.newCollection")}
-          </button>
-          <button
-            onClick={handleOpenFolder}
-            className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-4 py-2 text-xs font-medium text-[var(--color-text-secondary)] transition-all hover:bg-[var(--color-elevated)]"
-          >
-            <FolderOpen className="h-3.5 w-3.5" />
-            {t("sidebar.openFolder")}
           </button>
           {onOpenImport && (
             <button
@@ -325,13 +306,6 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
             >
               <FolderPlus className="h-4 w-4" />
               {t("sidebar.new")}
-            </button>
-            <button
-              onClick={handleOpenFolder}
-              className="flex items-center gap-1.5 rounded-md px-2.5 py-2 text-sm text-[var(--color-text-dimmed)] transition-colors hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
-            >
-              <FolderOpen className="h-4 w-4" />
-              {t("sidebar.open")}
             </button>
             {onOpenImport && (
               <button
@@ -529,10 +503,14 @@ function CollectionHeader({
   onDelete: () => void;
   onClose: () => void;
 }) {
-  const { expandedPaths, toggleExpand, renameItem } = useCollectionStore();
+  const { expandedPaths, toggleExpand, renameItem, createRequest, refreshCollection } = useCollectionStore();
+  const { openTab } = useTabStore();
   const isExpanded = expandedPaths.has(collection.path);
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState("");
+  const [newRequestName, setNewRequestName] = useState("");
+  const [addingRequest, setAddingRequest] = useState(false);
+  const newRequestInputRef = useRef<HTMLInputElement>(null);
 
   const handleRename = () => {
     setRenameValue(collection.name);
@@ -547,6 +525,30 @@ function CollectionHeader({
     } catch (err) {
       import("@/stores/toast-store").then(({ useToastStore }) =>
         useToastStore.getState().showError(`Failed to rename: ${err}`),
+      );
+    }
+  };
+
+  const startAddingRequest = () => {
+    if (!isExpanded) toggleExpand(collection.path);
+    setNewRequestName("");
+    setAddingRequest(true);
+    setTimeout(() => newRequestInputRef.current?.focus(), 50);
+  };
+
+  const submitNewRequest = async () => {
+    const name = newRequestName.trim();
+    setAddingRequest(false);
+    setNewRequestName("");
+    if (!name) return;
+    try {
+      const filename = name.toLowerCase().replace(/\s+/g, "-");
+      const path = await createRequest(collection.path, filename, name, collection.path);
+      await openTab(path, collection.path);
+      await refreshCollection(collection.path);
+    } catch (err) {
+      import("@/stores/toast-store").then(({ useToastStore }) =>
+        useToastStore.getState().showError(`Failed to create request: ${err}`),
       );
     }
   };
@@ -587,6 +589,13 @@ function CollectionHeader({
         {!renaming && (
           <span className="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100">
             <button
+              onClick={(e) => { e.stopPropagation(); startAddingRequest(); }}
+              className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-accent)]"
+              title="New Request"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+            <button
               onClick={(e) => { e.stopPropagation(); handleRename(); }}
               className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
               title="Rename"
@@ -622,9 +631,36 @@ function CollectionHeader({
           searchQuery={searchQuery}
         />
       )}
+      {isExpanded && addingRequest && (
+        <div className="flex items-center gap-1.5 px-2 py-1 pl-6">
+          <Plus className="h-3 w-3 shrink-0 text-[var(--color-accent)]" />
+          <input
+            ref={newRequestInputRef}
+            value={newRequestName}
+            onChange={(e) => setNewRequestName(e.target.value)}
+            onBlur={submitNewRequest}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submitNewRequest();
+              if (e.key === "Escape") { setAddingRequest(false); setNewRequestName(""); }
+            }}
+            placeholder="Request name..."
+            className="min-w-0 flex-1 rounded bg-[var(--color-elevated)] px-2 py-0.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none ring-1 ring-[var(--color-accent)]/60"
+          />
+        </div>
+      )}
+      {isExpanded && !addingRequest && !searchQuery && (
+        <button
+          onClick={startAddingRequest}
+          className="flex w-full items-center gap-1.5 px-2 py-0.5 pl-6 text-xs text-[var(--color-text-dimmed)] hover:text-[var(--color-accent)] hover:bg-[var(--color-elevated)] rounded"
+        >
+          <Plus className="h-3 w-3" />
+          New Request
+        </button>
+      )}
     </div>
   );
 }
+
 
 function NewCollectionDialog({
   open: isOpen,
@@ -637,31 +673,24 @@ function NewCollectionDialog({
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
-  const [parentDir, setParentDir] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
   const handleOpenChange = (v: boolean) => {
     if (v) {
       setName("");
-      setParentDir("");
       setError("");
     }
     onOpenChange(v);
   };
 
-  const handlePickFolder = async () => {
-    try {
-      const selected = await open({ directory: true, multiple: false });
-      if (selected) setParentDir(selected as string);
-    } catch { /* cancelled */ }
-  };
-
   const handleCreate = async () => {
-    if (!name.trim() || !parentDir) return;
+    if (!name.trim()) return;
     setCreating(true);
     setError("");
     try {
+      const { useWorkspaceStore } = await import("@/stores/workspace-store");
+      const parentDir = await useWorkspaceStore.getState().activeWorkspaceDir();
       const path = await createCollection(parentDir, name.trim());
       await onCreated(path);
       onOpenChange(false);
@@ -672,13 +701,13 @@ function NewCollectionDialog({
     }
   };
 
-  const canCreate = name.trim() && parentDir && !creating;
+  const canCreate = name.trim() && !creating;
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
           <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
             <Dialog.Title className="text-sm font-medium text-[var(--color-text-primary)]">
               {t("sidebar.newCollection")}
@@ -688,7 +717,7 @@ function NewCollectionDialog({
             </Dialog.Close>
           </div>
 
-          <div className="space-y-4 p-4">
+          <div className="space-y-3 p-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)]">
                 {t("sidebar.collectionName")}
@@ -704,32 +733,6 @@ function NewCollectionDialog({
                   if (e.key === "Enter" && canCreate) handleCreate();
                 }}
               />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--color-text-secondary)]">
-                {t("sidebar.location")}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={parentDir}
-                  readOnly
-                  placeholder={t("common.browse")}
-                  className="flex-1 truncate rounded bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
-                />
-                <button
-                  onClick={handlePickFolder}
-                  className="shrink-0 rounded bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
-                >
-                  {t("common.browse")}
-                </button>
-              </div>
-              {name.trim() && parentDir && (
-                <p className="truncate text-[11px] text-[var(--color-text-dimmed)]">
-                  Will create: {parentDir}/{name.trim().toLowerCase().replace(/\s+/g, "-")}
-                </p>
-              )}
             </div>
 
             {error && (

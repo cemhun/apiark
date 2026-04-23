@@ -9,6 +9,7 @@ import {
   importCollection,
 } from "@/lib/tauri-api";
 import { useCollectionStore } from "@/stores/collection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 interface ImportDialogProps {
   open: boolean;
@@ -38,6 +39,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
   const [result, setResult] = useState<string | null>(null);
 
   const { openCollection } = useCollectionStore();
+  const { addCollection } = useWorkspaceStore();
 
   const reset = useCallback(() => {
     setStep("select");
@@ -120,32 +122,15 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       const p = await getImportPreview(filePath, format);
       setPreview(p);
 
-      // Default target dir
-      const { homeDir, join } = await import("@tauri-apps/api/path");
-      const home = await homeDir();
-      setTargetDir(await join(home, "ApiArk"));
+      // Always save to active workspace dir ~/ApiArk/<workspace>/
+      const { useWorkspaceStore } = await import("@/stores/workspace-store");
+      setTargetDir(await useWorkspaceStore.getState().activeWorkspaceDir());
 
       setStep("preview");
     } catch (err) {
       setError(String(err));
     }
   }, [filePath, format]);
-
-  const handleSelectTargetDir = useCallback(async () => {
-    try {
-      const { open: openDialog } = await import("@tauri-apps/plugin-dialog");
-      const selected = await openDialog({
-        directory: true,
-        multiple: false,
-      });
-
-      if (selected && typeof selected === "string") {
-        setTargetDir(selected);
-      }
-    } catch (err) {
-      setError(String(err));
-    }
-  }, []);
 
   const handleImport = useCallback(async () => {
     if (!filePath || !format || !targetDir) return;
@@ -161,6 +146,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
 
       // Auto-open the imported collection
       try {
+        await addCollection(collectionPath);
         await openCollection(collectionPath);
       } catch {
         // Non-fatal: collection was created, user can open it manually
@@ -169,7 +155,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
       setError(String(err));
       setImporting(false);
     }
-  }, [filePath, format, targetDir, openCollection]);
+  }, [filePath, format, targetDir, openCollection, addCollection]);
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
@@ -205,7 +191,6 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
                 preview={preview}
                 targetDir={targetDir}
                 error={error}
-                onSelectTargetDir={handleSelectTargetDir}
                 onBack={() => setStep("select")}
                 onImport={handleImport}
               />
@@ -317,14 +302,12 @@ function PreviewStep({
   preview,
   targetDir,
   error,
-  onSelectTargetDir,
   onBack,
   onImport,
 }: {
   preview: ImportPreview;
   targetDir: string;
   error: string | null;
-  onSelectTargetDir: () => void;
   onBack: () => void;
   onImport: () => void;
 }) {
@@ -357,17 +340,9 @@ function PreviewStep({
         </div>
       )}
 
-      <div className="space-y-2">
-        <label className="text-xs font-medium text-[var(--color-text-secondary)]">
-          {t("import.saveTo")}
-        </label>
-        <button
-          onClick={onSelectTargetDir}
-          className="w-full truncate rounded border border-[var(--color-border)] bg-[var(--color-elevated)] px-3 py-2 text-left text-sm text-[var(--color-text-secondary)] hover:border-blue-500"
-        >
-          {targetDir || t("import.selectDirectory")}
-        </button>
-      </div>
+      <p className="text-xs text-[var(--color-text-dimmed)]">
+        {t("import.saveTo")}: <span className="font-medium text-[var(--color-text-secondary)]">{targetDir}</span>
+      </p>
 
       {error && (
         <p className="flex items-center gap-1.5 text-xs text-red-400">
@@ -385,8 +360,7 @@ function PreviewStep({
         </button>
         <button
           onClick={onImport}
-          disabled={!targetDir}
-          className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-500"
         >
           {t("sidebar.import")}
         </button>

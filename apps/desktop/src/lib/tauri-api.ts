@@ -586,8 +586,8 @@ export async function unwatchCollection(collectionPath: string): Promise<void> {
 
 // ── Sample Collection ──
 
-export async function createSampleCollection(): Promise<string> {
-  return await invoke<string>("create_sample_collection", {});
+export async function createSampleCollection(parentDir?: string): Promise<string> {
+  return await invoke<string>("create_sample_collection", { parentDir: parentDir ?? null });
 }
 
 export async function createCollection(parentDir: string, name: string): Promise<string> {
