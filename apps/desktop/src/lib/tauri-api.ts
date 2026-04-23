@@ -631,8 +631,12 @@ export async function deactivateLicense(): Promise<LicenseStatus> {
 
 // ── Window ──
 
-export async function openNewWindow(): Promise<string> {
-  return await invoke<string>("open_new_window", {});
+export async function openNewWindow(tabData?: string): Promise<string> {
+  return await invoke<string>("open_new_window", { tabData: tabData ?? null });
+}
+
+export async function consumeTabTransfer(windowLabel: string): Promise<string | null> {
+  return await invoke<string | null>("consume_tab_transfer", { windowLabel });
 }
 
 // ── Plugins ──

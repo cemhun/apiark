@@ -4,11 +4,12 @@ import { useCollectionStore } from "@/stores/collection-store";
 import { CollectionTree } from "@/components/collection/collection-tree";
 import { EnvironmentSelector } from "@/components/environment/environment-selector";
 import { HistoryPanel } from "@/components/history/history-panel";
-import { FolderOpen, FolderPlus, Plus, Search, Trash2, X, Upload, FolderX, ChevronDown, ChevronRight, Folder, Globe, Pencil, Settings } from "lucide-react";
+import { FolderOpen, FolderPlus, Plus, Search, Trash2, X, Upload, FolderX, ChevronDown, ChevronRight, Folder, Globe, Pencil, Settings, Briefcase, Check } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { createCollection, saveEnvironment } from "@/lib/tauri-api";
 import { useEnvironmentStore } from "@/stores/environment-store";
 import { useSettingsStore } from "@/stores/settings-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import type { EnvironmentData, CollectionNode } from "@apiark/types";
 import * as Dialog from "@radix-ui/react-dialog";
 import type { ActivityView } from "./activity-bar";
@@ -54,11 +55,15 @@ export function SidePanel({
       style={{ width: `${sidebarWidth}px` }}
     >
       {/* Panel header */}
-      <div className="flex h-11 shrink-0 items-center px-4">
-        <span className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-          {titles[activeView]}
-        </span>
-      </div>
+      {activeView === "collections" ? (
+        <WorkspaceHeader />
+      ) : (
+        <div className="flex h-11 shrink-0 items-center px-4">
+          <span className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+            {titles[activeView]}
+          </span>
+        </div>
+      )}
 
       {/* Panel content */}
       <div className="flex-1 overflow-y-auto">
@@ -76,20 +81,130 @@ export function SidePanel({
   );
 }
 
+function WorkspaceHeader() {
+  const { workspaces, activeWorkspaceId, activeWorkspace, setActiveWorkspace, createWorkspace, renameWorkspace, deleteWorkspace } = useWorkspaceStore();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [newOpen, setNewOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+
+  const ws = activeWorkspace();
+
+  return (
+    <div className="relative shrink-0 border-b border-[var(--color-border)]">
+      <button
+        onClick={() => setMenuOpen((v) => !v)}
+        className="flex h-11 w-full items-center gap-2 px-4 text-left hover:bg-[var(--color-elevated)] transition-colors"
+      >
+        <Briefcase className="h-4 w-4 shrink-0 text-[var(--color-accent)]" />
+        <span className="flex-1 truncate text-sm font-semibold text-[var(--color-text-primary)]">{ws.name}</span>
+        <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-dimmed)]" />
+      </button>
+
+      {menuOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+          <div className="absolute left-0 right-0 z-50 rounded-b-lg border border-t-0 border-[var(--color-border)] bg-[var(--color-elevated)] py-1 shadow-xl">
+            <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-dimmed)]">
+              Workspaces
+            </div>
+            {workspaces.map((w) => (
+              <div key={w.id} className="group flex items-center gap-1 px-1">
+                {renamingId === w.id ? (
+                  <input
+                    autoFocus
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onBlur={() => { if (renameValue.trim()) renameWorkspace(w.id, renameValue.trim()); setRenamingId(null); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { if (renameValue.trim()) renameWorkspace(w.id, renameValue.trim()); setRenamingId(null); }
+                      else if (e.key === "Escape") setRenamingId(null);
+                    }}
+                    className="flex-1 rounded bg-[var(--color-surface)] px-2 py-1 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]/50"
+                  />
+                ) : (
+                  <button
+                    onClick={async () => { setMenuOpen(false); await setActiveWorkspace(w.id); }}
+                    className="flex flex-1 items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-border)] transition-colors"
+                  >
+                    {w.id === activeWorkspaceId
+                      ? <Check className="h-3 w-3 shrink-0 text-[var(--color-accent)]" />
+                      : <span className="h-3 w-3 shrink-0" />}
+                    <span className="flex-1 truncate">{w.name}</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => { setRenameValue(w.name); setRenamingId(w.id); }}
+                  className="hidden rounded p-1 text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)] group-hover:flex"
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
+                {workspaces.length > 1 && (
+                  <button
+                    onClick={() => deleteWorkspace(w.id)}
+                    className="hidden rounded p-1 text-[var(--color-text-dimmed)] hover:text-red-400 group-hover:flex"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            ))}
+            <div className="mx-2 my-1 border-t border-[var(--color-border)]" />
+            {newOpen ? (
+              <div className="flex items-center gap-1 px-2 pb-1">
+                <input
+                  autoFocus
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Workspace name"
+                  onKeyDown={async (e) => {
+                    if (e.key === "Enter" && newName.trim()) {
+                      const created = createWorkspace(newName.trim());
+                      setNewName(""); setNewOpen(false); setMenuOpen(false);
+                      await setActiveWorkspace(created.id);
+                    } else if (e.key === "Escape") { setNewOpen(false); setNewName(""); }
+                  }}
+                  onBlur={() => { setNewOpen(false); setNewName(""); }}
+                  className="flex-1 rounded bg-[var(--color-surface)] px-2 py-1 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]/50"
+                />
+              </div>
+            ) : (
+              <button
+                onClick={() => setNewOpen(true)}
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                New Workspace
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
   const { t } = useTranslation();
-  const { collections, openCollection, closeCollection } = useCollectionStore();
+  const { collections } = useCollectionStore();
+  const { activeWorkspace, addCollection, removeCollection } = useWorkspaceStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [newCollectionOpen, setNewCollectionOpen] = useState(false);
   const [collectionMenu, setCollectionMenu] = useState<{ x: number; y: number; path: string; name: string } | null>(null);
   const [deleteCollectionTarget, setDeleteCollectionTarget] = useState<{ path: string; name: string } | null>(null);
   const [defaultsPath, setDefaultsPath] = useState<string | null>(null);
 
+  const ws = activeWorkspace();
+  const wsCollections = collections.filter(
+    (c) => c.type === "collection" && ws.collectionPaths.includes(c.path),
+  );
+
   const handleOpenFolder = async () => {
     try {
       const selected = await open({ directory: true, multiple: false });
       if (selected) {
-        await openCollection(selected as string);
+        await addCollection(selected as string);
       }
     } catch (err) {
       import("@/stores/toast-store").then(({ useToastStore }) =>
@@ -99,9 +214,9 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
   };
 
   return (
-    <div className="flex flex-col gap-2 px-2">
+    <div className="flex flex-col gap-2 px-2 pt-2">
       {/* Search */}
-      {collections.length > 0 && (
+      {wsCollections.length > 0 && (
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-text-dimmed)]" />
           <input
@@ -122,7 +237,7 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
         </div>
       )}
 
-      {collections.length === 0 ? (
+      {wsCollections.length === 0 ? (
         <div className="flex flex-col items-center gap-3 px-2 py-8 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-accent-glow)]">
             <FolderOpen className="h-6 w-6 text-[var(--color-accent)]" />
@@ -159,7 +274,7 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
         </div>
       ) : (
         <>
-          {collections.map((collection) => (
+          {wsCollections.map((collection) => (
             <CollectionHeader
               key={collection.path}
               collection={collection}
@@ -169,10 +284,9 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
                 setCollectionMenu({ x: e.clientX, y: e.clientY, path: collection.path, name: collection.name });
               }}
               onDelete={() => setDeleteCollectionTarget({ path: collection.path, name: collection.name })}
-              onClose={() => closeCollection(collection.path)}
+              onClose={() => removeCollection(collection.path)}
             />
           ))}
-          {/* Collection context menu */}
           {collectionMenu && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setCollectionMenu(null)} />
@@ -181,30 +295,21 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
                 style={{ left: collectionMenu.x, top: collectionMenu.y }}
               >
                 <button
-                  onClick={() => {
-                    setDefaultsPath(collectionMenu.path);
-                    setCollectionMenu(null);
-                  }}
+                  onClick={() => { setDefaultsPath(collectionMenu.path); setCollectionMenu(null); }}
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-border)]"
                 >
                   <Settings className="h-3.5 w-3.5" />
                   Collection Defaults
                 </button>
                 <button
-                  onClick={() => {
-                    closeCollection(collectionMenu.path);
-                    setCollectionMenu(null);
-                  }}
+                  onClick={() => { removeCollection(collectionMenu.path); setCollectionMenu(null); }}
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-border)]"
                 >
                   <FolderX className="h-3.5 w-3.5" />
                   {t("sidebar.closeCollection")}
                 </button>
                 <button
-                  onClick={() => {
-                    setDeleteCollectionTarget({ path: collectionMenu.path, name: collectionMenu.name });
-                    setCollectionMenu(null);
-                  }}
+                  onClick={() => { setDeleteCollectionTarget({ path: collectionMenu.path, name: collectionMenu.name }); setCollectionMenu(null); }}
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-red-400 hover:bg-[var(--color-border)]"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -244,10 +349,9 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
       <NewCollectionDialog
         open={newCollectionOpen}
         onOpenChange={setNewCollectionOpen}
-        onCreated={openCollection}
+        onCreated={async (path) => { await addCollection(path); }}
       />
 
-      {/* Delete collection confirmation */}
       <Dialog.Root open={!!deleteCollectionTarget} onOpenChange={(v) => { if (!v) setDeleteCollectionTarget(null); }}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50" />
@@ -259,17 +363,13 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
               Delete collection &ldquo;{deleteCollectionTarget?.name}&rdquo;? This will move the entire collection to trash.
             </p>
             <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setDeleteCollectionTarget(null)}
-                className="rounded-lg px-4 py-1.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
-              >
-                Cancel
-              </button>
+              <button onClick={() => setDeleteCollectionTarget(null)} className="rounded-lg px-4 py-1.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface]">Cancel</button>
               <button
                 onClick={async () => {
                   if (!deleteCollectionTarget) return;
                   const { path, name } = deleteCollectionTarget;
                   setDeleteCollectionTarget(null);
+                  removeCollection(path);
                   try {
                     await useCollectionStore.getState().deleteCollection(path, name);
                   } catch (err) {
@@ -287,7 +387,6 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
         </Dialog.Portal>
       </Dialog.Root>
 
-      {/* Collection Defaults Dialog */}
       {defaultsPath && (
         <CollectionDefaultsDialog
           collectionPath={defaultsPath}

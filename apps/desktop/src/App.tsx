@@ -88,7 +88,25 @@ function App() {
   // Load settings and restore tabs on mount
   useEffect(() => {
     loadSettings();
-    restoreTabs();
+
+    // Check if this window was opened to receive a detached tab
+    const tryConsumeTabTransfer = async () => {
+      try {
+        const { getCurrentWebviewWindow } = await import("@tauri-apps/api/webviewWindow");
+        const { consumeTabTransfer } = await import("@/lib/tauri-api");
+        const win = getCurrentWebviewWindow();
+        const tabData = await consumeTabTransfer(win.label);
+        if (tabData) {
+          const tab = JSON.parse(tabData);
+          useTabStore.getState().injectTab(tab);
+          return; // Skip normal tab restore — this window has a specific tab
+        }
+      } catch {
+        // Not in Tauri env or failed — fall through to normal restore
+      }
+      restoreTabs();
+    };
+    tryConsumeTabTransfer();
 
     // Window restore is handled in Rust (lib.rs setup hook)
   }, [loadSettings, restoreTabs]);

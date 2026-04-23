@@ -137,6 +137,21 @@ function flattenTree(
     : nodes;
 
   for (const node of filtered) {
+    // Skip folder nodes — flatten their children at the same depth
+    if (node.type === "folder") {
+      flattenTree(
+        node.children,
+        expandedPaths,
+        collectionPath,
+        collectionName,
+        searchQuery,
+        depth,
+        parentDir,
+        result,
+      );
+      continue;
+    }
+
     result.push({ node, depth, collectionPath, collectionName, parentDir });
 
     if (node.type !== "request") {
@@ -261,12 +276,13 @@ export function CollectionTree({
         strategy={verticalListSortingStrategy}
       >
         {needsOwnScroll ? (
-          <div ref={internalParentRef} style={{ overflow: "auto", maxHeight: "100%" }}>
+          <div ref={internalParentRef} style={{ overflowX: "hidden", overflowY: "auto", maxHeight: "100%" }}>
             <div
               style={{
                 height: `${virtualizer.getTotalSize()}px`,
                 width: "100%",
                 position: "relative",
+                overflow: "hidden",
               }}
             >
               {virtualizer.getVirtualItems().map((virtualRow) => {
@@ -294,6 +310,7 @@ export function CollectionTree({
               height: `${virtualizer.getTotalSize()}px`,
               width: "100%",
               position: "relative",
+              overflow: "hidden",
             }}
           >
             {virtualizer.getVirtualItems().map((virtualRow) => {
@@ -334,7 +351,7 @@ function VirtualRow({ flat, style }: { flat: FlatNode; style: React.CSSPropertie
 
   const dndStyle: React.CSSProperties = {
     ...style,
-    transform: CSS.Transform.toString(transform) || style.transform as string,
+    transform: CSS.Transform.toString(transform ? { ...transform, x: 0 } : null) || style.transform as string,
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
@@ -510,7 +527,7 @@ function TreeNodeRow({
     return (
       <>
         <div
-          className="group relative flex w-full items-center gap-1.5 rounded px-2 py-1 text-sm hover:bg-[var(--color-elevated)]"
+          className="group relative flex w-full items-center gap-1.5 overflow-hidden rounded px-2 py-1 text-sm hover:bg-[var(--color-elevated)]"
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
           onContextMenu={handleContextMenu}
         >
@@ -612,7 +629,7 @@ function TreeNodeRow({
         onClick={() => toggleExpand(node.path)}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") toggleExpand(node.path); }}
         onContextMenu={handleContextMenu}
-        className="group flex w-full cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-left text-sm hover:bg-[var(--color-elevated)]"
+        className="group flex w-full cursor-pointer items-center gap-1.5 overflow-hidden rounded px-2 py-1 text-left text-sm hover:bg-[var(--color-elevated)]"
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
         {node.type !== "collection" && (

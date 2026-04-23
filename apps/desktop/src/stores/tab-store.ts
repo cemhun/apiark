@@ -91,6 +91,9 @@ interface TabState {
   // Detach tab to new window
   detachTab: (id: string) => Promise<void>;
 
+  // Inject a tab from cross-window transfer
+  injectTab: (tab: Tab) => void;
+
   // Persistence
   persistTabs: () => void;
   restoreTabs: () => Promise<void>;
@@ -1003,18 +1006,36 @@ export const useTabStore = create<TabState>((set, get) => ({
 
   detachTab: async (id) => {
     const tab = get().tabs.find((t) => t.id === id);
-    if (!tab || !tab.filePath) return;
+    if (!tab) return;
 
     try {
       const { openNewWindow } = await import("@/lib/tauri-api");
-      await openNewWindow();
-      // Close the tab in the current window — the new window will load its own state
+      // Serialize tab state (strip non-serializable / large runtime state)
+      const tabSnapshot = {
+        ...tab,
+        loading: false,
+        response: null,
+        error: null,
+        consoleOutput: [],
+        undoStack: [],
+        redoStack: [],
+      };
+      await openNewWindow(JSON.stringify(tabSnapshot));
       get().closeTab(id);
-    } catch (err) {
+    } catch {
       import("@/stores/toast-store").then(({ useToastStore }) =>
         useToastStore.getState().showError("Failed to open new window. Please try again.")
       );
     }
+  },
+
+  injectTab: (tab: Tab) => {
+    const newId = generateTabId();
+    const injected: Tab = { ...tab, id: newId };
+    set((state) => ({
+      tabs: [...state.tabs, injected],
+      activeTabId: newId,
+    }));
   },
 
   persistTabs: () => {
@@ -1069,6 +1090,24 @@ export const useTabStore = create<TabState>((set, get) => ({
   restoreTabs: async () => {
     try {
       const persisted = await loadPersistedState();
+
+      // Migrate old persisted collections into Default workspace (one-time)
+      import("@/stores/workspace-store").then(({ useWorkspaceStore }) => {
+        const ws = useWorkspaceStore.getState();
+        const defaultWs = ws.workspaces.find((w) => w.id === "default");
+        if (defaultWs && defaultWs.collectionPaths.length === 0 && persisted.collections?.length) {
+          // Seed default workspace with persisted collections
+          import("@/stores/workspace-store").then(({ useWorkspaceStore: store }) => {
+            store.setState((s) => ({
+              workspaces: s.workspaces.map((w) =>
+                w.id === "default"
+                  ? { ...w, collectionPaths: persisted.collections! }
+                  : w,
+              ),
+            }));
+          });
+        }
+      });
 
       const collectionPaths = new Set<string>();
 

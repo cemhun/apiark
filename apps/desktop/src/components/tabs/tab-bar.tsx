@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { HttpMethod, Tab } from "@apiark/types";
 import { useTabStore } from "@/stores/tab-store";
@@ -11,6 +11,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragMoveEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -334,6 +335,8 @@ export function TabBar() {
   const { t } = useTranslation();
   const { tabs, activeTabId, setActiveTab, closeTab, closeOtherTabs, closeAllTabs, reorderTabs, detachTab, togglePin, duplicateTab, save } = useTabStore();
   const activeTab = tabs.find((t) => t.id === activeTabId);
+  const tabBarRef = useRef<HTMLDivElement>(null);
+  const dragDetachRef = useRef<{ tabId: string; detached: boolean } | null>(null);
 
   // Sort: pinned tabs first, preserving order within each group
   const sortedTabs = [...tabs].sort((a, b) => {
@@ -348,7 +351,28 @@ export function TabBar() {
     }),
   );
 
+  const handleDragMove = useCallback((event: DragMoveEvent) => {
+    if (!tabBarRef.current || !event.active) return;
+    const rect = tabBarRef.current.getBoundingClientRect();
+    // Get pointer position from the native event
+    const nativeEvent = event.activatorEvent as PointerEvent | MouseEvent | null;
+    if (!nativeEvent) return;
+    const deltaY = (event.delta?.y ?? 0);
+    const pointerY = nativeEvent.clientY + deltaY;
+    // If dragged more than 80px below the tab bar, detach to new window
+    if (pointerY > rect.bottom + 80) {
+      const tabId = String(event.active.id);
+      if (!dragDetachRef.current || dragDetachRef.current.tabId !== tabId) {
+        dragDetachRef.current = { tabId, detached: true };
+        detachTab(tabId);
+      }
+    }
+  }, [detachTab]);
+
   const handleDragEnd = (event: DragEndEvent) => {
+    // Reset detach tracking
+    dragDetachRef.current = null;
+
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const fromIndex = tabs.findIndex((t) => t.id === active.id);
@@ -361,10 +385,11 @@ export function TabBar() {
   if (tabs.length === 0) return null;
 
   return (
-    <div data-tour="tabs" className="flex items-end gap-1 bg-[var(--color-surface)] px-2 pt-2">
+    <div data-tour="tabs" ref={tabBarRef} className="flex items-end gap-1 bg-[var(--color-surface)] px-2 pt-2">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
       >
         <SortableContext

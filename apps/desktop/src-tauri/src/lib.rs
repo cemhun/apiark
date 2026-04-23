@@ -76,7 +76,7 @@ use commands::updater::{
 };
 use commands::watcher::{unwatch_collection, watch_collection};
 use commands::websocket::{ws_connect, ws_disconnect, ws_send};
-use commands::window::open_new_window;
+use commands::window::{consume_tab_transfer, open_new_window, TabTransferStore};
 use grpc::client::GrpcManager;
 use http::cookies::CookieJarManager;
 use mock::server::MockServerManager;
@@ -239,6 +239,7 @@ pub fn run() {
         .manage(MqttManager::new())
         .manage(ProxyCaptureManager::new())
         .manage(TerminalManager::new())
+        .manage(TabTransferStore(std::sync::Mutex::new(std::collections::HashMap::new())))
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -352,6 +353,7 @@ pub fn run() {
             deactivate_license,
             // Window commands
             open_new_window,
+            consume_tab_transfer,
             // Socket.IO commands
             socketio_build_url,
             // MQTT commands
