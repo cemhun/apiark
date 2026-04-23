@@ -24,9 +24,10 @@ use commands::ai::{ai_chat, ai_generate_request, ai_generate_tests};
 use commands::audit::{audit_clear, audit_get_logs, audit_log_action, AuditState};
 use commands::backup::{export_app_state, import_app_state};
 use commands::collection::{
-    create_collection, create_folder, create_request, create_sample_collection, delete_item,
-    get_collection_defaults, open_collection, read_request_file, rename_item, save_folder_order,
-    save_request_file, update_collection_defaults,
+    create_collection, create_folder, create_request, create_sample_collection, create_workspace,
+    delete_item, get_collection_defaults, open_collection, read_request_file, rename_item,
+    rename_workspace, save_folder_order, save_request_file, scan_workspaces,
+    update_collection_defaults,
 };
 use commands::cookies::{clear_cookie_jar, delete_cookie, get_cookie_jar};
 use commands::curl::{export_curl_command, parse_curl_command};
@@ -260,6 +261,9 @@ pub fn run() {
             send_request_with_scripts,
             read_full_response,
             // Collection commands
+            scan_workspaces,
+            create_workspace,
+            rename_workspace,
             open_collection,
             read_request_file,
             save_request_file,

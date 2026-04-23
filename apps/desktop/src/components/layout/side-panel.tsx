@@ -84,12 +84,33 @@ export function SidePanel({
 function WorkspaceHeader() {
   const { workspaces, activeWorkspaceId, activeWorkspace, setActiveWorkspace, createWorkspace, renameWorkspace, deleteWorkspace } = useWorkspaceStore();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [newOpen, setNewOpen] = useState(false);
+  const [newDialogOpen, setNewDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
 
   const ws = activeWorkspace();
+
+  const handleCreate = async () => {
+    if (!newName.trim()) return;
+    const name = newName.trim();
+    setCreating(true);
+    setCreateError("");
+    try {
+      const created = await createWorkspace(name);
+      setNewName("");
+      setNewDialogOpen(false);
+      await setActiveWorkspace(created.id);
+    } catch (err) {
+      setCreateError(String(err));
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  if (!ws) return null;
 
   return (
     <div className="relative shrink-0 border-b border-[var(--color-border)]">
@@ -151,36 +172,54 @@ function WorkspaceHeader() {
               </div>
             ))}
             <div className="mx-2 my-1 border-t border-[var(--color-border)]" />
-            {newOpen ? (
-              <div className="flex items-center gap-1 px-2 pb-1">
-                <input
-                  autoFocus
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Workspace name"
-                  onKeyDown={async (e) => {
-                    if (e.key === "Enter" && newName.trim()) {
-                      const created = await createWorkspace(newName.trim());
-                      setNewName(""); setNewOpen(false); setMenuOpen(false);
-                      await setActiveWorkspace(created.id);
-                    } else if (e.key === "Escape") { setNewOpen(false); setNewName(""); }
-                  }}
-                  onBlur={() => { setNewOpen(false); setNewName(""); }}
-                  className="flex-1 rounded bg-[var(--color-surface)] px-2 py-1 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]/50"
-                />
-              </div>
-            ) : (
-              <button
-                onClick={() => setNewOpen(true)}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                New Workspace
-              </button>
-            )}
+            <button
+              onClick={() => { setMenuOpen(false); setNewName(""); setNewDialogOpen(true); }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New Workspace
+            </button>
           </div>
         </>
       )}
+
+      <Dialog.Root open={newDialogOpen} onOpenChange={(v) => { if (!creating) { setNewDialogOpen(v); if (!v) { setNewName(""); setCreateError(""); } } }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] p-5 shadow-2xl focus:outline-none">
+            <Dialog.Title className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
+              New Workspace
+            </Dialog.Title>
+            <input
+              autoFocus
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleCreate(); if (e.key === "Escape") setNewDialogOpen(false); }}
+              placeholder="Workspace name"
+              className="mb-3 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:border-[var(--color-accent)]/50"
+            />
+            {createError && (
+              <p className="mb-3 text-xs text-red-400">{createError}</p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setNewDialogOpen(false)}
+                className="rounded-lg px-4 py-1.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={!newName.trim() || creating}
+                className="rounded-lg bg-[var(--color-accent)] px-4 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+              >
+                {creating ? "Creating…" : "Create"}
+              </button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
@@ -224,6 +263,7 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
           )}
         </div>
       )}
+
 
       {wsCollections.length === 0 ? (
         <div className="flex flex-col items-center gap-3 px-2 py-8 text-center">
@@ -690,7 +730,7 @@ function NewCollectionDialog({
     setError("");
     try {
       const { useWorkspaceStore } = await import("@/stores/workspace-store");
-      const parentDir = await useWorkspaceStore.getState().activeWorkspaceDir();
+      const parentDir = useWorkspaceStore.getState().activeWorkspaceDir();
       const path = await createCollection(parentDir, name.trim());
       await onCreated(path);
       onOpenChange(false);

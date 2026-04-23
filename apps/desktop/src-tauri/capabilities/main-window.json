@@ -35,6 +35,15 @@
     "fs:allow-rename",
     "fs:allow-copy-file",
     "fs:allow-stat",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "$HOME/ApiArk" },
+        { "path": "$HOME/ApiArk/**" },
+        { "path": "$HOME/.apiark" },
+        { "path": "$HOME/.apiark/**" }
+      ]
+    },
     "updater:default",
     "updater:allow-check",
     "updater:allow-download-and-install",

@@ -594,6 +594,14 @@ export async function createCollection(parentDir: string, name: string): Promise
   return await invoke<string>("create_collection", { parentDir, name });
 }
 
+export async function createWorkspaceDir(name: string): Promise<string> {
+  return await invoke<string>("create_workspace", { name });
+}
+
+export async function renameWorkspaceDir(oldDir: string, newName: string): Promise<string> {
+  return await invoke<string>("rename_workspace", { oldDir, newName });
+}
+
 // ── Settings ──
 
 export async function getSettings(): Promise<AppSettings> {

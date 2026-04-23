@@ -124,7 +124,7 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
 
       // Always save to active workspace dir ~/ApiArk/<workspace>/
       const { useWorkspaceStore } = await import("@/stores/workspace-store");
-      setTargetDir(await useWorkspaceStore.getState().activeWorkspaceDir());
+      setTargetDir(useWorkspaceStore.getState().activeWorkspaceDir());
 
       setStep("preview");
     } catch (err) {

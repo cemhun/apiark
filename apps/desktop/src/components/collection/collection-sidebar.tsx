@@ -248,7 +248,7 @@ function NewCollectionDialog({
     setError("");
     try {
       const { useWorkspaceStore } = await import("@/stores/workspace-store");
-      const parentDir = await useWorkspaceStore.getState().activeWorkspaceDir();
+      const parentDir = useWorkspaceStore.getState().activeWorkspaceDir();
       const path = await createCollection(parentDir, name.trim());
       await onCreated(path);
       onOpenChange(false);

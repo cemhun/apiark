@@ -29,6 +29,7 @@ import { GuidedTour } from "@/components/onboarding/guided-tour";
 import { BottomPanel } from "@/components/layout/bottom-panel";
 import { useCollectionStore } from "@/stores/collection-store";
 import { useShortcutsStore } from "@/stores/shortcuts-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { AlertCircle, X, RefreshCw, FileX, GitMerge, Shield, ArrowRightLeft, Download, ExternalLink } from "lucide-react";
 import { ToastContainer } from "@/components/ui/toast-container";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -58,6 +59,7 @@ function App() {
   const activeTabId = useTabStore((s) => s.activeTabId);
   const { loadSettings } = useSettingsStore();
   const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const workspacesLoaded = useWorkspaceStore((s) => s.loaded);
   const onboardingComplete = useSettingsStore((s) => s.settings.onboardingComplete);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showTour, setShowTour] = useState(false);
@@ -89,9 +91,15 @@ function App() {
   useEffect(() => {
     loadSettings();
 
-    // Prune collection paths that no longer exist on disk
-    import("@/stores/workspace-store").then(({ pruneStaleCollections }) => {
-      pruneStaleCollections().catch(() => {});
+    // Scan ~/ApiArk/ for workspaces and collections
+    import("@/stores/workspace-store").then(({ scanWorkspaces }) => {
+      scanWorkspaces().catch((err) => {
+        console.error("scanWorkspaces failed:", err);
+        // Still mark as loaded so app renders even if scan fails
+        import("@/stores/workspace-store").then(({ useWorkspaceStore }) => {
+          useWorkspaceStore.setState({ loaded: true });
+        });
+      });
     });
 
     // Check if this window was opened to receive a detached tab
@@ -277,6 +285,10 @@ function App() {
       useHistoryStore.getState().loadHistory();
     }
   }, [activeTab?.loading, activeTab?.response, activeTab?.error]);
+
+  if (!settingsLoaded || !workspacesLoaded) {
+    return <div className="h-screen bg-[var(--color-bg)]" />;
+  }
 
   if (showWelcome) {
     return (

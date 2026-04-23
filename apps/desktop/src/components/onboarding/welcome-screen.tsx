@@ -20,7 +20,7 @@ export function WelcomeScreen({
     setLoading(true);
     try {
       const { useWorkspaceStore } = await import("@/stores/workspace-store");
-      const parentDir = await useWorkspaceStore.getState().activeWorkspaceDir();
+      const parentDir = useWorkspaceStore.getState().activeWorkspaceDir();
       const path = await createSampleCollection(parentDir);
       await useWorkspaceStore.getState().addCollection(path);
       useTabStore.getState().newTab();

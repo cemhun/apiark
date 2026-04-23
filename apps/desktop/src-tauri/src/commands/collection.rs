@@ -6,6 +6,151 @@ use crate::models::collection::{
 use crate::models::request::HttpMethod;
 use crate::storage::collection;
 
+#[derive(serde::Serialize)]
+pub struct WorkspaceScanResult {
+    pub workspaces: Vec<WorkspaceInfo>,
+}
+
+#[derive(serde::Serialize)]
+pub struct WorkspaceInfo {
+    pub name: String,
+    pub dir: String,
+    pub collection_paths: Vec<String>,
+}
+
+#[tauri::command]
+pub async fn scan_workspaces() -> Result<WorkspaceScanResult, String> {
+    let home = dirs::home_dir().ok_or("Could not determine home directory")?;
+    let base = home.join("ApiArk");
+
+    std::fs::create_dir_all(&base).map_err(|e| format!("Failed to create ApiArk dir: {e}"))?;
+
+    let entries = std::fs::read_dir(&base).map_err(|e| format!("Failed to read ApiArk dir: {e}"))?;
+
+    let mut ws_dirs: Vec<String> = entries
+        .filter_map(|e| e.ok())
+        .filter(|e| {
+            e.file_type().map(|t| t.is_dir()).unwrap_or(false)
+                && !e.file_name().to_string_lossy().starts_with('.')
+        })
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .collect();
+
+    ws_dirs.sort();
+
+    if ws_dirs.is_empty() {
+        let default_dir = base.join("default");
+        std::fs::create_dir_all(&default_dir)
+            .map_err(|e| format!("Failed to create default workspace: {e}"))?;
+        ws_dirs.push("default".to_string());
+    }
+
+    let mut workspaces = Vec::new();
+
+    for ws_name in &ws_dirs {
+        let ws_dir = base.join(ws_name);
+        let mut collection_paths = Vec::new();
+
+        if let Ok(col_entries) = std::fs::read_dir(&ws_dir) {
+            for col_entry in col_entries.filter_map(|e| e.ok()) {
+                let col_type = col_entry.file_type().unwrap_or_else(|_| {
+                    // fallback — skip
+                    col_entry.file_type().unwrap()
+                });
+                if !col_type.is_dir() {
+                    continue;
+                }
+                let col_name = col_entry.file_name().to_string_lossy().into_owned();
+                if col_name.starts_with('.') {
+                    continue;
+                }
+                let col_path = ws_dir.join(&col_name);
+                let marker = col_path.join(".apiark").join("apiark.yaml");
+                if marker.exists() {
+                    collection_paths.push(col_path.to_string_lossy().into_owned());
+                }
+            }
+        }
+
+        collection_paths.sort();
+
+        // "my-workspace" → "My workspace"
+        let display_name = {
+            let s = ws_name.replace('-', " ");
+            let mut c = s.chars();
+            match c.next() {
+                None => String::new(),
+                Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+            }
+        };
+
+        workspaces.push(WorkspaceInfo {
+            name: display_name,
+            dir: ws_dir.to_string_lossy().into_owned(),
+            collection_paths,
+        });
+    }
+
+    Ok(WorkspaceScanResult { workspaces })
+}
+
+#[tauri::command]
+pub async fn create_workspace(name: String) -> Result<String, String> {
+    let home = dirs::home_dir().ok_or("Could not determine home directory")?;
+    let base = home.join("ApiArk");
+    std::fs::create_dir_all(&base).map_err(|e| format!("Failed to create ApiArk dir: {e}"))?;
+
+    // slugify: lowercase, replace non-alphanum with '-', trim dashes
+    let slug: String = name
+        .trim()
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect::<String>()
+        .trim_matches('-')
+        .to_string();
+    let slug = if slug.is_empty() { "workspace".to_string() } else { slug };
+
+    // Find a unique folder name
+    let mut folder = slug.clone();
+    let mut suffix = 2u32;
+    while base.join(&folder).exists() {
+        folder = format!("{slug}-{suffix}");
+        suffix += 1;
+    }
+
+    let dir = base.join(&folder);
+    std::fs::create_dir_all(&dir).map_err(|e| format!("Failed to create workspace dir: {e}"))?;
+
+    Ok(dir.to_string_lossy().into_owned())
+}
+
+#[tauri::command]
+pub async fn rename_workspace(old_dir: String, new_name: String) -> Result<String, String> {
+    let old_path = std::path::Path::new(&old_dir);
+    let parent = old_path
+        .parent()
+        .ok_or("Could not determine parent directory")?;
+
+    let slug: String = new_name
+        .trim()
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect::<String>()
+        .trim_matches('-')
+        .to_string();
+    let slug = if slug.is_empty() { "workspace".to_string() } else { slug };
+
+    let new_path = parent.join(&slug);
+    if new_path != old_path {
+        std::fs::rename(&old_path, &new_path)
+            .map_err(|e| format!("Failed to rename workspace: {e}"))?;
+    }
+
+    Ok(new_path.to_string_lossy().into_owned())
+}
+
 #[tauri::command]
 pub async fn get_collection_defaults(
     collection_path: String,
