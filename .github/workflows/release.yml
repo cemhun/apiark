@@ -41,6 +41,19 @@ jobs:
         with:
           script: |
             const tag = '${{ steps.tag.outputs.tag }}';
+            // Try to find an existing release for this tag first
+            try {
+              const { data: existing } = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag,
+              });
+              console.log(`Found existing release: ${existing.id}`);
+              return existing.id;
+            } catch (e) {
+              if (e.status !== 404) throw e;
+            }
+            // Create a new release
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -514,7 +527,7 @@ jobs:
             console.log('latest.json:', JSON.stringify(latestJson, null, 2));
 
             if (Object.keys(platforms).length === 0) {
-              console.log('WARNING: No platforms found with signatures. Skipping latest.json upload.');
+              console.log('No platforms with signatures found — skipping latest.json (updater disabled).');
             } else {
               // Delete any existing latest.json uploaded by tauri-action
               const existing = assets.find(a => a.name === 'latest.json');
