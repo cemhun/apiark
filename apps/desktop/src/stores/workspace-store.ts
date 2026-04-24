@@ -21,6 +21,7 @@ interface WorkspaceState {
   deleteWorkspace: (id: string) => void;
   addCollection: (path: string) => Promise<void>;
   removeCollection: (path: string) => void;
+  renameCollectionPath: (oldPath: string, newPath: string) => void;
 }
 
 
@@ -157,6 +158,15 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
         if (tab.collectionPath === path) useTabStore.getState().closeTab(tab.id);
       }
     });
+  },
+
+  renameCollectionPath: (oldPath, newPath) => {
+    set((s) => ({
+      workspaces: s.workspaces.map((w) => ({
+        ...w,
+        collectionPaths: w.collectionPaths.map((p) => (p === oldPath ? newPath : p)),
+      })),
+    }));
   },
 }));
 

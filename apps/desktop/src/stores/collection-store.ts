@@ -273,6 +273,9 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       // to avoid race conditions with persistence and file watchers
       try {
         await unwatchCollection(collectionPath).catch(() => {});
+        // Update workspace store so the new path is tracked
+        const { useWorkspaceStore } = await import("@/stores/workspace-store");
+        useWorkspaceStore.getState().renameCollectionPath(collectionPath, newPath);
         const tree = await openCollectionApi(newPath);
         set((state) => ({
           collections: state.collections.map((c) =>
