@@ -31,15 +31,11 @@
       }
     },
     "updater": {
-      "endpoints": [
-        "https://github.com/berbicanes/apiark/releases/latest/download/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZBNEYzRDVFODZFMzM3NDIKUldSQ04rT0dYajFQK29pN1FNR1pNMUt6Sy8xdjFORXpZZXROb3RwVmRJUW9BbDViSWxRQkE5OUUK"
+      "active": false
     }
   },
   "bundle": {
     "active": true,
-    "createUpdaterArtifacts": "v1Compatible",
     "targets": "all",
     "icon": [
       "icons/32x32.png",
