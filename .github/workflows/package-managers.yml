@@ -1,8 +1,9 @@
 name: Update Package Managers
 
 on:
-  release:
-    types: [published]
+  # Disabled — uncomment to re-enable automatic package manager updates on release
+  # release:
+  #   types: [published]
   workflow_dispatch:
     inputs:
       tag:
