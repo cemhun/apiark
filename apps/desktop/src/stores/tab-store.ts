@@ -891,6 +891,12 @@ export const useTabStore = create<TabState>((set, get) => ({
           t.id === activeTabId ? { ...t, isDirty: false } : t,
         ),
       });
+      // Refresh collection tree so method/name badges stay in sync
+      if (tab.collectionPath) {
+        import("@/stores/collection-store").then(({ useCollectionStore }) => {
+          useCollectionStore.getState().refreshCollection(tab.collectionPath!);
+        });
+      }
     } catch (err) {
       set({ autoSaveError: String(err) });
     }

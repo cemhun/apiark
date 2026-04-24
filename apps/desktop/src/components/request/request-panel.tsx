@@ -6,7 +6,7 @@ import type { AuthConfig, BodyType, RequestBody, KeyValuePair, OAuth2GrantType, 
 import { oauthStartFlow, oauthGetTokenStatus, oauthClearToken } from "@/lib/tauri-api";
 import { HintTooltip } from "@/components/ui/hint-tooltip";
 import { CodeEditor } from "@/components/ui/code-editor";
-import { Plus, Trash2, FileUp, Wand2 } from "lucide-react";
+import { Plus, Trash2, FileUp, Wand2, AlignJustify, LayoutList } from "lucide-react";
 
 /** Extract :paramName path variables from a URL */
 function extractPathVariables(url: string): string[] {
@@ -100,7 +100,7 @@ export function RequestPanel() {
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-auto p-3">
+      <div className={`flex-1 p-3 ${activeTab === "body" ? "flex flex-col overflow-hidden" : "overflow-auto"}`}>
         {activeTab === "params" && (
           <div className="relative space-y-4">
             <PathVariablesEditor
@@ -121,11 +121,9 @@ export function RequestPanel() {
         )}
 
         {activeTab === "headers" && (
-          <KeyValueEditor
-            pairs={headers}
+          <HeadersEditor
+            headers={headers}
             onChange={setHeaders}
-            keyPlaceholder="Header"
-            valuePlaceholder={t("request.value")}
           />
         )}
 
@@ -476,6 +474,99 @@ function TestsEditor({
   );
 }
 
+let kvCounter2 = 0;
+const kvId2 = () => `kv_h_${Date.now()}_${++kvCounter2}`;
+
+/** Convert KeyValuePairs → bulk text (disabled lines prefixed with #) */
+function pairsToBulkText(pairs: KeyValuePair[]): string {
+  return pairs
+    .filter((p) => p.key)
+    .map((p) => `${p.enabled ? "" : "#"}${p.key}: ${p.value}`)
+    .join("\n");
+}
+
+/** Parse bulk text → KeyValuePairs */
+function bulkTextToPairs(text: string, existingPairs: KeyValuePair[]): KeyValuePair[] {
+  const lines = text.split("\n").filter((l) => l.trim());
+  const results: KeyValuePair[] = lines.map((line) => {
+    const disabled = line.startsWith("#");
+    const clean = disabled ? line.slice(1).trim() : line.trim();
+    const colonIdx = clean.indexOf(":");
+    const key = colonIdx >= 0 ? clean.slice(0, colonIdx).trim() : clean.trim();
+    const value = colonIdx >= 0 ? clean.slice(colonIdx + 1).trim() : "";
+    // Reuse existing id if key matches
+    const existing = existingPairs.find((p) => p.key === key);
+    return { id: existing?.id ?? kvId2(), key, value, enabled: !disabled };
+  });
+  // Always keep a blank row at end
+  return results.length > 0 ? results : [{ id: kvId2(), key: "", value: "", enabled: true }];
+}
+
+function HeadersEditor({
+  headers,
+  onChange,
+}: {
+  headers: KeyValuePair[];
+  onChange: (pairs: KeyValuePair[]) => void;
+}) {
+  const { t } = useTranslation();
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+
+  // Sync bulk text when switching to bulk mode
+  const enterBulk = () => {
+    setBulkText(pairsToBulkText(headers));
+    setBulkMode(true);
+  };
+
+  const exitBulk = () => {
+    onChange(bulkTextToPairs(bulkText, headers));
+    setBulkMode(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      {/* Toolbar */}
+      <div className="flex items-center justify-end">
+        <button
+          onClick={bulkMode ? exitBulk : enterBulk}
+          title={bulkMode ? "Switch to key-value view" : "Bulk edit"}
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)] transition-colors"
+        >
+          {bulkMode ? (
+            <><LayoutList className="h-3.5 w-3.5" /> Key-Value</>
+          ) : (
+            <><AlignJustify className="h-3.5 w-3.5" /> Bulk Edit</>
+          )}
+        </button>
+      </div>
+
+      {bulkMode ? (
+        <div className="space-y-1">
+          <p className="text-xs text-[var(--color-text-dimmed)]">
+            One header per line: <code className="rounded bg-[var(--color-elevated)] px-1">Key: Value</code>. Prefix with <code className="rounded bg-[var(--color-elevated)] px-1">#</code> to disable.
+          </p>
+          <textarea
+            value={bulkText}
+            onChange={(e) => setBulkText(e.target.value)}
+            rows={12}
+            spellCheck={false}
+            placeholder={"Content-Type: application/json\nAuthorization: Bearer token\n# X-Disabled-Header: value"}
+            className="w-full rounded bg-[var(--color-elevated)] px-3 py-2 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+          />
+        </div>
+      ) : (
+        <KeyValueEditor
+          pairs={headers}
+          onChange={onChange}
+          keyPlaceholder="Header"
+          valuePlaceholder={t("request.value")}
+        />
+      )}
+    </div>
+  );
+}
+
 function BodyEditor({
   body,
   onChange,
@@ -495,9 +586,9 @@ function BodyEditor({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="flex h-full flex-col gap-2">
       {/* Body type selector */}
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <div className="flex gap-2">
           {BODY_TYPE_IDS.map((btId) => (
             <button
@@ -527,13 +618,15 @@ function BodyEditor({
 
       {/* Body content */}
       {body.type !== "none" && body.type !== "form-data" && body.type !== "urlencoded" && (
-        <CodeEditor
-          value={body.content}
-          onChange={(v) => onChange({ ...body, content: v })}
-          language={body.type === "json" ? "json" : body.type === "xml" ? "xml" : "plaintext"}
-          height="220px"
-          placeholder={body.type === "json" ? '{\n  "key": "value"\n}' : ""}
-        />
+        <div className="min-h-0 flex-1">
+          <CodeEditor
+            value={body.content}
+            onChange={(v) => onChange({ ...body, content: v })}
+            language={body.type === "json" ? "json" : body.type === "xml" ? "xml" : "plaintext"}
+            height="100%"
+            placeholder={body.type === "json" ? '{\n  "key": "value"\n}' : ""}
+          />
+        </div>
       )}
 
       {body.type === "urlencoded" && (

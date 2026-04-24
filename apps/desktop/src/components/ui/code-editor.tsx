@@ -204,7 +204,7 @@ export function CodeEditor({
   const showPlaceholder = placeholder && !value;
 
   return (
-    <div className="relative h-full overflow-hidden rounded border border-[var(--color-border)]">
+    <div className="relative overflow-hidden rounded border border-[var(--color-border)]" style={{ height }}>
       {showPlaceholder && (
         <div className="pointer-events-none absolute top-2 z-10 text-sm text-[var(--color-text-dimmed)]" style={{ left: contentLeft }}>
           {placeholder}
