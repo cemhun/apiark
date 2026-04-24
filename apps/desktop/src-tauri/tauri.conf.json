@@ -31,7 +31,9 @@
       }
     },
     "updater": {
-      "active": false
+      "active": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZBNEYzRDVFODZFMzM3NDIKUldSQ04rT0dYajFQK29pN1FNR1pNMUt6Sy8xdjFORXpZZXROb3RwVmRJUW9BbDViSWxRQkE5OUUK",
+      "endpoints": []
     }
   },
   "bundle": {

@@ -6,7 +6,7 @@ import type { AuthConfig, BodyType, RequestBody, KeyValuePair, OAuth2GrantType, 
 import { oauthStartFlow, oauthGetTokenStatus, oauthClearToken } from "@/lib/tauri-api";
 import { HintTooltip } from "@/components/ui/hint-tooltip";
 import { CodeEditor } from "@/components/ui/code-editor";
-import { Plus, Trash2, FileUp } from "lucide-react";
+import { Plus, Trash2, FileUp, Wand2 } from "lucide-react";
 
 /** Extract :paramName path variables from a URL */
 function extractPathVariables(url: string): string[] {
@@ -484,23 +484,45 @@ function BodyEditor({
   onChange: (body: RequestBody) => void;
 }) {
   const { t } = useTranslation();
+
+  const handleBeautify = () => {
+    try {
+      const formatted = JSON.stringify(JSON.parse(body.content), null, 2);
+      onChange({ ...body, content: formatted });
+    } catch {
+      // invalid JSON — do nothing
+    }
+  };
+
   return (
     <div className="space-y-3">
       {/* Body type selector */}
-      <div className="flex gap-2">
-        {BODY_TYPE_IDS.map((btId) => (
+      <div className="flex items-center gap-2">
+        <div className="flex gap-2">
+          {BODY_TYPE_IDS.map((btId) => (
+            <button
+              key={btId}
+              onClick={() => onChange({ ...body, type: btId })}
+              className={`rounded px-3 py-1 text-xs transition-colors ${
+                body.type === btId
+                  ? "bg-blue-600 text-white"
+                  : "bg-[var(--color-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              {t(BODY_TYPE_LABEL_KEYS[btId])}
+            </button>
+          ))}
+        </div>
+        {body.type === "json" && (
           <button
-            key={btId}
-            onClick={() => onChange({ ...body, type: btId })}
-            className={`rounded px-3 py-1 text-xs transition-colors ${
-              body.type === btId
-                ? "bg-blue-600 text-white"
-                : "bg-[var(--color-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            }`}
+            onClick={handleBeautify}
+            title="Beautify JSON"
+            className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)] transition-colors"
           >
-            {t(BODY_TYPE_LABEL_KEYS[btId])}
+            <Wand2 className="h-3.5 w-3.5" />
+            Beautify
           </button>
-        ))}
+        )}
       </div>
 
       {/* Body content */}
