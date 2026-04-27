@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useCollectionStore } from "@/stores/collection-store";
 import { useTabStore } from "@/stores/tab-store";
@@ -48,12 +48,47 @@ export function SidePanel({
   };
 
   const sidebarWidth = useSettingsStore((s) => s.settings.sidebarWidth);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const [localWidth, setLocalWidth] = useState(sidebarWidth);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+
+  useEffect(() => { setLocalWidth(sidebarWidth); }, [sidebarWidth]);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+    startX.current = e.clientX;
+    startWidth.current = localWidth;
+
+    const onMove = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      const newWidth = Math.min(600, Math.max(180, startWidth.current + ev.clientX - startX.current));
+      setLocalWidth(newWidth);
+    };
+    const onUp = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      dragging.current = false;
+      const newWidth = Math.min(600, Math.max(180, startWidth.current + ev.clientX - startX.current));
+      updateSettings({ sidebarWidth: newWidth });
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [localWidth, updateSettings]);
 
   return (
     <div
-      className="flex shrink-0 flex-col border-r border-(--color-border) bg-(--color-surface)"
-      style={{ width: `${sidebarWidth}px` }}
+      className="relative flex shrink-0 flex-col border-r border-(--color-border) bg-(--color-surface)"
+      style={{ width: `${localWidth}px` }}
     >
+      {/* Resize handle */}
+      <div
+        onMouseDown={onMouseDown}
+        className="absolute right-0 top-0 z-10 h-full w-1 cursor-col-resize hover:bg-(--color-accent)/40 active:bg-(--color-accent)/60 transition-colors"
+      />
       {/* Panel header */}
       {activeView === "collections" ? (
         <WorkspaceHeader />
