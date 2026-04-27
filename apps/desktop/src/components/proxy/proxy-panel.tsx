@@ -93,7 +93,7 @@ export function ProxySidePanel() {
   return (
     <div className="flex flex-col gap-3 p-3">
       {/* Status */}
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] p-3">
+      <div className="rounded-lg border border-(--color-border) bg-(--color-elevated) p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span
@@ -101,12 +101,12 @@ export function ProxySidePanel() {
                 status.running ? "bg-green-500 animate-pulse" : "bg-gray-500"
               }`}
             />
-            <span className="text-sm font-medium text-[var(--color-text-primary)]">
+            <span className="text-sm font-medium text-(--color-text-primary)">
               {status.running ? "Running" : "Stopped"}
             </span>
           </div>
           {status.running && (
-            <span className="text-xs text-[var(--color-text-muted)]">
+            <span className="text-xs text-(--color-text-muted)">
               :{status.port}
             </span>
           )}
@@ -119,7 +119,7 @@ export function ProxySidePanel() {
               value={port}
               onChange={(e) => setPort(e.target.value)}
               placeholder="8888"
-              className="w-20 rounded bg-[var(--color-surface)] px-2 py-1.5 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-20 rounded bg-(--color-surface) px-2 py-1.5 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-indigo-500"
             />
           )}
           <button
@@ -146,7 +146,7 @@ export function ProxySidePanel() {
         </div>
 
         {status.running && (
-          <p className="mt-2 text-[10px] text-[var(--color-text-dimmed)]">
+          <p className="mt-2 text-[10px] text-(--color-text-dimmed)">
             Configure your HTTP client to use <code>127.0.0.1:{status.port}</code> as proxy
           </p>
         )}
@@ -160,14 +160,14 @@ export function ProxySidePanel() {
       )}
 
       {/* CA Certificate */}
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] p-3">
+      <div className="rounded-lg border border-(--color-border) bg-(--color-elevated) p-3">
         <div className="flex items-center gap-2 mb-2">
           {caExists ? (
             <ShieldCheck className="h-4 w-4 text-green-500" />
           ) : (
-            <Shield className="h-4 w-4 text-[var(--color-text-muted)]" />
+            <Shield className="h-4 w-4 text-(--color-text-muted)" />
           )}
-          <span className="text-sm font-medium text-[var(--color-text-primary)]">
+          <span className="text-sm font-medium text-(--color-text-primary)">
             CA Certificate
           </span>
         </div>
@@ -175,7 +175,7 @@ export function ProxySidePanel() {
           <div className="flex gap-2">
             <button
               onClick={handleCopyCaCert}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded bg-[var(--color-surface)] px-2 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded bg-(--color-surface) px-2 py-1.5 text-xs text-(--color-text-secondary) hover:bg-(--color-border)"
             >
               {caCopied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
               {caCopied ? "Copied" : "Copy PEM"}
@@ -184,22 +184,22 @@ export function ProxySidePanel() {
         ) : (
           <button
             onClick={handleGenerateCa}
-            className="flex w-full items-center justify-center gap-1.5 rounded bg-[var(--color-surface)] px-2 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+            className="flex w-full items-center justify-center gap-1.5 rounded bg-(--color-surface) px-2 py-1.5 text-xs text-(--color-text-secondary) hover:bg-(--color-border)"
           >
             <Download className="h-3 w-3" />
             Generate CA
           </button>
         )}
-        <p className="mt-1.5 text-[10px] text-[var(--color-text-dimmed)]">
+        <p className="mt-1.5 text-[10px] text-(--color-text-dimmed)">
           Install the CA certificate in your browser to capture HTTPS traffic
         </p>
       </div>
 
       {/* Settings */}
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)]">
+      <div className="rounded-lg border border-(--color-border) bg-(--color-elevated)">
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="flex w-full items-center gap-1.5 px-3 py-2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+          className="flex w-full items-center gap-1.5 px-3 py-2 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
         >
           {showSettings ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           Passthrough Domains
@@ -211,13 +211,13 @@ export function ProxySidePanel() {
               value={passthrough}
               onChange={(e) => setPassthrough(e.target.value)}
               placeholder="e.g. github.com, google.com"
-              className="w-full rounded bg-[var(--color-surface)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded bg-(--color-surface) px-2 py-1.5 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-indigo-500"
               onBlur={handleUpdatePassthrough}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleUpdatePassthrough();
               }}
             />
-            <p className="mt-1 text-[10px] text-[var(--color-text-dimmed)]">
+            <p className="mt-1 text-[10px] text-(--color-text-dimmed)">
               Comma-separated domains to skip capture
             </p>
           </div>
@@ -225,7 +225,7 @@ export function ProxySidePanel() {
       </div>
 
       {/* Captures count */}
-      <div className="text-center text-xs text-[var(--color-text-dimmed)]">
+      <div className="text-center text-xs text-(--color-text-dimmed)">
         {status.captureCount} request{status.captureCount !== 1 ? "s" : ""} captured
       </div>
     </div>
@@ -284,29 +284,29 @@ export function ProxyCaptureViewer() {
     : captures;
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden border-l border-[var(--color-border)]">
+    <div className="flex flex-1 flex-col overflow-hidden border-l border-(--color-border)">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-3 py-1.5">
-        <span className="text-xs font-semibold text-[var(--color-text-muted)]">
+      <div className="flex items-center gap-2 border-b border-(--color-border) px-3 py-1.5">
+        <span className="text-xs font-semibold text-(--color-text-muted)">
           CAPTURES
         </span>
-        <span className="rounded-full bg-[var(--color-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-dimmed)]">
+        <span className="rounded-full bg-(--color-elevated) px-1.5 py-0.5 text-[10px] text-(--color-text-dimmed)">
           {filtered.length}
         </span>
         <div className="flex-1" />
-        <div className="flex items-center gap-1 rounded-lg bg-[var(--color-elevated)] px-2 py-0.5">
-          <Search className="h-3 w-3 text-[var(--color-text-dimmed)]" />
+        <div className="flex items-center gap-1 rounded-lg bg-(--color-elevated) px-2 py-0.5">
+          <Search className="h-3 w-3 text-(--color-text-dimmed)" />
           <input
             type="text"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Filter..."
-            className="w-28 bg-transparent text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+            className="w-28 bg-transparent text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
           />
         </div>
         <button
           onClick={handleClear}
-          className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+          className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
           title="Clear captures"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -315,9 +315,9 @@ export function ProxyCaptureViewer() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Capture list */}
-        <div className="w-1/2 overflow-auto border-r border-[var(--color-border)]">
+        <div className="w-1/2 overflow-auto border-r border-(--color-border)">
           {filtered.length === 0 ? (
-            <div className="flex items-center justify-center py-8 text-xs text-[var(--color-text-dimmed)]">
+            <div className="flex items-center justify-center py-8 text-xs text-(--color-text-dimmed)">
               {status.running
                 ? "Waiting for requests..."
                 : "Start the proxy to capture requests"}
@@ -327,18 +327,18 @@ export function ProxyCaptureViewer() {
               <button
                 key={cap.id}
                 onClick={() => selectCapture(cap.id)}
-                className={`flex w-full items-center gap-2 border-b border-[var(--color-border)] px-3 py-2 text-left transition-colors ${
+                className={`flex w-full items-center gap-2 border-b border-(--color-border) px-3 py-2 text-left transition-colors ${
                   selectedId === cap.id
-                    ? "bg-[var(--color-accent-glow)]"
-                    : "hover:bg-[var(--color-elevated)]"
+                    ? "bg-(--color-accent-glow)"
+                    : "hover:bg-(--color-elevated)"
                 }`}
               >
                 <MethodBadge method={cap.method} />
                 <StatusBadge status={cap.status} />
-                <span className="flex-1 truncate text-xs text-[var(--color-text-primary)]">
+                <span className="flex-1 truncate text-xs text-(--color-text-primary)">
                   {shortenUrl(cap.url)}
                 </span>
-                <span className="shrink-0 text-[10px] text-[var(--color-text-dimmed)]">
+                <span className="shrink-0 text-[10px] text-(--color-text-dimmed)">
                   {cap.timeMs}ms
                 </span>
               </button>
@@ -351,7 +351,7 @@ export function ProxyCaptureViewer() {
           {selected ? (
             <CaptureDetail capture={selected} />
           ) : (
-            <div className="flex items-center justify-center py-8 text-xs text-[var(--color-text-dimmed)]">
+            <div className="flex items-center justify-center py-8 text-xs text-(--color-text-dimmed)">
               Select a request to view details
             </div>
           )}
@@ -372,32 +372,32 @@ function CaptureDetail({ capture }: { capture: CapturedRequest }) {
   return (
     <div className="flex flex-col">
       {/* URL */}
-      <div className="border-b border-[var(--color-border)] px-3 py-2">
+      <div className="border-b border-(--color-border) px-3 py-2">
         <div className="flex items-center gap-2">
           <MethodBadge method={capture.method} />
           <StatusBadge status={capture.status} />
-          <span className="text-[10px] text-[var(--color-text-dimmed)]">
+          <span className="text-[10px] text-(--color-text-dimmed)">
             {capture.timeMs}ms
           </span>
         </div>
-        <p className="mt-1 break-all text-xs text-[var(--color-text-primary)]">
+        <p className="mt-1 break-all text-xs text-(--color-text-primary)">
           {capture.url}
         </p>
-        <p className="mt-0.5 text-[10px] text-[var(--color-text-dimmed)]">
+        <p className="mt-0.5 text-[10px] text-(--color-text-dimmed)">
           {new Date(capture.timestamp).toLocaleString()}
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[var(--color-border)]">
+      <div className="flex border-b border-(--color-border)">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-3 py-1.5 text-xs font-medium transition-colors ${
               activeTab === tab.id
-                ? "border-b-2 border-[var(--color-accent)] text-[var(--color-text-primary)]"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                ? "border-b-2 border-(--color-accent) text-(--color-text-primary)"
+                : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
             }`}
           >
             {tab.label}
@@ -414,7 +414,7 @@ function CaptureDetail({ capture }: { capture: CapturedRequest }) {
             {capture.requestBody && (
               <>
                 <SectionTitle>Body</SectionTitle>
-                <pre className="mt-1 whitespace-pre-wrap break-all rounded bg-[var(--color-surface)] p-2 font-mono text-xs text-[var(--color-text-primary)]">
+                <pre className="mt-1 whitespace-pre-wrap break-all rounded bg-(--color-surface) p-2 font-mono text-xs text-(--color-text-primary)">
                   {tryFormatJson(capture.requestBody)}
                 </pre>
               </>
@@ -427,7 +427,7 @@ function CaptureDetail({ capture }: { capture: CapturedRequest }) {
             {capture.responseBody && (
               <>
                 <SectionTitle>Body</SectionTitle>
-                <pre className="mt-1 max-h-96 overflow-auto whitespace-pre-wrap break-all rounded bg-[var(--color-surface)] p-2 font-mono text-xs text-[var(--color-text-primary)]">
+                <pre className="mt-1 max-h-96 overflow-auto whitespace-pre-wrap break-all rounded bg-(--color-surface) p-2 font-mono text-xs text-(--color-text-primary)">
                   {tryFormatJson(capture.responseBody)}
                 </pre>
               </>
@@ -441,7 +441,7 @@ function CaptureDetail({ capture }: { capture: CapturedRequest }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h4 className="mb-1 mt-3 first:mt-0 text-[10px] font-semibold uppercase text-[var(--color-text-dimmed)]">
+    <h4 className="mb-1 mt-3 first:mt-0 text-[10px] font-semibold uppercase text-(--color-text-dimmed)">
       {children}
     </h4>
   );
@@ -450,19 +450,19 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function HeadersTable({ headers }: { headers: Record<string, string> }) {
   const entries = Object.entries(headers);
   if (entries.length === 0) {
-    return <p className="text-xs text-[var(--color-text-dimmed)]">No headers</p>;
+    return <p className="text-xs text-(--color-text-dimmed)">No headers</p>;
   }
   return (
-    <div className="rounded border border-[var(--color-border)]">
+    <div className="rounded border border-(--color-border)">
       {entries.map(([key, value]) => (
         <div
           key={key}
-          className="flex border-b border-[var(--color-border)] last:border-b-0"
+          className="flex border-b border-(--color-border) last:border-b-0"
         >
-          <span className="w-1/3 shrink-0 break-all px-2 py-1 text-[10px] font-medium text-[var(--color-text-muted)]">
+          <span className="w-1/3 shrink-0 break-all px-2 py-1 text-[10px] font-medium text-(--color-text-muted)">
             {key}
           </span>
-          <span className="flex-1 break-all px-2 py-1 text-[10px] text-[var(--color-text-primary)]">
+          <span className="flex-1 break-all px-2 py-1 text-[10px] text-(--color-text-primary)">
             {value}
           </span>
         </div>

@@ -67,13 +67,13 @@ export function PluginManagerDialog({ open, onOpenChange }: PluginManagerDialogP
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[520px] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none">
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-4">
-            <Dialog.Title className="flex items-center gap-2 text-lg font-semibold text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[520px] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-6 py-4">
+            <Dialog.Title className="flex items-center gap-2 text-lg font-semibold text-(--color-text-primary)">
               <Puzzle className="h-5 w-5" />
               Plugins
             </Dialog.Title>
-            <Dialog.Close className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)]">
+            <Dialog.Close className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary)">
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
@@ -81,18 +81,18 @@ export function PluginManagerDialog({ open, onOpenChange }: PluginManagerDialogP
           <div className="p-6">
             <button
               onClick={handleInstall}
-              className="mb-4 flex items-center gap-1.5 rounded bg-[var(--color-accent)] px-3 py-1.5 text-sm text-white hover:opacity-90"
+              className="mb-4 flex items-center gap-1.5 rounded bg-(--color-accent) px-3 py-1.5 text-sm text-white hover:opacity-90"
             >
               <FolderOpen className="h-3.5 w-3.5" />
               Install from Folder
             </button>
 
             {loading && (
-              <p className="text-sm text-[var(--color-text-muted)]">Loading...</p>
+              <p className="text-sm text-(--color-text-muted)">Loading...</p>
             )}
 
             {!loading && plugins.length === 0 && (
-              <p className="text-sm text-[var(--color-text-dimmed)]">
+              <p className="text-sm text-(--color-text-dimmed)">
                 No plugins installed. Plugins are directories containing a <code>plugin.json</code> manifest.
               </p>
             )}
@@ -101,25 +101,25 @@ export function PluginManagerDialog({ open, onOpenChange }: PluginManagerDialogP
               {plugins.map((p) => (
                 <div
                   key={p.manifest.name}
-                  className="flex items-start justify-between rounded border border-[var(--color-border)] bg-[var(--color-elevated)] p-3"
+                  className="flex items-start justify-between rounded border border-(--color-border) bg-(--color-elevated) p-3"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-[var(--color-text-primary)]">
+                      <span className="text-sm font-medium text-(--color-text-primary)">
                         {p.manifest.name}
                       </span>
-                      <span className="rounded bg-[var(--color-surface)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]">
+                      <span className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] text-(--color-text-muted)">
                         v{p.manifest.version}
                       </span>
-                      <span className="rounded bg-[var(--color-surface)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]">
+                      <span className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] text-(--color-text-muted)">
                         {p.manifest.runtime.toUpperCase()}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">
+                    <p className="mt-0.5 text-xs text-(--color-text-secondary)">
                       {p.manifest.description}
                     </p>
                     {p.manifest.author && (
-                      <p className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
+                      <p className="mt-0.5 text-[10px] text-(--color-text-muted)">
                         by {p.manifest.author}
                       </p>
                     )}
@@ -127,7 +127,7 @@ export function PluginManagerDialog({ open, onOpenChange }: PluginManagerDialogP
                       {p.manifest.hooks.map((h) => (
                         <span
                           key={h}
-                          className="rounded bg-[var(--color-surface)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]"
+                          className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] text-(--color-text-muted)"
                         >
                           {h}
                         </span>
@@ -140,7 +140,7 @@ export function PluginManagerDialog({ open, onOpenChange }: PluginManagerDialogP
                       className={`rounded p-1.5 ${
                         p.enabled
                           ? "text-green-400 hover:bg-green-500/10"
-                          : "text-[var(--color-text-dimmed)] hover:bg-[var(--color-surface)]"
+                          : "text-(--color-text-dimmed) hover:bg-(--color-surface)"
                       }`}
                       title={p.enabled ? t("monitor.disabled") : t("app.enable")}
                     >
@@ -148,7 +148,7 @@ export function PluginManagerDialog({ open, onOpenChange }: PluginManagerDialogP
                     </button>
                     <button
                       onClick={() => handleUninstall(p.manifest.name)}
-                      className="rounded p-1.5 text-[var(--color-text-muted)] hover:bg-red-500/10 hover:text-red-400"
+                      className="rounded p-1.5 text-(--color-text-muted) hover:bg-red-500/10 hover:text-red-400"
                       title={t("common.delete")}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -165,17 +165,17 @@ export function PluginManagerDialog({ open, onOpenChange }: PluginManagerDialogP
       <Dialog.Root open={!!uninstallTarget} onOpenChange={(v) => { if (!v) setUninstallTarget(null); }}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/50" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 z-[60] w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] p-5 shadow-2xl">
-            <Dialog.Title className="mb-2 text-sm font-semibold text-[var(--color-text-primary)]">
+          <Dialog.Content className="fixed left-1/2 top-1/2 z-[60] w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--color-border) bg-(--color-elevated) p-5 shadow-2xl">
+            <Dialog.Title className="mb-2 text-sm font-semibold text-(--color-text-primary)">
               Uninstall Plugin
             </Dialog.Title>
-            <p className="mb-5 text-sm text-[var(--color-text-secondary)]">
+            <p className="mb-5 text-sm text-(--color-text-secondary)">
               Uninstall plugin &ldquo;{uninstallTarget}&rdquo;?
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setUninstallTarget(null)}
-                className="rounded-lg px-4 py-1.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
+                className="rounded-lg px-4 py-1.5 text-sm text-(--color-text-muted) hover:bg-(--color-surface)"
               >
                 Cancel
               </button>

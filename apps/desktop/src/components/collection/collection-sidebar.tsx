@@ -48,16 +48,16 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
   return (
     <aside
       data-tour="sidebar"
-      className="flex shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]"
+      className="flex shrink-0 flex-col border-r border-(--color-border) bg-(--color-surface)"
       style={{ width: `${sidebarWidth}px` }}
     >
       {/* Header */}
-      <div className="flex h-12 items-center justify-between border-b border-[var(--color-border)] px-4">
-        <span className="text-lg font-semibold text-[var(--color-accent)]">ApiArk</span>
+      <div className="flex h-12 items-center justify-between border-b border-(--color-border) px-4">
+        <span className="text-lg font-semibold text-(--color-accent)">ApiArk</span>
         {onOpenSettings && (
           <button
             onClick={onOpenSettings}
-            className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+            className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
             title="Settings (Ctrl+,)"
           >
             <Settings className="h-4 w-4" />
@@ -69,35 +69,56 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
       <div className="flex-1 overflow-y-auto">
         {/* Collections section */}
         <div>
-          <button
-            onClick={() => toggleSection("collections")}
-            className="flex w-full items-center gap-1 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
-          >
-            {expandedSections.has("collections") ? (
-              <ChevronDown className="h-3 w-3" />
-            ) : (
-              <ChevronRight className="h-3 w-3" />
-            )}
-            {t("sidebar.collections")}
-          </button>
+          {/* Collections section header — with inline New + Import actions */}
+          <div className="flex items-center">
+            <button
+              onClick={() => toggleSection("collections")}
+              className="flex flex-1 items-center gap-1 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-(--color-text-muted) hover:text-(--color-text-secondary)"
+            >
+              {expandedSections.has("collections") ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+              {t("sidebar.collections")}
+            </button>
+            <div className="flex items-center gap-0.5 pr-2">
+              <button
+                onClick={() => setNewCollectionOpen(true)}
+                className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
+                title={t("sidebar.newCollection")}
+              >
+                <FolderPlus className="h-3.5 w-3.5" />
+              </button>
+              {onOpenImport && (
+                <button
+                  onClick={onOpenImport}
+                  className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
+                  title={t("sidebar.importCollection")}
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
 
           {expandedSections.has("collections") && (
             <div className="px-1 pb-2">
               {/* Search input */}
               {collections.length > 0 && (
                 <div className="relative mb-1 px-2">
-                  <Search className="absolute left-4 top-1/2 h-3 w-3 -translate-y-1/2 text-[var(--color-text-dimmed)]" />
+                  <Search className="absolute left-4 top-1/2 h-3 w-3 -translate-y-1/2 text-(--color-text-dimmed)" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t("sidebar.search")}
-                    className="w-full rounded bg-[var(--color-elevated)] py-1 pl-7 pr-6 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded bg-(--color-elevated) py-1 pl-7 pr-6 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-(--color-text-dimmed) hover:text-(--color-text-secondary)"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -114,7 +135,7 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
                     <div className="flex flex-col gap-2">
                       <button
                         onClick={() => setNewCollectionOpen(true)}
-                        className="flex items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-medium text-white hover:bg-[var(--color-accent-hover)]"
+                        className="flex items-center gap-1.5 rounded-lg bg-(--color-accent) px-3 py-1.5 text-xs font-medium text-white hover:bg-(--color-accent-hover)"
                       >
                         <FolderPlus className="h-3.5 w-3.5" />
                         {t("sidebar.newCollection")}
@@ -122,7 +143,7 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
                       {onOpenImport && (
                         <button
                           onClick={onOpenImport}
-                          className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]"
+                          className="flex items-center gap-1.5 rounded-lg border border-(--color-border) px-3 py-1.5 text-xs font-medium text-(--color-text-secondary) hover:bg-(--color-elevated)"
                         >
                           <Upload className="h-3.5 w-3.5" />
                           {t("sidebar.importCollection")}
@@ -146,24 +167,6 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
                       searchQuery={searchQuery}
                     />
                   ))}
-                  <div className="mt-1 flex flex-wrap gap-1 px-2">
-                    <button
-                      onClick={() => setNewCollectionOpen(true)}
-                      className="flex items-center gap-1.5 rounded px-2 py-1 text-xs text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
-                    >
-                      <FolderPlus className="h-3 w-3" />
-                      {t("sidebar.new")}
-                    </button>
-                    {onOpenImport && (
-                      <button
-                        onClick={onOpenImport}
-                        className="flex items-center gap-1.5 rounded px-2 py-1 text-xs text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
-                      >
-                        <Upload className="h-3 w-3" />
-                        {t("sidebar.import")}
-                      </button>
-                    )}
-                  </div>
                 </>
               )}
             </div>
@@ -171,10 +174,10 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
         </div>
 
         {/* Environment section */}
-        <div className="border-t border-[var(--color-border)]">
+        <div className="border-t border-(--color-border)">
           <button
             onClick={() => toggleSection("environments")}
-            className="flex w-full items-center gap-1 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+            className="flex w-full items-center gap-1 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-(--color-text-muted) hover:text-(--color-text-secondary)"
           >
             {expandedSections.has("environments") ? (
               <ChevronDown className="h-3 w-3" />
@@ -191,10 +194,10 @@ export function CollectionSidebar({ onOpenSettings, collapsed, envSelectorRef, o
         </div>
 
         {/* History section */}
-        <div className="border-t border-[var(--color-border)]">
+        <div className="border-t border-(--color-border)">
           <button
             onClick={() => toggleSection("history")}
-            className="flex w-full items-center gap-1 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+            className="flex w-full items-center gap-1 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-(--color-text-muted) hover:text-(--color-text-secondary)"
           >
             {expandedSections.has("history") ? (
               <ChevronDown className="h-3 w-3" />
@@ -265,19 +268,19 @@ function NewCollectionDialog({
     <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
-            <Dialog.Title className="text-sm font-medium text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-4 py-3">
+            <Dialog.Title className="text-sm font-medium text-(--color-text-primary)">
               {t("sidebar.newCollection")}
             </Dialog.Title>
-            <Dialog.Close className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)]">
+            <Dialog.Close className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated)">
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
 
           <div className="space-y-3 p-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--color-text-secondary)]">
+              <label className="text-xs font-medium text-(--color-text-secondary)">
                 {t("sidebar.collectionName")}
               </label>
               <input
@@ -286,7 +289,7 @@ function NewCollectionDialog({
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("sidebar.collectionNamePlaceholder")}
                 autoFocus
-                className="w-full rounded bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                className="w-full rounded bg-(--color-elevated) px-3 py-2 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && canCreate) handleCreate();
                 }}
@@ -297,14 +300,14 @@ function NewCollectionDialog({
             )}
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-4 py-3">
-            <Dialog.Close className="rounded px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]">
+          <div className="flex justify-end gap-2 border-t border-(--color-border) px-4 py-3">
+            <Dialog.Close className="rounded px-3 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)">
               {t("common.cancel")}
             </Dialog.Close>
             <button
               onClick={handleCreate}
               disabled={!canCreate}
-              className="rounded bg-[var(--color-accent)] px-4 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+              className="rounded bg-(--color-accent) px-4 py-1.5 text-sm font-medium text-white hover:bg-(--color-accent-hover) disabled:opacity-50"
             >
               {creating ? t("sidebar.creating") : t("common.create")}
             </button>

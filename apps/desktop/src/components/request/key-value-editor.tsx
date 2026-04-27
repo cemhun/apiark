@@ -39,7 +39,7 @@ export function KeyValueEditor({
   return (
     <div className="space-y-1">
       {/* Header row */}
-      <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2 px-1 text-xs text-[var(--color-text-muted)]">
+      <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2 px-1 text-xs text-(--color-text-muted)">
         <span className="w-5" />
         <span>{keyPlaceholder}</span>
         <span>{valuePlaceholder}</span>
@@ -63,18 +63,18 @@ export function KeyValueEditor({
             value={pair.key}
             onChange={(e) => update(index, "key", e.target.value)}
             placeholder={keyPlaceholder}
-            className="rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
           />
           <input
             type="text"
             value={pair.value}
             onChange={(e) => update(index, "value", e.target.value)}
             placeholder={valuePlaceholder}
-            className="rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             onClick={() => removeRow(index)}
-            className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-red-400"
+            className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-border) hover:text-red-400"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -84,7 +84,7 @@ export function KeyValueEditor({
       {/* Add row button */}
       <button
         onClick={addRow}
-        className="flex items-center gap-1 px-1 pt-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+        className="flex items-center gap-1 px-1 pt-1 text-xs text-(--color-text-muted) hover:text-(--color-text-primary)"
       >
         <Plus className="h-3 w-3" /> Add
       </button>

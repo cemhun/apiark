@@ -48,7 +48,7 @@ export function ActivityBar({
 }: ActivityBarProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex w-12 shrink-0 flex-col items-center border-r border-[var(--color-border)] bg-[var(--color-activity-bar)] py-3">
+    <div className="flex w-12 shrink-0 flex-col items-center border-r border-(--color-border) bg-(--color-activity-bar) py-3">
       {/* Logo */}
       <div className="mb-4 flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg">
         <img src="/app-icon.png" alt="ApiArk" className="h-8 w-8 rounded-lg" />
@@ -69,7 +69,7 @@ export function ActivityBar({
         ))}
       </div>
 
-      <div className="mx-auto my-3 h-px w-6 bg-[var(--color-border)]" />
+      <div className="mx-auto my-3 h-px w-6 bg-(--color-border)" />
 
       {/* Bottom nav items */}
       <div className="flex flex-col items-center gap-1">
@@ -120,12 +120,12 @@ function ActivityBarButton({
       title={label}
       className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-all ${
         active
-          ? `${activeGlow ?? "bg-[var(--color-accent-glow)]"} ${activeColor ?? "text-[var(--color-accent)]"}`
-          : "text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+          ? `${activeGlow ?? "bg-(--color-accent-glow)"} ${activeColor ?? "text-(--color-accent)"}`
+          : "text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
       }`}
     >
       {active && (
-        <span className={`absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-r ${activeColor ? activeColor.replace("text-", "bg-") : "bg-[var(--color-accent)]"}`} />
+        <span className={`absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-r ${activeColor ? activeColor.replace("text-", "bg-") : "bg-(--color-accent)"}`} />
       )}
       <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2 : 1.5} />
     </button>

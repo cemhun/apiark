@@ -63,7 +63,7 @@ export function SSEView() {
                     : "bg-gray-500"
               }`}
             />
-            <span className="text-xs text-[var(--color-text-muted)] capitalize">{status}</span>
+            <span className="text-xs text-(--color-text-muted) capitalize">{status}</span>
           </div>
         }
         sendButton={
@@ -92,10 +92,10 @@ export function SSEView() {
       />
 
       {/* Headers (collapsible) */}
-      <div className="border-b border-[var(--color-border)]">
+      <div className="border-b border-(--color-border)">
         <button
           onClick={() => setShowHeaders(!showHeaders)}
-          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
         >
           {showHeaders ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           Headers
@@ -117,13 +117,13 @@ export function SSEView() {
 
       {/* Error */}
       {error && (
-        <div className="border-b border-[var(--color-border)] bg-red-500/10 px-3 py-2 text-xs text-red-400">
+        <div className="border-b border-(--color-border) bg-red-500/10 px-3 py-2 text-xs text-red-400">
           {error}
         </div>
       )}
 
       {/* Stats and filter bar */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-muted)]">
+      <div className="flex items-center justify-between border-b border-(--color-border) px-3 py-1 text-xs text-(--color-text-muted)">
         <div className="flex gap-3">
           <span>{t("sse.events")}: {events.length}</span>
           {eventTypes.length > 0 && (
@@ -136,7 +136,7 @@ export function SSEView() {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Filter by event type..."
-            className="w-36 rounded bg-[var(--color-elevated)] px-2 py-0.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+            className="w-36 rounded bg-(--color-elevated) px-2 py-0.5 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
           />
           <label className="flex items-center gap-1 cursor-pointer">
             <input
@@ -149,7 +149,7 @@ export function SSEView() {
           </label>
           <button
             onClick={clearEvents}
-            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-[var(--color-elevated)]"
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-(--color-elevated)"
             title={t("console.clear")}
           >
             <Trash2 className="h-3 w-3" />
@@ -160,29 +160,29 @@ export function SSEView() {
       {/* Event stream */}
       <div ref={logRef} className="flex-1 overflow-auto">
         {filteredEvents.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-sm text-[var(--color-text-dimmed)]">
+          <div className="flex items-center justify-center py-8 text-sm text-(--color-text-dimmed)">
             {status === "connected" ? "Waiting for events..." : t("sse.connectToStart")}
           </div>
         ) : (
           filteredEvents.map((event, i) => (
             <div
               key={i}
-              className="border-b border-[var(--color-border)] px-3 py-2"
+              className="border-b border-(--color-border) px-3 py-2"
             >
               <div className="mb-1 flex items-center gap-2">
                 <span className="rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-medium text-orange-400">
                   {event.eventType}
                 </span>
                 {event.id && (
-                  <span className="text-[10px] text-[var(--color-text-dimmed)]">
+                  <span className="text-[10px] text-(--color-text-dimmed)">
                     id: {event.id}
                   </span>
                 )}
-                <span className="ml-auto text-[10px] text-[var(--color-text-dimmed)]">
+                <span className="ml-auto text-[10px] text-(--color-text-dimmed)">
                   {new Date(event.timestamp).toLocaleTimeString()}
                 </span>
               </div>
-              <pre className="whitespace-pre-wrap break-all font-mono text-xs text-[var(--color-text-primary)]">
+              <pre className="whitespace-pre-wrap break-all font-mono text-xs text-(--color-text-primary)">
                 {event.data}
               </pre>
             </div>

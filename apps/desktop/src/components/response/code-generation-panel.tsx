@@ -115,7 +115,7 @@ export function CodeGenerationPanel() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Language selector */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
+      <div className="flex items-center justify-between border-b border-(--color-border) px-3 py-2">
         <div className="flex gap-1">
           {LANGUAGES.map((lang) => (
             <button
@@ -123,8 +123,8 @@ export function CodeGenerationPanel() {
               onClick={() => setLanguage(lang.value)}
               className={`rounded px-3 py-1 text-xs transition-colors ${
                 language === lang.value
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                  ? "bg-(--color-accent) text-white"
+                  : "bg-(--color-elevated) text-(--color-text-secondary) hover:text-(--color-text-primary)"
               }`}
             >
               {lang.label}
@@ -133,7 +133,7 @@ export function CodeGenerationPanel() {
         </div>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)]"
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary)"
         >
           {copied ? (
             <>
@@ -151,7 +151,7 @@ export function CodeGenerationPanel() {
 
       {/* Code display */}
       <div className="flex-1 overflow-auto p-3">
-        <pre className="whitespace-pre-wrap break-all font-mono text-sm text-[var(--color-text-primary)]">
+        <pre className="whitespace-pre-wrap break-all font-mono text-sm text-(--color-text-primary)">
           {code}
         </pre>
       </div>

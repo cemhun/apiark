@@ -80,15 +80,15 @@ export function OpenAPIEditorDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 flex h-[85vh] w-[90vw] max-w-[1200px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 flex h-[85vh] w-[90vw] max-w-[1200px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-3">
-            <Dialog.Title className="text-base font-semibold text-[var(--color-text-primary)]">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-6 py-3">
+            <Dialog.Title className="text-base font-semibold text-(--color-text-primary)">
               OpenAPI Spec Editor
             </Dialog.Title>
             <div className="flex items-center gap-3">
               {linting && (
-                <span className="text-xs text-[var(--color-text-muted)]">Linting...</span>
+                <span className="text-xs text-(--color-text-muted)">Linting...</span>
               )}
               {!linting && lintResults.length > 0 && (
                 <span className="flex items-center gap-2 text-xs">
@@ -112,7 +112,7 @@ export function OpenAPIEditorDialog({
                   Valid
                 </span>
               )}
-              <Dialog.Close className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)]">
+              <Dialog.Close className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary)">
                 <X className="h-4 w-4" />
               </Dialog.Close>
             </div>
@@ -132,11 +132,11 @@ export function OpenAPIEditorDialog({
 
             {/* Problems panel */}
             {lintResults.length > 0 && (
-              <div className="w-80 overflow-auto border-l border-[var(--color-border)] bg-[var(--color-bg)]">
-                <div className="border-b border-[var(--color-border)] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              <div className="w-80 overflow-auto border-l border-(--color-border) bg-(--color-bg)">
+                <div className="border-b border-(--color-border) px-3 py-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
                   Problems ({lintResults.length})
                 </div>
-                <div className="divide-y divide-[var(--color-border)]">
+                <div className="divide-y divide-(--color-border)">
                   {lintResults.map((r, i) => (
                     <div key={i} className="px-3 py-2">
                       <div className="flex items-start gap-1.5">
@@ -147,11 +147,11 @@ export function OpenAPIEditorDialog({
                         ) : (
                           <Info className="mt-0.5 h-3 w-3 shrink-0 text-blue-400" />
                         )}
-                        <span className="text-xs text-[var(--color-text-secondary)]">
+                        <span className="text-xs text-(--color-text-secondary)">
                           {r.message}
                         </span>
                       </div>
-                      <div className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
+                      <div className="mt-0.5 text-[10px] text-(--color-text-muted)">
                         Line {r.line}:{r.character} · {r.code}
                       </div>
                     </div>
@@ -162,10 +162,10 @@ export function OpenAPIEditorDialog({
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-6 py-3">
+          <div className="flex justify-end gap-2 border-t border-(--color-border) px-6 py-3">
             <button
               onClick={() => onOpenChange(false)}
-              className="rounded px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]"
+              className="rounded px-3 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)"
             >
               Cancel
             </button>
@@ -176,7 +176,7 @@ export function OpenAPIEditorDialog({
                   onOpenChange(false);
                 }}
                 disabled={errorCount > 0}
-                className="rounded bg-[var(--color-accent)] px-3 py-1.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
+                className="rounded bg-(--color-accent) px-3 py-1.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
               >
                 Save
               </button>

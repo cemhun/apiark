@@ -521,7 +521,7 @@ function TreeNodeRow({
       const baseFilename = node.path.split("/").pop()?.replace(/\.(yaml|yml)$/, "") ?? node.name;
       const cloneFilename = `${baseFilename}-clone`;
       const cloneName = `${node.name}-clone`;
-      const newPath = await createRequest(dir, cloneFilename, cloneName);
+      const newPath = await createRequest(dir, cloneFilename, cloneName, collectionPath);
       await saveRequestFile(newPath, { ...source, name: cloneName });
       await useCollectionStore.getState().refreshCollection(collectionPath);
       await openTab(newPath, collectionPath);
@@ -548,7 +548,7 @@ function TreeNodeRow({
     return (
       <>
         <div
-          className="group relative flex w-full items-center gap-1.5 overflow-hidden rounded px-2 py-1 text-sm hover:bg-[var(--color-elevated)]"
+          className="group relative flex w-full items-center gap-1.5 overflow-hidden rounded px-2 py-1 text-sm hover:bg-(--color-elevated)"
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
           onContextMenu={handleContextMenu}
         >
@@ -556,7 +556,7 @@ function TreeNodeRow({
             className="shrink-0 cursor-grab opacity-0 group-hover:opacity-50 hover:!opacity-100"
             {...dragHandleProps}
           >
-            <GripVertical className="h-3 w-3 text-[var(--color-text-muted)]" />
+            <GripVertical className="h-3 w-3 text-(--color-text-muted)" />
           </span>
           <span
             className={`w-9 shrink-0 text-[10px] font-bold ${
@@ -583,12 +583,12 @@ function TreeNodeRow({
                 if (e.key === "Enter") submitRename();
                 if (e.key === "Escape") setRenaming(false);
               }}
-              className="min-w-0 flex-1 rounded bg-[var(--color-elevated)] px-1 text-sm text-[var(--color-text-primary)] outline-none ring-1 ring-blue-500"
+              className="min-w-0 flex-1 rounded bg-(--color-elevated) px-1 text-sm text-(--color-text-primary) outline-none ring-1 ring-blue-500"
             />
           ) : (
             <>
               <span
-                className="flex-1 cursor-pointer truncate text-[var(--color-text-secondary)]"
+                className="flex-1 cursor-pointer truncate text-(--color-text-secondary)"
                 onClick={() => openTab(node.path, collectionPath)}
               >
                 {node.name}
@@ -600,7 +600,7 @@ function TreeNodeRow({
                 e.stopPropagation();
                 handleRename();
               }}
-              className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+              className="rounded p-0.5 text-(--color-text-muted) hover:bg-(--color-border) hover:text-(--color-text-primary)"
               title={t("common.rename")}
             >
               <Pencil className="h-3 w-3" />
@@ -610,7 +610,7 @@ function TreeNodeRow({
                 e.stopPropagation();
                 handleDelete();
               }}
-              className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-red-500/20 hover:text-red-400"
+              className="rounded p-0.5 text-(--color-text-muted) hover:bg-red-500/20 hover:text-red-400"
               title={t("common.delete")}
             >
               <Trash2 className="h-3 w-3" />
@@ -651,7 +651,7 @@ function TreeNodeRow({
         onClick={() => toggleExpand(node.path)}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") toggleExpand(node.path); }}
         onContextMenu={handleContextMenu}
-        className="group flex w-full cursor-pointer items-center gap-1.5 overflow-hidden rounded px-2 py-1 text-left text-sm hover:bg-[var(--color-elevated)]"
+        className="group flex w-full cursor-pointer items-center gap-1.5 overflow-hidden rounded px-2 py-1 text-left text-sm hover:bg-(--color-elevated)"
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
         {node.type !== "collection" && (
@@ -660,18 +660,18 @@ function TreeNodeRow({
             {...dragHandleProps}
             onClick={(e) => e.stopPropagation()}
           >
-            <GripVertical className="h-3 w-3 text-[var(--color-text-muted)]" />
+            <GripVertical className="h-3 w-3 text-(--color-text-muted)" />
           </span>
         )}
         {isExpanded ? (
-          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
+          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
         ) : (
-          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
+          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
         )}
         {isExpanded ? (
-          <FolderOpen className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
+          <FolderOpen className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
         ) : (
-          <Folder className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
+          <Folder className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
         )}
         {renaming ? (
           <input
@@ -683,11 +683,11 @@ function TreeNodeRow({
               if (e.key === "Enter") submitRename();
               if (e.key === "Escape") setRenaming(false);
             }}
-            className="min-w-0 flex-1 rounded bg-[var(--color-elevated)] px-1 text-sm text-[var(--color-text-primary)] outline-none ring-1 ring-blue-500"
+            className="min-w-0 flex-1 rounded bg-(--color-elevated) px-1 text-sm text-(--color-text-primary) outline-none ring-1 ring-blue-500"
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className="flex-1 truncate text-[var(--color-text-primary)]">{node.name}</span>
+          <span className="flex-1 truncate text-(--color-text-primary)">{node.name}</span>
         )}
         {/* Action buttons — visible on hover */}
         {!renaming && (
@@ -696,14 +696,14 @@ function TreeNodeRow({
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleRename(); }}
-                  className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+                  className="rounded p-0.5 text-(--color-text-muted) hover:bg-(--color-border) hover:text-(--color-text-primary)"
                   title={t("common.rename")}
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-                  className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-red-500/20 hover:text-red-400"
+                  className="rounded p-0.5 text-(--color-text-muted) hover:bg-red-500/20 hover:text-red-400"
                   title={t("common.delete")}
                 >
                   <Trash2 className="h-3 w-3" />
@@ -714,14 +714,14 @@ function TreeNodeRow({
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleRename(); }}
-                  className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+                  className="rounded p-0.5 text-(--color-text-muted) hover:bg-(--color-border) hover:text-(--color-text-primary)"
                   title={t("common.rename")}
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-                  className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-red-500/20 hover:text-red-400"
+                  className="rounded p-0.5 text-(--color-text-muted) hover:bg-red-500/20 hover:text-red-400"
                   title={t("common.delete")}
                 >
                   <Trash2 className="h-3 w-3" />
@@ -731,7 +731,7 @@ function TreeNodeRow({
                     e.stopPropagation();
                     useCollectionStore.getState().closeCollection(collectionPath);
                   }}
-                  className="rounded p-0.5 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+                  className="rounded p-0.5 text-(--color-text-muted) hover:bg-(--color-border) hover:text-(--color-text-primary)"
                   title={t("sidebar.closeCollection")}
                 >
                   <FolderX className="h-3 w-3" />
@@ -933,18 +933,18 @@ function CookieSettingsDialog({
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none">
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
-            <Dialog.Title className="text-sm font-semibold text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-5 py-3">
+            <Dialog.Title className="text-sm font-semibold text-(--color-text-primary)">
               {t("sidebar.cookieSettings")}
             </Dialog.Title>
-            <Dialog.Close className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)]">
+            <Dialog.Close className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary)">
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
           <div className="space-y-3 p-5">
             {loading ? (
-              <p className="text-sm text-[var(--color-text-muted)]">{t("common.loading")}</p>
+              <p className="text-sm text-(--color-text-muted)">{t("common.loading")}</p>
             ) : defaults ? (
               <>
                 <ToggleRow
@@ -967,7 +967,7 @@ function CookieSettingsDialog({
                 />
               </>
             ) : (
-              <p className="text-sm text-[var(--color-text-muted)]">Failed to load settings.</p>
+              <p className="text-sm text-(--color-text-muted)">Failed to load settings.</p>
             )}
           </div>
         </Dialog.Content>
@@ -990,15 +990,15 @@ function ToggleRow({
   return (
     <div className="flex items-center justify-between">
       <div>
-        <div className="text-sm text-[var(--color-text-primary)]">{label}</div>
-        <div className="text-xs text-[var(--color-text-muted)]">{description}</div>
+        <div className="text-sm text-(--color-text-primary)">{label}</div>
+        <div className="text-xs text-(--color-text-muted)">{description}</div>
       </div>
       <button
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
-          checked ? "bg-[var(--color-accent)]" : "bg-[var(--color-border)]"
+          checked ? "bg-(--color-accent)" : "bg-(--color-border)"
         }`}
       >
         <span
@@ -1052,8 +1052,8 @@ function InputDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] p-5 shadow-2xl">
-          <Dialog.Title className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--color-border) bg-(--color-elevated) p-5 shadow-2xl">
+          <Dialog.Title className="mb-4 text-sm font-semibold text-(--color-text-primary)">
             {title}
           </Dialog.Title>
           <input
@@ -1066,7 +1066,7 @@ function InputDialog({
               if (e.key === "Escape") onOpenChange(false);
             }}
             placeholder={placeholder}
-            className="mb-3 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none transition-colors focus:border-[var(--color-accent)]/50"
+            className="mb-3 w-full rounded-lg border border-(--color-border) bg-(--color-bg) px-3 py-2 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none transition-colors focus:border-(--color-accent)/50"
           />
           {showProtocol && (
             <div className="mb-3 flex flex-wrap gap-1.5">
@@ -1085,7 +1085,7 @@ function InputDialog({
                   className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-all ${
                     protocol === p.value
                       ? `${p.color} ring-1 ring-current`
-                      : "bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                      : "bg-(--color-surface) text-(--color-text-muted) hover:text-(--color-text-secondary)"
                   }`}
                 >
                   {p.label}
@@ -1096,14 +1096,14 @@ function InputDialog({
           <div className="flex justify-end gap-2">
             <button
               onClick={() => onOpenChange(false)}
-              className="rounded-lg px-4 py-1.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
+              className="rounded-lg px-4 py-1.5 text-sm text-(--color-text-muted) hover:bg-(--color-surface)"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!value.trim()}
-              className="rounded-lg bg-[var(--color-accent)] px-4 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+              className="rounded-lg bg-(--color-accent) px-4 py-1.5 text-sm font-medium text-white hover:bg-(--color-accent-hover) disabled:opacity-50"
             >
               Create
             </button>
@@ -1135,15 +1135,15 @@ function ConfirmDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] p-5 shadow-2xl">
-          <Dialog.Title className="mb-2 text-sm font-semibold text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--color-border) bg-(--color-elevated) p-5 shadow-2xl">
+          <Dialog.Title className="mb-2 text-sm font-semibold text-(--color-text-primary)">
             {title}
           </Dialog.Title>
-          <p className="mb-5 text-sm text-[var(--color-text-secondary)]">{message}</p>
+          <p className="mb-5 text-sm text-(--color-text-secondary)">{message}</p>
           <div className="flex justify-end gap-2">
             <button
               onClick={() => onOpenChange(false)}
-              className="rounded-lg px-4 py-1.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
+              className="rounded-lg px-4 py-1.5 text-sm text-(--color-text-muted) hover:bg-(--color-surface)"
             >
               Cancel
             </button>
@@ -1199,15 +1199,15 @@ function ContextMenu({
       <div className="fixed inset-0 z-40" onMouseDown={onClose} />
       <div
         ref={menuRef}
-        className="fixed z-50 min-w-[160px] max-h-[80vh] overflow-y-auto rounded border border-[var(--color-border)] bg-[var(--color-elevated)] py-1 shadow-lg"
+        className="fixed z-50 min-w-[160px] max-h-[80vh] overflow-y-auto rounded border border-(--color-border) bg-(--color-elevated) py-1 shadow-lg"
         style={{ left: position.left, top: position.top }}
       >
         {items.map((item) => (
           <button
             key={item.label}
             onClick={item.onClick}
-            className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-[var(--color-border)] ${
-              item.danger ? "text-red-400" : "text-[var(--color-text-primary)]"
+            className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-(--color-border) ${
+              item.danger ? "text-red-400" : "text-(--color-text-primary)"
             }`}
           >
             <item.icon className="h-3.5 w-3.5" />

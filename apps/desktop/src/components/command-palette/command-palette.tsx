@@ -362,12 +362,12 @@ export function CommandPalette({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Content
-          className="fixed left-1/2 top-[20%] z-50 w-[480px] -translate-x-1/2 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none"
+          className="fixed left-1/2 top-[20%] z-50 w-[480px] -translate-x-1/2 overflow-hidden rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none"
           onKeyDown={handleKeyDown}
         >
           {/* Search input */}
-          <div className="flex items-center gap-2 border-b border-[var(--color-border)] px-4 py-3">
-            <Search className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
+          <div className="flex items-center gap-2 border-b border-(--color-border) px-4 py-3">
+            <Search className="h-4 w-4 shrink-0 text-(--color-text-muted)" />
             <Dialog.Title className="sr-only">Command Palette</Dialog.Title>
             <input
               ref={inputRef}
@@ -375,14 +375,14 @@ export function CommandPalette({
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
               placeholder={t("commandPalette.placeholder")}
-              className="flex-1 bg-transparent text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+              className="flex-1 bg-transparent text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
             />
           </div>
 
           {/* Command list */}
           <div ref={listRef} className="max-h-[320px] overflow-y-auto py-1">
             {filtered.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-[var(--color-text-dimmed)]">
+              <p className="px-4 py-6 text-center text-sm text-(--color-text-dimmed)">
                 {t("commandPalette.noResults")}
               </p>
             ) : (
@@ -395,13 +395,13 @@ export function CommandPalette({
                     onMouseEnter={() => setSelectedIndex(i)}
                     className={`flex w-full items-center gap-3 px-4 py-2 text-left text-sm ${
                       i === selectedIndex
-                        ? "bg-[var(--color-elevated)] text-[var(--color-text-primary)]"
-                        : "text-[var(--color-text-secondary)]"
+                        ? "bg-(--color-elevated) text-(--color-text-primary)"
+                        : "text-(--color-text-secondary)"
                     }`}
                   >
-                    {Icon && <Icon className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />}
+                    {Icon && <Icon className="h-4 w-4 shrink-0 text-(--color-text-muted)" />}
                     <span className="flex-1 truncate">{cmd.label}</span>
-                    <span className="text-xs text-[var(--color-text-dimmed)]">{cmd.category}</span>
+                    <span className="text-xs text-(--color-text-dimmed)">{cmd.category}</span>
                   </button>
                 );
               })
@@ -409,7 +409,7 @@ export function CommandPalette({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-[var(--color-border)] px-4 py-2 text-xs text-[var(--color-text-dimmed)]">
+          <div className="flex items-center justify-between border-t border-(--color-border) px-4 py-2 text-xs text-(--color-text-dimmed)">
             <span>{t("commandPalette.navigate")}</span>
             <span>{t("commandPalette.enterToSelect")}</span>
           </div>

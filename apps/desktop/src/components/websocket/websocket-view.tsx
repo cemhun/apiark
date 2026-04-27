@@ -61,7 +61,7 @@ export function WebSocketView() {
                     : "bg-gray-500"
               }`}
             />
-            <span className="text-xs text-[var(--color-text-muted)] capitalize">{status}</span>
+            <span className="text-xs text-(--color-text-muted) capitalize">{status}</span>
           </div>
         }
         sendButton={
@@ -90,10 +90,10 @@ export function WebSocketView() {
       />
 
       {/* Headers (collapsible) */}
-      <div className="border-b border-[var(--color-border)]">
+      <div className="border-b border-(--color-border)">
         <button
           onClick={() => setShowHeaders(!showHeaders)}
-          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
         >
           {showHeaders ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           Headers
@@ -115,19 +115,19 @@ export function WebSocketView() {
 
       {/* Error */}
       {error && (
-        <div className="border-b border-[var(--color-border)] bg-red-500/10 px-3 py-2 text-xs text-red-400">
+        <div className="border-b border-(--color-border) bg-red-500/10 px-3 py-2 text-xs text-red-400">
           {error}
         </div>
       )}
 
       {/* Message input */}
-      <div className="flex items-end gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+      <div className="flex items-end gap-2 border-b border-(--color-border) bg-(--color-surface) px-3 py-2">
         <textarea
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
           placeholder={status === "connected" ? "Type a message..." : "Connect first to send messages"}
           disabled={status !== "connected"}
-          className="flex-1 resize-none rounded bg-[var(--color-elevated)] p-2 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50"
+          className="flex-1 resize-none rounded bg-(--color-elevated) p-2 font-mono text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50"
           rows={2}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -147,7 +147,7 @@ export function WebSocketView() {
       </div>
 
       {/* Stats bar */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-muted)]">
+      <div className="flex items-center justify-between border-b border-(--color-border) px-3 py-1 text-xs text-(--color-text-muted)">
         <div className="flex gap-3">
           <span>Messages: {messages.length}</span>
           <span className="text-green-500">Sent: {sentCount}</span>
@@ -165,7 +165,7 @@ export function WebSocketView() {
           </label>
           <button
             onClick={clearMessages}
-            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-[var(--color-elevated)]"
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-(--color-elevated)"
             title="Clear log"
           >
             <Trash2 className="h-3 w-3" />
@@ -176,14 +176,14 @@ export function WebSocketView() {
       {/* Message log */}
       <div ref={logRef} className="flex-1 overflow-auto">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-sm text-[var(--color-text-dimmed)]">
+          <div className="flex items-center justify-center py-8 text-sm text-(--color-text-dimmed)">
             {status === "connected" ? "No messages yet" : "Connect to start"}
           </div>
         ) : (
           messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex gap-2 border-b border-[var(--color-border)] px-3 py-2 text-sm ${
+              className={`flex gap-2 border-b border-(--color-border) px-3 py-2 text-sm ${
                 msg.direction === "sent"
                   ? "bg-green-500/5"
                   : "bg-blue-500/5"
@@ -197,11 +197,11 @@ export function WebSocketView() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <pre className="whitespace-pre-wrap break-all font-mono text-xs text-[var(--color-text-primary)]">
+                <pre className="whitespace-pre-wrap break-all font-mono text-xs text-(--color-text-primary)">
                   {msg.content}
                 </pre>
               </div>
-              <div className="shrink-0 text-right text-[10px] text-[var(--color-text-dimmed)]">
+              <div className="shrink-0 text-right text-[10px] text-(--color-text-dimmed)">
                 <div>{new Date(msg.timestamp).toLocaleTimeString()}</div>
                 <div>{msg.sizeBytes}B</div>
               </div>

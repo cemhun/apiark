@@ -8,7 +8,7 @@ interface RunResultsTableProps {
 export function RunResultsTable({ results }: RunResultsTableProps) {
   if (results.length === 0) {
     return (
-      <p className="py-4 text-center text-sm text-[var(--color-text-dimmed)]">
+      <p className="py-4 text-center text-sm text-(--color-text-dimmed)">
         No results yet
       </p>
     );
@@ -18,7 +18,7 @@ export function RunResultsTable({ results }: RunResultsTableProps) {
     <div className="overflow-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[var(--color-border)] text-left text-xs text-[var(--color-text-muted)]">
+          <tr className="border-b border-(--color-border) text-left text-xs text-(--color-text-muted)">
             <th className="px-3 py-2 w-8"></th>
             <th className="px-3 py-2">Name</th>
             <th className="px-3 py-2 w-16">Method</th>
@@ -32,7 +32,7 @@ export function RunResultsTable({ results }: RunResultsTableProps) {
           {results.map((result, i) => (
             <tr
               key={i}
-              className="border-b border-[var(--color-border)] hover:bg-[var(--color-elevated)]"
+              className="border-b border-(--color-border) hover:bg-(--color-elevated)"
             >
               <td className="px-3 py-2">
                 {result.error ? (
@@ -43,13 +43,13 @@ export function RunResultsTable({ results }: RunResultsTableProps) {
                   <X className="h-4 w-4 text-red-500" />
                 )}
               </td>
-              <td className="px-3 py-2 text-[var(--color-text-primary)]">
+              <td className="px-3 py-2 text-(--color-text-primary)">
                 {result.name}
                 {result.error && (
                   <span className="ml-2 text-xs text-red-400">{result.error}</span>
                 )}
               </td>
-              <td className="px-3 py-2 text-xs font-mono text-[var(--color-text-muted)]">
+              <td className="px-3 py-2 text-xs font-mono text-(--color-text-muted)">
                 {result.method}
               </td>
               <td className="px-3 py-2">
@@ -66,10 +66,10 @@ export function RunResultsTable({ results }: RunResultsTableProps) {
                     {result.status}
                   </span>
                 ) : (
-                  <span className="text-xs text-[var(--color-text-dimmed)]">—</span>
+                  <span className="text-xs text-(--color-text-dimmed)">—</span>
                 )}
               </td>
-              <td className="px-3 py-2 text-right text-xs text-[var(--color-text-muted)]">
+              <td className="px-3 py-2 text-right text-xs text-(--color-text-muted)">
                 {result.timeMs != null ? `${result.timeMs}ms` : "—"}
               </td>
               <td className="px-3 py-2 text-right text-xs">
@@ -78,7 +78,7 @@ export function RunResultsTable({ results }: RunResultsTableProps) {
                     {result.testPassed}/{result.testCount}
                   </span>
                 ) : (
-                  <span className="text-[var(--color-text-dimmed)]">—</span>
+                  <span className="text-(--color-text-dimmed)">—</span>
                 )}
               </td>
               <td className="px-3 py-2 text-right text-xs">
@@ -87,7 +87,7 @@ export function RunResultsTable({ results }: RunResultsTableProps) {
                     {result.assertionPassed}/{result.assertionCount}
                   </span>
                 ) : (
-                  <span className="text-[var(--color-text-dimmed)]">—</span>
+                  <span className="text-(--color-text-dimmed)">—</span>
                 )}
               </td>
             </tr>

@@ -161,14 +161,14 @@ export function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
-            <Dialog.Title className="flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary)]">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-5 py-4">
+            <Dialog.Title className="flex items-center gap-2 text-sm font-medium text-(--color-text-primary)">
               <Upload className="h-4 w-4" />
               {t("import.title")}
             </Dialog.Title>
-            <Dialog.Close className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+            <Dialog.Close className="text-(--color-text-muted) hover:text-(--color-text-primary)">
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
@@ -233,32 +233,32 @@ function SelectStep({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="text-xs font-medium text-(--color-text-secondary)">
           {t("import.source")}
         </label>
         <div className="flex gap-2">
           <button
             onClick={onSelectFile}
-            className="flex flex-1 items-center gap-2 rounded border border-[var(--color-border)] bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:border-blue-500 hover:text-[var(--color-text-primary)]"
+            className="flex flex-1 items-center gap-2 rounded border border-(--color-border) bg-(--color-elevated) px-3 py-2 text-sm text-(--color-text-secondary) hover:border-blue-500 hover:text-(--color-text-primary)"
           >
             <FileJson className="h-4 w-4" />
             {t("import.selectFile")}
           </button>
           <button
             onClick={onSelectDirectory}
-            className="flex flex-1 items-center gap-2 rounded border border-[var(--color-border)] bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:border-blue-500 hover:text-[var(--color-text-primary)]"
+            className="flex flex-1 items-center gap-2 rounded border border-(--color-border) bg-(--color-elevated) px-3 py-2 text-sm text-(--color-text-secondary) hover:border-blue-500 hover:text-(--color-text-primary)"
           >
             <FolderOpen className="h-4 w-4" />
             {t("import.selectFolder")}
           </button>
         </div>
         {filePath && (
-          <p className="truncate text-xs text-[var(--color-text-dimmed)]">{filePath}</p>
+          <p className="truncate text-xs text-(--color-text-dimmed)">{filePath}</p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="text-xs font-medium text-(--color-text-secondary)">
           {t("import.format")} {format && <span className="text-green-500">{t("import.autoDetect")}</span>}
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -269,7 +269,7 @@ function SelectStep({
               className={`rounded border px-3 py-1.5 text-sm ${
                 format === f
                   ? "border-blue-500 bg-blue-500/10 text-blue-400"
-                  : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)]"
+                  : "border-(--color-border) text-(--color-text-secondary) hover:border-(--color-text-muted)"
               }`}
             >
               {FORMAT_LABELS[f]}
@@ -316,10 +316,10 @@ function PreviewStep({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-medium text-[var(--color-text-primary)]">
+        <h3 className="text-sm font-medium text-(--color-text-primary)">
           {preview.collectionName}
         </h3>
-        <div className="mt-2 flex gap-4 text-xs text-[var(--color-text-secondary)]">
+        <div className="mt-2 flex gap-4 text-xs text-(--color-text-secondary)">
           <span>{preview.requestCount} request{preview.requestCount !== 1 ? "s" : ""}</span>
           <span>{preview.folderCount} folder{preview.folderCount !== 1 ? "s" : ""}</span>
           <span>{preview.environmentCount} environment{preview.environmentCount !== 1 ? "s" : ""}</span>
@@ -340,8 +340,8 @@ function PreviewStep({
         </div>
       )}
 
-      <p className="text-xs text-[var(--color-text-dimmed)]">
-        {t("import.saveTo")}: <span className="font-medium text-[var(--color-text-secondary)]">{targetDir}</span>
+      <p className="text-xs text-(--color-text-dimmed)">
+        {t("import.saveTo")}: <span className="font-medium text-(--color-text-secondary)">{targetDir}</span>
       </p>
 
       {error && (
@@ -354,7 +354,7 @@ function PreviewStep({
       <div className="flex justify-between pt-2">
         <button
           onClick={onBack}
-          className="rounded border border-[var(--color-border)] px-4 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]"
+          className="rounded border border-(--color-border) px-4 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)"
         >
           {t("import.back")}
         </button>
@@ -387,15 +387,15 @@ function ImportingStep({
       {importing && (
         <div className="flex flex-col items-center gap-3 py-6">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <p className="text-sm text-[var(--color-text-secondary)]">{t("import.importing")}</p>
+          <p className="text-sm text-(--color-text-secondary)">{t("import.importing")}</p>
         </div>
       )}
 
       {!importing && result && (
         <div className="flex flex-col items-center gap-3 py-6">
           <Check className="h-8 w-8 text-green-500" />
-          <p className="text-sm text-[var(--color-text-primary)]">{t("import.success")}</p>
-          <p className="truncate text-xs text-[var(--color-text-dimmed)]">{result}</p>
+          <p className="text-sm text-(--color-text-primary)">{t("import.success")}</p>
+          <p className="truncate text-xs text-(--color-text-dimmed)">{result}</p>
           <button
             onClick={onClose}
             className="mt-2 rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-500"
@@ -411,7 +411,7 @@ function ImportingStep({
           <p className="text-sm text-red-400">{error}</p>
           <button
             onClick={onClose}
-            className="mt-2 rounded border border-[var(--color-border)] px-4 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]"
+            className="mt-2 rounded border border-(--color-border) px-4 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)"
           >
             {t("common.close")}
           </button>

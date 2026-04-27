@@ -89,25 +89,25 @@ export function MockServerDialog() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex h-[600px] w-[900px] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="flex h-[600px] w-[900px] flex-col overflow-hidden rounded-lg border border-(--color-border) bg-(--color-surface)">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
-          <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">{t("mock.title")}</h2>
-          <button onClick={closeDialog} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+        <div className="flex items-center justify-between border-b border-(--color-border) px-4 py-3">
+          <h2 className="text-sm font-semibold text-(--color-text-primary)">{t("mock.title")}</h2>
+          <button onClick={closeDialog} className="text-(--color-text-muted) hover:text-(--color-text-primary)">
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
           {/* Left: config + server list */}
-          <div className="flex w-[340px] flex-col border-r border-[var(--color-border)]">
+          <div className="flex w-[340px] flex-col border-r border-(--color-border)">
             {/* Start new server */}
-            <div className="space-y-2 border-b border-[var(--color-border)] p-3">
-              <label className="block text-xs font-medium text-[var(--color-text-muted)]">{t("mock.collection")}</label>
+            <div className="space-y-2 border-b border-(--color-border) p-3">
+              <label className="block text-xs font-medium text-(--color-text-muted)">{t("mock.collection")}</label>
               <select
                 value={selectedCollection}
                 onChange={(e) => setSelectedCollection(e.target.value)}
-                className="w-full rounded bg-[var(--color-elevated)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none"
+                className="w-full rounded bg-(--color-elevated) px-2 py-1.5 text-xs text-(--color-text-primary) outline-none"
               >
                 {collections.map((c) => (
                   <option key={c.path} value={c.path}>{c.name}</option>
@@ -116,32 +116,32 @@ export function MockServerDialog() {
 
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="block text-xs text-[var(--color-text-muted)]">{t("mock.port")}</label>
+                  <label className="block text-xs text-(--color-text-muted)">{t("mock.port")}</label>
                   <input
                     type="number"
                     value={port}
                     onChange={(e) => setPort(Number(e.target.value))}
-                    className="w-full rounded bg-[var(--color-elevated)] px-2 py-1 text-xs text-[var(--color-text-primary)] outline-none"
+                    className="w-full rounded bg-(--color-elevated) px-2 py-1 text-xs text-(--color-text-primary) outline-none"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-[var(--color-text-muted)]">{t("mock.latency")}</label>
+                  <label className="block text-xs text-(--color-text-muted)">{t("mock.latency")}</label>
                   <input
                     type="number"
                     value={latencyMs}
                     onChange={(e) => setLatencyMs(Number(e.target.value))}
-                    className="w-full rounded bg-[var(--color-elevated)] px-2 py-1 text-xs text-[var(--color-text-primary)] outline-none"
+                    className="w-full rounded bg-(--color-elevated) px-2 py-1 text-xs text-(--color-text-primary) outline-none"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-[var(--color-text-muted)]">Error %</label>
+                  <label className="block text-xs text-(--color-text-muted)">Error %</label>
                   <input
                     type="number"
                     min={0}
                     max={100}
                     value={errorRate}
                     onChange={(e) => setErrorRate(Number(e.target.value))}
-                    className="w-full rounded bg-[var(--color-elevated)] px-2 py-1 text-xs text-[var(--color-text-primary)] outline-none"
+                    className="w-full rounded bg-(--color-elevated) px-2 py-1 text-xs text-(--color-text-primary) outline-none"
                   />
                 </div>
               </div>
@@ -163,7 +163,7 @@ export function MockServerDialog() {
             {/* Server list */}
             <div className="flex-1 overflow-auto">
               {servers.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-xs text-[var(--color-text-dimmed)]">
+                <div className="flex h-full items-center justify-center text-xs text-(--color-text-dimmed)">
                   {t("mock.noServers")}
                 </div>
               ) : (
@@ -171,15 +171,15 @@ export function MockServerDialog() {
                   <div
                     key={srv.id}
                     onClick={() => setActiveServerId(srv.id)}
-                    className={`flex cursor-pointer items-center justify-between border-b border-[var(--color-border)] px-3 py-2 ${
-                      activeServerId === srv.id ? "bg-[var(--color-elevated)]" : ""
+                    className={`flex cursor-pointer items-center justify-between border-b border-(--color-border) px-3 py-2 ${
+                      activeServerId === srv.id ? "bg-(--color-elevated)" : ""
                     }`}
                   >
                     <div>
-                      <p className="text-xs font-medium text-[var(--color-text-primary)]">
+                      <p className="text-xs font-medium text-(--color-text-primary)">
                         :{srv.port} — {srv.collectionName}
                       </p>
-                      <p className="text-xs text-[var(--color-text-muted)]">
+                      <p className="text-xs text-(--color-text-muted)">
                         {srv.endpoints.length} endpoint{srv.endpoints.length !== 1 ? "s" : ""}
                       </p>
                     </div>
@@ -201,27 +201,27 @@ export function MockServerDialog() {
             {activeServer ? (
               <>
                 {/* Endpoints */}
-                <div className="border-b border-[var(--color-border)] p-3">
-                  <h3 className="mb-1 text-xs font-medium text-[var(--color-text-muted)]">{t("mock.endpoints")}</h3>
+                <div className="border-b border-(--color-border) p-3">
+                  <h3 className="mb-1 text-xs font-medium text-(--color-text-muted)">{t("mock.endpoints")}</h3>
                   <div className="max-h-[140px] overflow-auto">
                     {activeServer.endpoints.map((ep, i) => (
                       <div key={i} className="flex items-center gap-2 py-0.5 text-xs">
                         <span className={`w-14 font-mono font-bold ${methodColor(ep.method)}`}>
                           {ep.method}
                         </span>
-                        <span className="font-mono text-[var(--color-text-primary)]">{ep.path}</span>
-                        <span className="text-[var(--color-text-muted)]">→ {ep.status}</span>
+                        <span className="font-mono text-(--color-text-primary)">{ep.path}</span>
+                        <span className="text-(--color-text-muted)">→ {ep.status}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Request log */}
-                <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-1.5">
-                  <h3 className="text-xs font-medium text-[var(--color-text-muted)]">{t("mock.requestLog")}</h3>
+                <div className="flex items-center justify-between border-b border-(--color-border) px-3 py-1.5">
+                  <h3 className="text-xs font-medium text-(--color-text-muted)">{t("mock.requestLog")}</h3>
                   <button
                     onClick={() => clearLogs(activeServer.id)}
-                    className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                    className="text-(--color-text-muted) hover:text-(--color-text-primary)"
                     title={t("mock.clearLogs")}
                   >
                     <Trash2 className="h-3 w-3" />
@@ -229,7 +229,7 @@ export function MockServerDialog() {
                 </div>
                 <div className="flex-1 overflow-auto p-2">
                   {activeLogs.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-xs text-[var(--color-text-dimmed)]">
+                    <div className="flex h-full items-center justify-center text-xs text-(--color-text-dimmed)">
                       Waiting for requests on localhost:{activeServer.port}...
                     </div>
                   ) : (
@@ -238,8 +238,8 @@ export function MockServerDialog() {
                         <div key={i} className="flex items-center gap-2 text-xs font-mono">
                           <span className={`w-10 text-right ${statusColor(log.status)}`}>{log.status}</span>
                           <span className={`w-12 font-bold ${methodColor(log.method)}`}>{log.method}</span>
-                          <span className="flex-1 truncate text-[var(--color-text-primary)]">{log.path}</span>
-                          <span className="text-[var(--color-text-muted)]">{log.timeMs}ms</span>
+                          <span className="flex-1 truncate text-(--color-text-primary)">{log.path}</span>
+                          <span className="text-(--color-text-muted)">{log.timeMs}ms</span>
                         </div>
                       ))}
                     </div>
@@ -247,7 +247,7 @@ export function MockServerDialog() {
                 </div>
               </>
             ) : (
-              <div className="flex flex-1 items-center justify-center text-xs text-[var(--color-text-dimmed)]">
+              <div className="flex flex-1 items-center justify-center text-xs text-(--color-text-dimmed)">
                 {t("mock.selectServer")}
               </div>
             )}
@@ -265,7 +265,7 @@ function methodColor(method: string): string {
     case "PUT": return "text-blue-400";
     case "PATCH": return "text-purple-400";
     case "DELETE": return "text-red-400";
-    default: return "text-[var(--color-text-muted)]";
+    default: return "text-(--color-text-muted)";
   }
 }
 
@@ -274,5 +274,5 @@ function statusColor(status: number): string {
   if (status >= 300 && status < 400) return "text-yellow-400";
   if (status >= 400 && status < 500) return "text-red-400";
   if (status >= 500) return "text-red-500";
-  return "text-[var(--color-text-muted)]";
+  return "text-(--color-text-muted)";
 }

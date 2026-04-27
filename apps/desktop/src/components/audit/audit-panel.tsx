@@ -59,13 +59,13 @@ export function AuditPanel() {
     <div className="flex h-full flex-col px-2">
       {/* Header actions */}
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-xs text-[var(--color-text-dimmed)]">
+        <span className="text-xs text-(--color-text-dimmed)">
           {entries.length} event{entries.length !== 1 ? "s" : ""}
         </span>
         {entries.length > 0 && (
           <button
             onClick={clearLogs}
-            className="rounded p-1 text-[var(--color-text-dimmed)] hover:bg-[var(--color-border)] hover:text-red-400"
+            className="rounded p-1 text-(--color-text-dimmed) hover:bg-(--color-border) hover:text-red-400"
             title="Clear audit logs"
           >
             <Trash2 className="h-3 w-3" />
@@ -78,13 +78,13 @@ export function AuditPanel() {
         <div className="space-y-2 py-2">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-2 rounded px-2 py-1.5">
-              <div className="h-4 w-4 animate-pulse rounded bg-[var(--color-elevated)]" />
-              <div className="h-3 flex-1 animate-pulse rounded bg-[var(--color-elevated)]" />
+              <div className="h-4 w-4 animate-pulse rounded bg-(--color-elevated)" />
+              <div className="h-3 flex-1 animate-pulse rounded bg-(--color-elevated)" />
             </div>
           ))}
         </div>
       ) : entries.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-[var(--color-text-dimmed)]">
+        <div className="flex flex-col items-center justify-center py-8 text-(--color-text-dimmed)">
           <ClipboardList className="mb-2 h-8 w-8 opacity-40" />
           <p className="text-xs">No audit events yet</p>
           <p className="mt-1 text-[10px] opacity-60">
@@ -100,7 +100,7 @@ export function AuditPanel() {
           {entries.map((entry) => {
             const config = ACTION_CONFIG[entry.action] ?? {
               icon: ClipboardList,
-              color: "text-[var(--color-text-muted)]",
+              color: "text-(--color-text-muted)",
               label: entry.action,
             };
             const Icon = config.icon;
@@ -108,7 +108,7 @@ export function AuditPanel() {
             return (
               <div
                 key={entry.id}
-                className="group flex items-start gap-2 rounded px-2 py-1.5 hover:bg-[var(--color-elevated)]"
+                className="group flex items-start gap-2 rounded px-2 py-1.5 hover:bg-(--color-elevated)"
                 title={formatTimestamp(entry.timestamp)}
               >
                 <Icon className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${config.color}`} strokeWidth={1.5} />
@@ -117,15 +117,15 @@ export function AuditPanel() {
                     <span className={`text-[11px] font-medium ${config.color}`}>
                       {config.label}
                     </span>
-                    <span className="shrink-0 text-[10px] text-[var(--color-text-dimmed)]">
+                    <span className="shrink-0 text-[10px] text-(--color-text-dimmed)">
                       {timeAgo(entry.timestamp)}
                     </span>
                   </div>
-                  <p className="truncate text-[11px] text-[var(--color-text-secondary)]">
+                  <p className="truncate text-[11px] text-(--color-text-secondary)">
                     {entry.target}
                   </p>
                   {entry.detail && (
-                    <p className="truncate text-[10px] text-[var(--color-text-dimmed)]">
+                    <p className="truncate text-[10px] text-(--color-text-dimmed)">
                       {entry.detail}
                     </p>
                   )}
@@ -134,7 +134,7 @@ export function AuditPanel() {
             );
           })}
           {loading && (
-            <div className="py-2 text-center text-[10px] text-[var(--color-text-dimmed)]">
+            <div className="py-2 text-center text-[10px] text-(--color-text-dimmed)">
               Loading more...
             </div>
           )}

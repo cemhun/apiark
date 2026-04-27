@@ -287,7 +287,7 @@ function App() {
   }, [activeTab?.loading, activeTab?.response, activeTab?.error]);
 
   if (!settingsLoaded || !workspacesLoaded) {
-    return <div className="h-screen bg-[var(--color-bg)]" />;
+    return <div className="h-screen bg-(--color-bg)" />;
   }
 
   if (showWelcome) {
@@ -306,7 +306,7 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--color-bg)] text-[var(--color-text-primary)]">
+    <div className="flex h-screen flex-col bg-(--color-bg) text-(--color-text-primary)">
       <a href="#main-content" className="sr-skip-link">Skip to content</a>
       {/* Update available banner */}
       <UpdateBanner />
@@ -316,18 +316,18 @@ function App() {
 
       {/* Auto-save error banner */}
       {autoSaveError && (
-        <div className="flex items-center gap-2 bg-[var(--color-error)]/10 px-4 py-2 text-sm text-[var(--color-error)]">
+        <div className="flex items-center gap-2 bg-(--color-error)/10 px-4 py-2 text-sm text-(--color-error)">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span className="flex-1">{t("errors.autoSaveFailed", { reason: autoSaveError })}</span>
           <button
             onClick={() => useTabStore.getState().autoSave()}
-            className="rounded-md bg-[var(--color-error)]/20 px-2 py-0.5 text-xs hover:bg-[var(--color-error)]/30"
+            className="rounded-md bg-(--color-error)/20 px-2 py-0.5 text-xs hover:bg-(--color-error)/30"
           >
             {t("common.retry")}
           </button>
           <button
             onClick={() => useTabStore.getState().clearAutoSaveError()}
-            className="rounded p-0.5 hover:bg-[var(--color-error)]/20"
+            className="rounded p-0.5 hover:bg-(--color-error)/20"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -373,7 +373,7 @@ function App() {
         )}
 
         {/* Main Panel */}
-        <main id="main-content" className="flex flex-1 flex-col overflow-hidden bg-[var(--color-card)]" role="main">
+        <main id="main-content" className="flex flex-1 flex-col overflow-hidden bg-(--color-card)" role="main">
           {/* Tab Bar */}
           {!zenMode && <TabBar />}
 
@@ -405,7 +405,7 @@ function App() {
 
       {/* Zen mode indicator */}
       {zenMode && (
-        <div className="absolute left-1/2 top-3 z-50 -translate-x-1/2 animate-fade-in rounded-lg bg-[var(--color-elevated)] px-3 py-1 text-xs text-[var(--color-text-dimmed)] opacity-60">
+        <div className="absolute left-1/2 top-3 z-50 -translate-x-1/2 animate-fade-in rounded-lg bg-(--color-elevated) px-3 py-1 text-xs text-(--color-text-dimmed) opacity-60">
           {t("app.zenMode")}
         </div>
       )}
@@ -534,13 +534,13 @@ function ProtocolView({
           {isTabbed ? (
             <div className="flex flex-1 flex-col overflow-hidden">
               {/* Tabbed layout panel switcher */}
-              <div className="flex shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+              <div className="flex shrink-0 border-b border-(--color-border) bg-(--color-surface)">
                 <button
                   onClick={() => setTabbedActivePanel("request")}
                   className={`px-4 py-2 text-sm font-medium transition-colors ${
                     tabbedActivePanel === "request"
-                      ? "border-b-2 border-[var(--color-accent)] text-[var(--color-accent)]"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                      ? "border-b-2 border-(--color-accent) text-(--color-accent)"
+                      : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
                   }`}
                 >
                   Request
@@ -549,8 +549,8 @@ function ProtocolView({
                   onClick={() => setTabbedActivePanel("response")}
                   className={`px-4 py-2 text-sm font-medium transition-colors ${
                     tabbedActivePanel === "response"
-                      ? "border-b-2 border-[var(--color-accent)] text-[var(--color-accent)]"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                      ? "border-b-2 border-(--color-accent) text-(--color-accent)"
+                      : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
                   }`}
                 >
                   Response
@@ -610,15 +610,15 @@ function EmptyState() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6">
       {/* Logo */}
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-accent)] shadow-lg">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-(--color-accent) shadow-lg">
         <ArrowRightLeft className="h-8 w-8 text-white" />
       </div>
 
       <div className="text-center">
-        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
+        <h2 className="text-lg font-semibold text-(--color-text-primary)">
           {t("app.readyToBuild")}
         </h2>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-1 text-sm text-(--color-text-muted)">
           {t("app.readyToBuildDesc")}
         </p>
       </div>
@@ -626,30 +626,30 @@ function EmptyState() {
       <div className="flex gap-3">
         <button
           onClick={newTab}
-          className="flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[var(--color-accent-hover)] active:scale-[0.98]"
+          className="flex items-center gap-2 rounded-lg bg-(--color-accent) px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-(--color-accent-hover) active:scale-[0.98]"
         >
           {t("tabs.httpRequest")}
         </button>
         <button
           onClick={newGraphQLTab}
-          className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-5 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] transition-all hover:bg-[var(--color-card-hover)] active:scale-[0.98]"
+          className="rounded-lg border border-(--color-border) bg-(--color-elevated) px-5 py-2.5 text-sm font-medium text-(--color-text-secondary) transition-all hover:bg-(--color-card-hover) active:scale-[0.98]"
         >
           GraphQL
         </button>
         <button
           onClick={newWebSocketTab}
-          className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-5 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] transition-all hover:bg-[var(--color-card-hover)] active:scale-[0.98]"
+          className="rounded-lg border border-(--color-border) bg-(--color-elevated) px-5 py-2.5 text-sm font-medium text-(--color-text-secondary) transition-all hover:bg-(--color-card-hover) active:scale-[0.98]"
         >
           WebSocket
         </button>
       </div>
 
-      <p className="text-xs text-[var(--color-text-dimmed)]">
-        <kbd className="rounded border border-[var(--color-border)] bg-[var(--color-elevated)] px-1.5 py-0.5 text-[10px]">
+      <p className="text-xs text-(--color-text-dimmed)">
+        <kbd className="rounded border border-(--color-border) bg-(--color-elevated) px-1.5 py-0.5 text-[10px]">
           Ctrl+N
         </kbd>{" "}
         new request{" "}
-        <kbd className="ml-2 rounded border border-[var(--color-border)] bg-[var(--color-elevated)] px-1.5 py-0.5 text-[10px]">
+        <kbd className="ml-2 rounded border border-(--color-border) bg-(--color-elevated) px-1.5 py-0.5 text-[10px]">
           Ctrl+K
         </kbd>{" "}
         command palette
@@ -739,17 +739,17 @@ function UpdateBanner() {
     <Dialog.Root open onOpenChange={(open) => { if (!open && !installing) setDismissed(true); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl focus:outline-none">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--color-border) bg-(--color-surface) shadow-2xl focus:outline-none">
           <div className="p-6">
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-accent)]/15">
-                <Download className="h-5 w-5 text-[var(--color-accent)]" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-(--color-accent)/15">
+                <Download className="h-5 w-5 text-(--color-accent)" />
               </div>
               <div>
-                <Dialog.Title className="text-base font-semibold text-[var(--color-text-primary)]">
+                <Dialog.Title className="text-base font-semibold text-(--color-text-primary)">
                   {t("app.updateAvailable")}
                 </Dialog.Title>
-                <p className="text-sm text-[var(--color-text-secondary)]">
+                <p className="text-sm text-(--color-text-secondary)">
                   ApiArk v{update.version} is ready
                 </p>
               </div>
@@ -757,7 +757,7 @@ function UpdateBanner() {
 
             {isSystemPackage ? (
               <div className="mb-4">
-                <p className="mb-3 text-sm text-[var(--color-text-secondary)]">
+                <p className="mb-3 text-sm text-(--color-text-secondary)">
                   Auto-update isn't supported for system package installs (.deb/.rpm).
                   Download the new version from GitHub:
                 </p>
@@ -765,7 +765,7 @@ function UpdateBanner() {
                   href={downloadUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-accent)] hover:bg-[var(--color-border)] transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-(--color-elevated) px-3 py-2 text-sm text-(--color-accent) hover:bg-(--color-border) transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
                   Download v{update.version}
@@ -775,11 +775,11 @@ function UpdateBanner() {
               <>
                 {status && (
                   <div className="mb-4">
-                    <p className="mb-2 text-sm text-[var(--color-text-secondary)]">{status}</p>
+                    <p className="mb-2 text-sm text-(--color-text-secondary)">{status}</p>
                     {installing && !isFinished && (
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-border)]">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-(--color-border)">
                         <div
-                          className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-300"
+                          className="h-full rounded-full bg-(--color-accent) transition-all duration-300"
                           style={{ width: `${progress || 5}%` }}
                         />
                       </div>
@@ -793,7 +793,7 @@ function UpdateBanner() {
               {!installing && (
                 <button
                   onClick={() => setDismissed(true)}
-                  className="rounded-lg px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]"
+                  className="rounded-lg px-4 py-2 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)"
                 >
                   {isSystemPackage ? t("app.dismiss") : t("app.later")}
                 </button>
@@ -808,7 +808,7 @@ function UpdateBanner() {
                       setInstalling(false);
                     }
                   }}
-                  className="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                  className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium text-white hover:opacity-90"
                 >
                   {t("app.updateNow")}
                 </button>
@@ -816,7 +816,7 @@ function UpdateBanner() {
               {isFinished && (
                 <button
                   onClick={() => setDismissed(true)}
-                  className="rounded-lg bg-[var(--color-success)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                  className="rounded-lg bg-(--color-success) px-4 py-2 text-sm font-medium text-white hover:opacity-90"
                 >
                   {t("app.ok")}
                 </button>
@@ -835,20 +835,20 @@ function CrashReportBanner() {
   if (settings.crashReportsEnabled !== null) return null;
 
   return (
-    <div className="flex items-center gap-2 bg-[var(--color-accent)]/10 px-4 py-2 text-sm text-[var(--color-accent)]">
+    <div className="flex items-center gap-2 bg-(--color-accent)/10 px-4 py-2 text-sm text-(--color-accent)">
       <Shield className="h-4 w-4 shrink-0" />
       <span className="flex-1">
         {t("app.crashReportPrompt")}
       </span>
       <button
         onClick={() => updateSettings({ crashReportsEnabled: true })}
-        className="rounded-md bg-[var(--color-accent)]/20 px-3 py-0.5 text-xs font-medium hover:bg-[var(--color-accent)]/30"
+        className="rounded-md bg-(--color-accent)/20 px-3 py-0.5 text-xs font-medium hover:bg-(--color-accent)/30"
       >
         {t("app.enable")}
       </button>
       <button
         onClick={() => updateSettings({ crashReportsEnabled: false })}
-        className="rounded-md bg-[var(--color-accent)]/20 px-3 py-0.5 text-xs font-medium hover:bg-[var(--color-accent)]/30"
+        className="rounded-md bg-(--color-accent)/20 px-3 py-0.5 text-xs font-medium hover:bg-(--color-accent)/30"
       >
         {t("app.noThanks")}
       </button>
@@ -863,35 +863,35 @@ function ConflictBanner({ tabId, conflictState }: { tabId: string; conflictState
 
   if (conflictState === "merge-conflict") {
     return (
-      <div className="flex items-center gap-3 border-b-2 border-[var(--color-warning)] bg-[var(--color-warning)]/15 px-4 py-3 text-sm font-medium text-[var(--color-warning)]">
+      <div className="flex items-center gap-3 border-b-2 border-(--color-warning) bg-(--color-warning)/15 px-4 py-3 text-sm font-medium text-(--color-warning)">
         <GitMerge className="h-5 w-5 shrink-0" />
         <span className="flex-1">
           This file has Git merge conflicts. Please resolve them in your editor or Git tool, then reload.
         </span>
-        <button onClick={() => reloadFromDisk(tabId)} className={`${bannerButton} bg-[var(--color-warning)]/20 hover:bg-[var(--color-warning)]/30`}>Reload</button>
-        <button onClick={() => closeTab(tabId)} className={`${bannerButton} bg-[var(--color-warning)]/20 hover:bg-[var(--color-warning)]/30`}>Close</button>
+        <button onClick={() => reloadFromDisk(tabId)} className={`${bannerButton} bg-(--color-warning)/20 hover:bg-(--color-warning)/30`}>Reload</button>
+        <button onClick={() => closeTab(tabId)} className={`${bannerButton} bg-(--color-warning)/20 hover:bg-(--color-warning)/30`}>Close</button>
       </div>
     );
   }
 
   if (conflictState === "deleted") {
     return (
-      <div className="flex items-center gap-3 border-b-2 border-[var(--color-error)] bg-[var(--color-error)]/15 px-4 py-3 text-sm font-medium text-[var(--color-error)]">
+      <div className="flex items-center gap-3 border-b-2 border-(--color-error) bg-(--color-error)/15 px-4 py-3 text-sm font-medium text-(--color-error)">
         <FileX className="h-5 w-5 shrink-0" />
         <span className="flex-1">This file was deleted externally.</span>
-        <button onClick={() => closeTab(tabId)} className={`${bannerButton} bg-[var(--color-error)]/20 hover:bg-[var(--color-error)]/30`}>Close</button>
-        <button onClick={() => dismissConflict(tabId)} className="rounded p-1 hover:bg-[var(--color-error)]/20"><X className="h-4 w-4" /></button>
+        <button onClick={() => closeTab(tabId)} className={`${bannerButton} bg-(--color-error)/20 hover:bg-(--color-error)/30`}>Close</button>
+        <button onClick={() => dismissConflict(tabId)} className="rounded p-1 hover:bg-(--color-error)/20"><X className="h-4 w-4" /></button>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-3 border-b-2 border-[var(--color-accent)] bg-[var(--color-accent)]/15 px-4 py-3 text-sm font-medium text-[var(--color-accent)]">
+    <div className="flex items-center gap-3 border-b-2 border-(--color-accent) bg-(--color-accent)/15 px-4 py-3 text-sm font-medium text-(--color-accent)">
       <RefreshCw className="h-5 w-5 shrink-0" />
       <span className="flex-1">This file was changed externally.</span>
-      <button onClick={() => reloadFromDisk(tabId)} className={`${bannerButton} bg-[var(--color-accent)]/20 hover:bg-[var(--color-accent)]/30`}>Reload</button>
-      <button onClick={() => dismissConflict(tabId)} className={`${bannerButton} bg-[var(--color-accent)]/20 hover:bg-[var(--color-accent)]/30`}>Keep Mine</button>
-      <button onClick={() => dismissConflict(tabId)} className="rounded p-1 hover:bg-[var(--color-accent)]/20"><X className="h-4 w-4" /></button>
+      <button onClick={() => reloadFromDisk(tabId)} className={`${bannerButton} bg-(--color-accent)/20 hover:bg-(--color-accent)/30`}>Reload</button>
+      <button onClick={() => dismissConflict(tabId)} className={`${bannerButton} bg-(--color-accent)/20 hover:bg-(--color-accent)/30`}>Keep Mine</button>
+      <button onClick={() => dismissConflict(tabId)} className="rounded p-1 hover:bg-(--color-accent)/20"><X className="h-4 w-4" /></button>
     </div>
   );
 }
@@ -908,38 +908,38 @@ function MigrationDialog() {
     <Dialog.Root open onOpenChange={(open) => !open && dismissMigration()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl focus:outline-none">
-          <div className="border-b border-[var(--color-border)] px-6 py-4">
-            <Dialog.Title className="text-base font-semibold text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--color-border) bg-(--color-surface) shadow-2xl focus:outline-none">
+          <div className="border-b border-(--color-border) px-6 py-4">
+            <Dialog.Title className="text-base font-semibold text-(--color-text-primary)">
               {status.isNewer ? t("migration.newerFormat") : t("migration.title")}
             </Dialog.Title>
           </div>
           <div className="space-y-3 px-6 py-4">
             {status.isNewer ? (
-              <p className="text-sm text-[var(--color-text-secondary)]">
+              <p className="text-sm text-(--color-text-secondary)">
                 This collection uses format v{status.collectionVersion}, but this
                 version of ApiArk only supports up to v{status.currentVersion}.
                 You can open it in read-only mode.
               </p>
             ) : (
-              <p className="text-sm text-[var(--color-text-secondary)]">
+              <p className="text-sm text-(--color-text-secondary)">
                 This collection uses format v{status.collectionVersion}. The
                 current version is v{status.currentVersion}. Would you like to
                 upgrade?
               </p>
             )}
             {!status.isNewer && (
-              <p className="text-xs text-[var(--color-text-muted)]">
+              <p className="text-xs text-(--color-text-muted)">
                 Tip: commit your collection to Git before upgrading so you can
                 revert if needed.
               </p>
             )}
           </div>
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-6 py-3">
-            <button onClick={dismissMigration} className="rounded-lg px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]">Cancel</button>
-            <button onClick={openReadOnly} className="rounded-lg bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-border)]">{t("migration.readOnly")}</button>
+          <div className="flex justify-end gap-2 border-t border-(--color-border) px-6 py-3">
+            <button onClick={dismissMigration} className="rounded-lg px-3 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)">Cancel</button>
+            <button onClick={openReadOnly} className="rounded-lg bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) hover:bg-(--color-border)">{t("migration.readOnly")}</button>
             {!status.isNewer && (
-              <button onClick={acceptMigration} className="rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-sm text-white hover:brightness-110">{t("migration.upgrade")}</button>
+              <button onClick={acceptMigration} className="rounded-lg bg-(--color-accent) px-3 py-1.5 text-sm text-white hover:brightness-110">{t("migration.upgrade")}</button>
             )}
           </div>
         </Dialog.Content>

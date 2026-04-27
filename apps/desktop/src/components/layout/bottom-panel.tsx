@@ -73,17 +73,17 @@ export function BottomPanel({ terminalOpen, onTerminalOpenChange }: BottomPanelP
 
   return (
     <div
-      className="flex flex-col border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+      className="flex flex-col border-t border-(--color-border) bg-(--color-surface)"
       style={{ height }}
     >
       {/* Resize handle */}
       <div
         onMouseDown={handleMouseDown}
-        className={`h-1 cursor-row-resize transition-colors hover:bg-[var(--color-accent)]/30 ${resizing ? "bg-[var(--color-accent)]/30" : ""}`}
+        className={`h-1 cursor-row-resize transition-colors hover:bg-(--color-accent)/30 ${resizing ? "bg-(--color-accent)/30" : ""}`}
       />
 
       {/* Tab bar */}
-      <div className="flex items-center border-b border-[var(--color-border)] px-1">
+      <div className="flex items-center border-b border-(--color-border) px-1">
         <PanelTab
           icon={ScrollText}
           label={t("console.title")}
@@ -104,7 +104,7 @@ export function BottomPanel({ terminalOpen, onTerminalOpenChange }: BottomPanelP
 
         <button
           onClick={closePanel}
-          className="rounded-md p-1 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+          className="rounded-md p-1 text-(--color-text-muted) transition-colors hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
           title={t("console.closePanel")}
         >
           <ChevronDown className="h-4 w-4" />
@@ -118,7 +118,7 @@ export function BottomPanel({ terminalOpen, onTerminalOpenChange }: BottomPanelP
         ) : (
           <Suspense
             fallback={
-              <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-dimmed)]">
+              <div className="flex h-full items-center justify-center text-sm text-(--color-text-dimmed)">
                 Loading terminal...
               </div>
             }
@@ -147,8 +147,8 @@ function PanelTab({
       onClick={onClick}
       className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors ${
         active
-          ? "border-b-2 border-[var(--color-accent)] text-[var(--color-text-primary)]"
-          : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+          ? "border-b-2 border-(--color-accent) text-(--color-text-primary)"
+          : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
       }`}
     >
       <Icon className="h-4 w-4" />
@@ -164,16 +164,16 @@ function ConsoleControls() {
 
   return (
     <div className="flex items-center gap-2 pr-1">
-      <div className="flex items-center gap-0.5 rounded-lg bg-[var(--color-elevated)] p-0.5">
-        <Filter className="mx-1 h-4 w-4 text-[var(--color-text-dimmed)]" />
+      <div className="flex items-center gap-0.5 rounded-lg bg-(--color-elevated) p-0.5">
+        <Filter className="mx-1 h-4 w-4 text-(--color-text-dimmed)" />
         {(["all", "log", "info", "warn", "error"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
             className={`rounded-md px-2.5 py-0.5 text-xs font-medium transition-colors ${
               filter === f
-                ? "bg-[var(--color-accent)] text-white"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                ? "bg-(--color-accent) text-white"
+                : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
             }`}
           >
             {f}
@@ -182,7 +182,7 @@ function ConsoleControls() {
       </div>
       <button
         onClick={clear}
-        className="rounded-md p-1 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+        className="rounded-md p-1 text-(--color-text-muted) transition-colors hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
         title="Clear console"
       >
         <Trash2 className="h-4 w-4" />
@@ -209,7 +209,7 @@ function ConsoleContent() {
   return (
     <div ref={listRef} className="h-full overflow-auto font-mono text-sm">
       {filtered.length === 0 ? (
-        <div className="flex h-full items-center justify-center text-[var(--color-text-dimmed)]">
+        <div className="flex h-full items-center justify-center text-(--color-text-dimmed)">
           {t("console.noLogs")}
         </div>
       ) : (
@@ -228,10 +228,10 @@ function ConsoleRow({ entry }: { entry: ConsoleLogEntry }) {
   });
 
   const levelColors: Record<string, string> = {
-    log: "text-[var(--color-text-secondary)]",
+    log: "text-(--color-text-secondary)",
     info: "text-blue-400",
     warn: "text-amber-400",
-    error: "text-[var(--color-error)]",
+    error: "text-(--color-error)",
   };
 
   const bgColors: Record<string, string> = {
@@ -242,13 +242,13 @@ function ConsoleRow({ entry }: { entry: ConsoleLogEntry }) {
   };
 
   return (
-    <div className={`flex gap-2 border-b border-[var(--color-border)]/30 px-3 py-1 ${bgColors[entry.level] ?? ""}`}>
-      <span className="shrink-0 text-[var(--color-text-dimmed)]">{time}</span>
+    <div className={`flex gap-2 border-b border-(--color-border)/30 px-3 py-1 ${bgColors[entry.level] ?? ""}`}>
+      <span className="shrink-0 text-(--color-text-dimmed)">{time}</span>
       <span className={`w-10 shrink-0 uppercase ${levelColors[entry.level] ?? ""}`}>
         {entry.level}
       </span>
-      <span className="shrink-0 text-[var(--color-text-muted)]">[{entry.source}]</span>
-      <span className="flex-1 whitespace-pre-wrap break-all text-[var(--color-text-primary)]">
+      <span className="shrink-0 text-(--color-text-muted)">[{entry.source}]</span>
+      <span className="flex-1 whitespace-pre-wrap break-all text-(--color-text-primary)">
         {entry.message}
       </span>
     </div>

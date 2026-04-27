@@ -67,7 +67,7 @@ export function RequestPanel() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Tab bar */}
-      <div className="flex gap-0 overflow-x-auto border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="flex gap-0 overflow-x-auto border-b border-(--color-border) bg-(--color-surface)">
         {TAB_IDS.map((tabId) => (
           <button
             key={tabId}
@@ -75,18 +75,18 @@ export function RequestPanel() {
             onClick={() => setActiveTab(tabId)}
             className={`shrink-0 whitespace-nowrap px-3 py-2 text-sm transition-colors ${
               activeTab === tabId
-                ? "border-b-2 border-blue-500 text-[var(--color-text-primary)]"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                ? "border-b-2 border-blue-500 text-(--color-text-primary)"
+                : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
             }`}
           >
             {t(TAB_LABEL_KEYS[tabId])}
             {tabId === "params" && params.filter((p) => p.key).length > 0 && (
-              <span className="ml-1 text-xs text-[var(--color-text-dimmed)]">
+              <span className="ml-1 text-xs text-(--color-text-dimmed)">
                 ({params.filter((p) => p.key).length})
               </span>
             )}
             {tabId === "headers" && headers.filter((h) => h.key).length > 0 && (
-              <span className="ml-1 text-xs text-[var(--color-text-dimmed)]">
+              <span className="ml-1 text-xs text-(--color-text-dimmed)">
                 ({headers.filter((h) => h.key).length})
               </span>
             )}
@@ -202,7 +202,7 @@ function PathVariablesEditor({
   return (
     <div className="space-y-1">
       {/* Header row — matches KeyValueEditor layout */}
-      <div className="grid grid-cols-[1fr_1fr_auto] items-center gap-2 px-1 text-xs text-[var(--color-text-muted)]">
+      <div className="grid grid-cols-[1fr_1fr_auto] items-center gap-2 px-1 text-xs text-(--color-text-muted)">
         <span>{t("request.pathVariables")}</span>
         <span>{t("request.value")}</span>
         <span className="w-7" />
@@ -211,7 +211,7 @@ function PathVariablesEditor({
       {/* Rows */}
       {pathVars.map((param) => (
         <div key={param} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2 px-1">
-          <div className="flex items-center rounded bg-[var(--color-elevated)] px-2 py-1 text-sm font-medium text-purple-400">
+          <div className="flex items-center rounded bg-(--color-elevated) px-2 py-1 text-sm font-medium text-purple-400">
             :{param}
           </div>
           <input
@@ -219,11 +219,11 @@ function PathVariablesEditor({
             value={values[param] ?? ""}
             onChange={(e) => handleChange(param, e.target.value)}
             placeholder={t("request.value")}
-            className="rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             onClick={() => handleRemove(param)}
-            className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-red-400"
+            className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-border) hover:text-red-400"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -239,13 +239,13 @@ function PathVariablesEditor({
             onChange={(e) => setNewVarName(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
             placeholder={t("request.variableName")}
-            className="rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
           />
           <div />
           <button
             onClick={handleAdd}
             disabled={!newVarName.trim() || pathVars.includes(newVarName.trim())}
-            className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)] disabled:opacity-40"
+            className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-border) hover:text-(--color-text-primary) disabled:opacity-40"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
@@ -303,7 +303,7 @@ function FormDataEditor({
 
   return (
     <div className="space-y-1">
-      <div className="grid grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-2 px-1 text-xs text-[var(--color-text-muted)]">
+      <div className="grid grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-2 px-1 text-xs text-(--color-text-muted)">
         <span className="w-5" />
         <span>{t("request.field")}</span>
         <span>{t("request.value")}</span>
@@ -327,7 +327,7 @@ function FormDataEditor({
             value={pair.key}
             onChange={(e) => update(index, "key", e.target.value)}
             placeholder={t("request.field")}
-            className="rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
           />
           <div className="flex items-center gap-1">
             <input
@@ -340,10 +340,10 @@ function FormDataEditor({
                 onChange(updated);
               }}
               placeholder={pair.valueType === "file" ? t("request.filePath") : t("request.value")}
-              className={`min-w-0 flex-1 rounded bg-[var(--color-elevated)] px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500 ${
+              className={`min-w-0 flex-1 rounded bg-(--color-elevated) px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500 ${
                 pair.valueType === "file"
                   ? "text-violet-400 placeholder-violet-400/50"
-                  : "text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)]"
+                  : "text-(--color-text-primary) placeholder-(--color-text-dimmed)"
               }`}
             />
             <button
@@ -351,7 +351,7 @@ function FormDataEditor({
               className={`shrink-0 rounded p-1 transition-colors ${
                 pair.valueType === "file"
                   ? "bg-violet-500/20 text-violet-400"
-                  : "text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+                  : "text-(--color-text-muted) hover:bg-(--color-border) hover:text-(--color-text-primary)"
               }`}
               title={t("request.embedFileContent")}
             >
@@ -360,7 +360,7 @@ function FormDataEditor({
           </div>
           <button
             onClick={() => removeRow(index)}
-            className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-border)] hover:text-red-400"
+            className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-border) hover:text-red-400"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -369,7 +369,7 @@ function FormDataEditor({
 
       <button
         onClick={addRow}
-        className="flex items-center gap-1 px-1 pt-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+        className="flex items-center gap-1 px-1 pt-1 text-xs text-(--color-text-muted) hover:text-(--color-text-primary)"
       >
         <Plus className="h-3 w-3" /> Add
       </button>
@@ -392,11 +392,11 @@ function ScriptsEditor({
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="mb-1.5 block text-xs font-medium text-(--color-text-secondary)">
           {t("request.preRequest")}
         </label>
-        <p className="mb-2 text-xs text-[var(--color-text-dimmed)]">
-          Runs before the request is sent. Use <code className="rounded bg-[var(--color-elevated)] px-1">ark.env.set()</code>, <code className="rounded bg-[var(--color-elevated)] px-1">ark.request.setHeader()</code>, etc.
+        <p className="mb-2 text-xs text-(--color-text-dimmed)">
+          Runs before the request is sent. Use <code className="rounded bg-(--color-elevated) px-1">ark.env.set()</code>, <code className="rounded bg-(--color-elevated) px-1">ark.request.setHeader()</code>, etc.
         </p>
         <CodeEditor
           value={preRequestScript ?? ""}
@@ -408,11 +408,11 @@ function ScriptsEditor({
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="mb-1.5 block text-xs font-medium text-(--color-text-secondary)">
           {t("request.postResponse")}
         </label>
-        <p className="mb-2 text-xs text-[var(--color-text-dimmed)]">
-          Runs after the response is received. Access response via <code className="rounded bg-[var(--color-elevated)] px-1">ark.response.json()</code>, <code className="rounded bg-[var(--color-elevated)] px-1">ark.response.status</code>, etc.
+        <p className="mb-2 text-xs text-(--color-text-dimmed)">
+          Runs after the response is received. Access response via <code className="rounded bg-(--color-elevated) px-1">ark.response.json()</code>, <code className="rounded bg-(--color-elevated) px-1">ark.response.status</code>, etc.
         </p>
         <CodeEditor
           value={postResponseScript ?? ""}
@@ -441,11 +441,11 @@ function TestsEditor({
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="mb-1.5 block text-xs font-medium text-(--color-text-secondary)">
           {t("request.assertions")}
         </label>
-        <p className="mb-2 text-xs text-[var(--color-text-dimmed)]">
-          Declarative checks. E.g. <code className="rounded bg-[var(--color-elevated)] px-1">status: 200</code>, <code className="rounded bg-[var(--color-elevated)] px-1">{"body.id: { type: string }"}</code>
+        <p className="mb-2 text-xs text-(--color-text-dimmed)">
+          Declarative checks. E.g. <code className="rounded bg-(--color-elevated) px-1">status: 200</code>, <code className="rounded bg-(--color-elevated) px-1">{"body.id: { type: string }"}</code>
         </p>
         <CodeEditor
           value={assertions ?? ""}
@@ -457,11 +457,11 @@ function TestsEditor({
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="mb-1.5 block text-xs font-medium text-(--color-text-secondary)">
           {t("request.testScript")}
         </label>
-        <p className="mb-2 text-xs text-[var(--color-text-dimmed)]">
-          Write tests using <code className="rounded bg-[var(--color-elevated)] px-1">ark.test()</code> and <code className="rounded bg-[var(--color-elevated)] px-1">ark.expect()</code>.
+        <p className="mb-2 text-xs text-(--color-text-dimmed)">
+          Write tests using <code className="rounded bg-(--color-elevated) px-1">ark.test()</code> and <code className="rounded bg-(--color-elevated) px-1">ark.expect()</code>.
         </p>
         <CodeEditor
           value={testScript ?? ""}
@@ -532,7 +532,7 @@ function HeadersEditor({
         <button
           onClick={bulkMode ? exitBulk : enterBulk}
           title={bulkMode ? "Switch to key-value view" : "Bulk edit"}
-          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)] transition-colors"
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary) transition-colors"
         >
           {bulkMode ? (
             <><LayoutList className="h-3.5 w-3.5" /> Key-Value</>
@@ -544,8 +544,8 @@ function HeadersEditor({
 
       {bulkMode ? (
         <div className="space-y-1">
-          <p className="text-xs text-[var(--color-text-dimmed)]">
-            One header per line: <code className="rounded bg-[var(--color-elevated)] px-1">Key: Value</code>. Prefix with <code className="rounded bg-[var(--color-elevated)] px-1">#</code> to disable.
+          <p className="text-xs text-(--color-text-dimmed)">
+            One header per line: <code className="rounded bg-(--color-elevated) px-1">Key: Value</code>. Prefix with <code className="rounded bg-(--color-elevated) px-1">#</code> to disable.
           </p>
           <textarea
             value={bulkText}
@@ -553,7 +553,7 @@ function HeadersEditor({
             rows={12}
             spellCheck={false}
             placeholder={"Content-Type: application/json\nAuthorization: Bearer token\n# X-Disabled-Header: value"}
-            className="w-full rounded bg-[var(--color-elevated)] px-3 py-2 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+            className="w-full rounded bg-(--color-elevated) px-3 py-2 font-mono text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500 resize-y"
           />
         </div>
       ) : (
@@ -600,7 +600,7 @@ function BodyEditor({
               className={`rounded px-3 py-1 text-xs transition-colors ${
                 body.type === btId
                   ? "bg-blue-600 text-white"
-                  : "bg-[var(--color-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                  : "bg-(--color-elevated) text-(--color-text-secondary) hover:text-(--color-text-primary)"
               }`}
             >
               {t(BODY_TYPE_LABEL_KEYS[btId])}
@@ -611,7 +611,7 @@ function BodyEditor({
           <button
             onClick={handleBeautify}
             title="Beautify JSON"
-            className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)] transition-colors"
+            className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary) transition-colors"
           >
             <Wand2 className="h-3.5 w-3.5" />
             Beautify
@@ -653,9 +653,9 @@ function BodyEditor({
 }
 
 const INPUT_CLASS =
-  "w-full rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-blue-500";
+  "w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500";
 const SELECT_CLASS =
-  "rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-blue-500";
+  "rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-blue-500";
 
 function AuthEditor({
   auth,
@@ -1066,7 +1066,7 @@ function OAuth2Editor({
     <div className="space-y-2">
       {/* Grant Type */}
       <label className="block">
-        <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.grantType")}</span>
+        <span className="text-xs text-(--color-text-secondary)">{t("auth.grantType")}</span>
         <select
           value={auth.grantType}
           onChange={(e) =>
@@ -1084,7 +1084,7 @@ function OAuth2Editor({
       {/* Auth URL */}
       {showAuthUrl && (
         <label className="block">
-          <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.authUrl")}</span>
+          <span className="text-xs text-(--color-text-secondary)">{t("auth.authUrl")}</span>
           <input
             type="text"
             value={auth.authUrl}
@@ -1098,7 +1098,7 @@ function OAuth2Editor({
       {/* Token URL */}
       {showTokenUrl && (
         <label className="block">
-          <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.tokenUrl")}</span>
+          <span className="text-xs text-(--color-text-secondary)">{t("auth.tokenUrl")}</span>
           <input
             type="text"
             value={auth.tokenUrl}
@@ -1112,7 +1112,7 @@ function OAuth2Editor({
       {/* Client ID & Secret */}
       <div className="grid grid-cols-2 gap-2">
         <label className="block">
-          <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.clientId")}</span>
+          <span className="text-xs text-(--color-text-secondary)">{t("auth.clientId")}</span>
           <input
             type="text"
             value={auth.clientId}
@@ -1122,7 +1122,7 @@ function OAuth2Editor({
           />
         </label>
         <label className="block">
-          <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.clientSecret")}</span>
+          <span className="text-xs text-(--color-text-secondary)">{t("auth.clientSecret")}</span>
           <input
             type="password"
             value={auth.clientSecret}
@@ -1135,7 +1135,7 @@ function OAuth2Editor({
 
       {/* Scope */}
       <label className="block">
-        <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.scope")}</span>
+        <span className="text-xs text-(--color-text-secondary)">{t("auth.scope")}</span>
         <input
           type="text"
           value={auth.scope}
@@ -1149,7 +1149,7 @@ function OAuth2Editor({
       {showPassword && (
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.username")}</span>
+            <span className="text-xs text-(--color-text-secondary)">{t("auth.username")}</span>
             <input
               type="text"
               value={auth.username}
@@ -1159,7 +1159,7 @@ function OAuth2Editor({
             />
           </label>
           <label className="block">
-            <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.password")}</span>
+            <span className="text-xs text-(--color-text-secondary)">{t("auth.password")}</span>
             <input
               type="password"
               value={auth.password}
@@ -1174,7 +1174,7 @@ function OAuth2Editor({
       {/* Callback URL */}
       {showAuthUrl && (
         <label className="block">
-          <span className="text-xs text-[var(--color-text-secondary)]">{t("auth.callbackUrl")}</span>
+          <span className="text-xs text-(--color-text-secondary)">{t("auth.callbackUrl")}</span>
           <input
             type="text"
             value={auth.callbackUrl}
@@ -1187,7 +1187,7 @@ function OAuth2Editor({
 
       {/* PKCE */}
       {showPkce && (
-        <label className="flex items-center gap-2 text-sm text-[var(--color-text-primary)]">
+        <label className="flex items-center gap-2 text-sm text-(--color-text-primary)">
           <input
             type="checkbox"
             checked={auth.usePkce}
@@ -1210,7 +1210,7 @@ function OAuth2Editor({
         {tokenStatus?.hasToken && (
           <button
             onClick={handleClearToken}
-            className="rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            className="rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-secondary) hover:text-(--color-text-primary)"
           >
             {t("auth.clearToken")}
           </button>

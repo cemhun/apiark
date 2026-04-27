@@ -40,29 +40,29 @@ export function StatusBar({ onToggleTerminal, terminalOpen }: StatusBarProps) {
   };
 
   return (
-    <div className="flex h-9 shrink-0 items-center border-t border-[var(--color-border)] bg-[var(--color-activity-bar)] px-3 text-[13px]">
+    <div className="flex h-9 shrink-0 items-center border-t border-(--color-border) bg-(--color-activity-bar) px-3 text-[13px]">
       {/* Left side */}
       <div className="flex items-center gap-3">
         {activeEnv && (
-          <span className="flex items-center gap-1 text-[var(--color-text-muted)]">
+          <span className="flex items-center gap-1 text-(--color-text-muted)">
             <Globe className="h-4 w-4" />
             {activeEnv}
           </span>
         )}
         {collections.length > 0 && (
-          <span className="flex items-center gap-1 text-[var(--color-text-muted)]">
+          <span className="flex items-center gap-1 text-(--color-text-muted)">
             <FolderOpen className="h-4 w-4" />
             {collections.length} collection{collections.length !== 1 ? "s" : ""}
           </span>
         )}
         {runningMocks > 0 && (
-          <span className="flex items-center gap-1 text-[var(--color-success)]">
+          <span className="flex items-center gap-1 text-(--color-success)">
             <Server className="h-4 w-4" />
             {runningMocks} mock{runningMocks !== 1 ? "s" : ""}
           </span>
         )}
         {activeMonitors > 0 && (
-          <span className="flex items-center gap-1 text-[var(--color-success)]">
+          <span className="flex items-center gap-1 text-(--color-success)">
             <Activity className="h-4 w-4" />
             {activeMonitors} monitor{activeMonitors !== 1 ? "s" : ""}
           </span>
@@ -78,14 +78,14 @@ export function StatusBar({ onToggleTerminal, terminalOpen }: StatusBarProps) {
           onClick={toggleConsole}
           className={`flex items-center gap-1 rounded px-2 py-1 transition-colors ${
             consoleOpen
-              ? "bg-[var(--color-accent)]/20 text-[var(--color-accent)]"
-              : "text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
+              ? "bg-(--color-accent)/20 text-(--color-accent)"
+              : "text-(--color-text-dimmed) hover:text-(--color-text-secondary)"
           }`}
           title={t("commandPalette.toggleConsole")}
         >
           <ScrollText className="h-4 w-4" />
           {consoleEntries.length > 0 && (
-            <span className={`text-[11px] font-bold ${hasErrors ? "text-[var(--color-error)]" : ""}`}>
+            <span className={`text-[11px] font-bold ${hasErrors ? "text-(--color-error)" : ""}`}>
               {consoleEntries.length}
             </span>
           )}
@@ -97,8 +97,8 @@ export function StatusBar({ onToggleTerminal, terminalOpen }: StatusBarProps) {
             onClick={onToggleTerminal}
             className={`flex items-center gap-1 rounded px-2 py-1 transition-colors ${
               terminalOpen
-                ? "bg-[var(--color-accent)]/20 text-[var(--color-accent)]"
-                : "text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
+                ? "bg-(--color-accent)/20 text-(--color-accent)"
+                : "text-(--color-text-dimmed) hover:text-(--color-text-secondary)"
             }`}
             title="Toggle Terminal (Ctrl+`)"
           >
@@ -109,7 +109,7 @@ export function StatusBar({ onToggleTerminal, terminalOpen }: StatusBarProps) {
         {/* Layout toggle */}
         <button
           onClick={toggleLayout}
-          className="flex items-center gap-1 text-[var(--color-text-dimmed)] transition-colors hover:text-[var(--color-text-secondary)]"
+          className="flex items-center gap-1 text-(--color-text-dimmed) transition-colors hover:text-(--color-text-secondary)"
           title={
             layout === "horizontal"
               ? "Switch to stacked layout"
@@ -127,7 +127,7 @@ export function StatusBar({ onToggleTerminal, terminalOpen }: StatusBarProps) {
           )}
         </button>
 
-        <span className="text-[var(--color-text-dimmed)]">ApiArk v{appVersion}</span>
+        <span className="text-(--color-text-dimmed)">ApiArk v{appVersion}</span>
       </div>
     </div>
   );

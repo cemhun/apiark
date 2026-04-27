@@ -77,7 +77,7 @@ export function ResponsePanel() {
           <div>
             <p className="text-sm font-medium text-red-400">{error.message}</p>
             {error.suggestion && (
-              <p className="mt-1 text-xs text-[var(--color-text-muted)]">{error.suggestion}</p>
+              <p className="mt-1 text-xs text-(--color-text-muted)">{error.suggestion}</p>
             )}
           </div>
         </div>
@@ -99,12 +99,12 @@ export function ResponsePanel() {
 
       {/* Status bar — below tabs, always visible when response exists */}
       {response && (
-        <div className="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5" role="status" aria-live="polite">
+        <div className="flex items-center gap-3 border-b border-(--color-border) bg-(--color-surface) px-3 py-1.5" role="status" aria-live="polite">
           <span className={`text-sm font-semibold animate-status-pulse ${statusColor(response.status)}`} aria-label={`Response: ${response.status} ${response.statusText}, ${response.status < 300 ? "success" : response.status < 400 ? "redirect" : response.status < 500 ? "client error" : "server error"}`}>
             {response.status} {response.statusText}
           </span>
-          <span className="text-xs text-[var(--color-text-muted)]">{response.timeMs}ms</span>
-          <span className="text-xs text-[var(--color-text-muted)]">
+          <span className="text-xs text-(--color-text-muted)">{response.timeMs}ms</span>
+          <span className="text-xs text-(--color-text-muted)">
             {formatSize(response.sizeBytes)}
           </span>
         </div>
@@ -165,11 +165,11 @@ export function ResponsePanel() {
           <table className="w-full text-sm">
             <tbody>
               {response.headers.map((h, i) => (
-                <tr key={i} className="border-b border-[var(--color-elevated)]">
-                  <td className="py-1 pr-4 font-medium text-[var(--color-text-secondary)]">
+                <tr key={i} className="border-b border-(--color-elevated)">
+                  <td className="py-1 pr-4 font-medium text-(--color-text-secondary)">
                     {h.key}
                   </td>
-                  <td className="py-1 text-[var(--color-text-primary)]">{h.value}</td>
+                  <td className="py-1 text-(--color-text-primary)">{h.value}</td>
                 </tr>
               ))}
             </tbody>
@@ -179,11 +179,11 @@ export function ResponsePanel() {
         {activeTab === "cookies" && (
           <>
             {response.cookies.length === 0 ? (
-              <p className="text-sm text-[var(--color-text-dimmed)]">No cookies</p>
+              <p className="text-sm text-(--color-text-dimmed)">No cookies</p>
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-[var(--color-text-muted)]">
+                  <tr className="text-left text-xs text-(--color-text-muted)">
                     <th className="pb-1 pr-4">Name</th>
                     <th className="pb-1 pr-4">Value</th>
                     <th className="pb-1 pr-4">Domain</th>
@@ -192,15 +192,15 @@ export function ResponsePanel() {
                 </thead>
                 <tbody>
                   {response.cookies.map((c, i) => (
-                    <tr key={i} className="border-b border-[var(--color-elevated)]">
-                      <td className="py-1 pr-4 font-medium text-[var(--color-text-secondary)]">
+                    <tr key={i} className="border-b border-(--color-elevated)">
+                      <td className="py-1 pr-4 font-medium text-(--color-text-secondary)">
                         {c.name}
                       </td>
-                      <td className="py-1 pr-4 text-[var(--color-text-primary)]">{c.value}</td>
-                      <td className="py-1 pr-4 text-[var(--color-text-muted)]">
+                      <td className="py-1 pr-4 text-(--color-text-primary)">{c.value}</td>
+                      <td className="py-1 pr-4 text-(--color-text-muted)">
                         {c.domain ?? "—"}
                       </td>
-                      <td className="py-1 text-[var(--color-text-muted)]">{c.path ?? "/"}</td>
+                      <td className="py-1 text-(--color-text-muted)">{c.path ?? "/"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -258,7 +258,7 @@ function ResponseBodyActions({ body }: { body: string }) {
     <div className="mb-2 flex gap-1">
       <button
         onClick={handleCopy}
-        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
         title={t("response.copy")}
       >
         {copied ? <Check className="h-3 w-3 text-green-500" /> : <ClipboardCopy className="h-3 w-3" />}
@@ -266,7 +266,7 @@ function ResponseBodyActions({ body }: { body: string }) {
       </button>
       <button
         onClick={handleSave}
-        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
         title={t("response.saveToFile")}
       >
         <Download className="h-3 w-3" />
@@ -280,7 +280,7 @@ function ResponseBodyActions({ body }: { body: string }) {
                 saveSnapshot(tab.name || "Response", tab.response);
               }
             }}
-            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
             title={t("response.saveForDiff")}
           >
             <BookmarkPlus className="h-3 w-3" />
@@ -288,7 +288,7 @@ function ResponseBodyActions({ body }: { body: string }) {
           </button>
           <button
             onClick={openDiff}
-            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
             title={t("response.compare")}
           >
             <ArrowLeftRight className="h-3 w-3" />
@@ -329,25 +329,25 @@ function ResponseTabs({
   };
 
   return (
-    <div className="flex gap-0 overflow-x-auto border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="flex gap-0 overflow-x-auto border-b border-(--color-border) bg-(--color-surface)">
       {TAB_IDS.map((tabId) => (
         <button
           key={tabId}
           onClick={() => setActiveTab(tabId)}
           className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm transition-colors ${
             activeTab === tabId
-              ? "border-b-2 border-blue-500 text-[var(--color-text-primary)]"
-              : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+              ? "border-b-2 border-blue-500 text-(--color-text-primary)"
+              : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
           }`}
         >
           {t(TAB_LABEL_KEYS[tabId])}
           {tabId === "headers" && response && (
-            <span className="ml-1 text-xs text-[var(--color-text-dimmed)]">
+            <span className="ml-1 text-xs text-(--color-text-dimmed)">
               ({response.headers.length})
             </span>
           )}
           {tabId === "cookies" && response && response.cookies.length > 0 && (
-            <span className="ml-1 text-xs text-[var(--color-text-dimmed)]">
+            <span className="ml-1 text-xs text-(--color-text-dimmed)">
               ({response.cookies.length})
             </span>
           )}
@@ -357,7 +357,7 @@ function ResponseTabs({
             </span>
           )}
           {tabId === "console" && consoleCount > 0 && (
-            <span className="ml-1 text-xs text-[var(--color-text-dimmed)]">
+            <span className="ml-1 text-xs text-(--color-text-dimmed)">
               ({consoleCount})
             </span>
           )}
@@ -370,8 +370,8 @@ function ResponseTabs({
 function ConsolePanel({ entries }: { entries: ConsoleEntry[] }) {
   if (entries.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-[var(--color-text-dimmed)]">
-        No console output. Use <code className="rounded bg-[var(--color-elevated)] px-1">console.log()</code> in scripts.
+      <div className="flex flex-1 items-center justify-center text-sm text-(--color-text-dimmed)">
+        No console output. Use <code className="rounded bg-(--color-elevated) px-1">console.log()</code> in scripts.
       </div>
     );
   }
@@ -386,10 +386,10 @@ function ConsolePanel({ entries }: { entries: ConsoleEntry[] }) {
               ? "bg-red-500/10 text-red-400"
               : entry.level === "warn"
                 ? "bg-yellow-500/10 text-yellow-400"
-                : "text-[var(--color-text-primary)]"
+                : "text-(--color-text-primary)"
           }`}
         >
-          <span className="mr-2 text-xs text-[var(--color-text-dimmed)]">
+          <span className="mr-2 text-xs text-(--color-text-dimmed)">
             [{entry.level}]
           </span>
           {entry.message}

@@ -15,11 +15,11 @@ export function TimingPanel({ response }: TimingPanelProps) {
     <div className="space-y-4 p-4">
       {/* Total time */}
       <div>
-        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
           Response Time
         </h4>
         <div className="flex items-center gap-3">
-          <div className="h-6 flex-1 overflow-hidden rounded bg-[var(--color-elevated)]">
+          <div className="h-6 flex-1 overflow-hidden rounded bg-(--color-elevated)">
             <div
               className="flex h-full items-center rounded px-2 text-xs font-medium text-white"
               style={{
@@ -31,14 +31,14 @@ export function TimingPanel({ response }: TimingPanelProps) {
             </div>
           </div>
         </div>
-        <div className="mt-1 text-xs text-[var(--color-text-muted)]">
+        <div className="mt-1 text-xs text-(--color-text-muted)">
           {totalMs < 200 ? "Excellent" : totalMs < 500 ? "Good" : totalMs < 1000 ? "Slow" : "Very slow"}
         </div>
       </div>
 
       {/* Transfer metrics */}
       <div>
-        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
           Transfer
         </h4>
         <div className="grid grid-cols-2 gap-3">
@@ -51,7 +51,7 @@ export function TimingPanel({ response }: TimingPanelProps) {
 
       {/* Time comparison */}
       <div>
-        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
           Performance Thresholds
         </h4>
         <div className="space-y-1.5">
@@ -67,9 +67,9 @@ export function TimingPanel({ response }: TimingPanelProps) {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded bg-[var(--color-elevated)] px-3 py-2">
-      <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">{label}</div>
-      <div className="mt-0.5 text-sm font-medium text-[var(--color-text-primary)]">{value}</div>
+    <div className="rounded bg-(--color-elevated) px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-(--color-text-muted)">{label}</div>
+      <div className="mt-0.5 text-sm font-medium text-(--color-text-primary)">{value}</div>
     </div>
   );
 }
@@ -88,10 +88,10 @@ function ThresholdBar({
   const passed = actual <= threshold;
   return (
     <div className="flex items-center gap-2">
-      <span className="w-20 text-xs text-[var(--color-text-secondary)]">{label}</span>
-      <span className="w-14 text-xs text-[var(--color-text-muted)]">&lt;{threshold}ms</span>
+      <span className="w-20 text-xs text-(--color-text-secondary)">{label}</span>
+      <span className="w-14 text-xs text-(--color-text-muted)">&lt;{threshold}ms</span>
       <div className="flex-1">
-        <div className="h-2 rounded bg-[var(--color-elevated)]">
+        <div className="h-2 rounded bg-(--color-elevated)">
           <div
             className="h-full rounded transition-all"
             style={{

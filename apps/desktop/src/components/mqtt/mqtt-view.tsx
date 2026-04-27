@@ -103,8 +103,8 @@ export function MqttView() {
       <Breadcrumb />
 
       {/* Connection bar */}
-      <div className="flex items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
-        <span className="text-xs font-medium text-[var(--color-text-muted)]">MQTT</span>
+      <div className="flex items-center gap-2 border-b border-(--color-border) bg-(--color-surface) px-3 py-2">
+        <span className="text-xs font-medium text-(--color-text-muted)">MQTT</span>
         <div className="flex flex-1 items-center gap-1.5">
           <input
             type="text"
@@ -112,16 +112,16 @@ export function MqttView() {
             onChange={(e) => setBrokerUrl(e.target.value)}
             placeholder="Broker host"
             disabled={status === "connected"}
-            className="flex-1 rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+            className="flex-1 rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
           />
-          <span className="text-xs text-[var(--color-text-dimmed)]">:</span>
+          <span className="text-xs text-(--color-text-dimmed)">:</span>
           <input
             type="text"
             value={port}
             onChange={(e) => setPort(e.target.value)}
             placeholder="1883"
             disabled={status === "connected"}
-            className="w-16 rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+            className="w-16 rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
           />
         </div>
         <div className="flex items-center gap-1.5">
@@ -134,7 +134,7 @@ export function MqttView() {
                   : "bg-gray-500"
             }`}
           />
-          <span className="text-xs text-[var(--color-text-muted)] capitalize">{status}</span>
+          <span className="text-xs text-(--color-text-muted) capitalize">{status}</span>
         </div>
         <button
           onClick={handleConnect}
@@ -160,10 +160,10 @@ export function MqttView() {
       </div>
 
       {/* Connection settings (collapsible) */}
-      <div className="border-b border-[var(--color-border)]">
+      <div className="border-b border-(--color-border)">
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
         >
           {showSettings ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           Connection Settings
@@ -171,19 +171,19 @@ export function MqttView() {
         {showSettings && (
           <div className="grid grid-cols-2 gap-2 px-3 pb-2">
             <div>
-              <label className="text-[10px] text-[var(--color-text-dimmed)]">Client ID</label>
+              <label className="text-[10px] text-(--color-text-dimmed)">Client ID</label>
               <input
                 type="text"
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
                 disabled={status === "connected"}
-                className="w-full rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+                className="w-full rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
               />
             </div>
             <div>
               <button
                 onClick={() => setShowAuth(!showAuth)}
-                className="text-[10px] text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
+                className="text-[10px] text-(--color-text-dimmed) hover:text-(--color-text-secondary)"
               >
                 Authentication {showAuth ? "▾" : "▸"}
               </button>
@@ -195,7 +195,7 @@ export function MqttView() {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
                     disabled={status === "connected"}
-                    className="flex-1 rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+                    className="flex-1 rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
                   />
                   <input
                     type="password"
@@ -203,7 +203,7 @@ export function MqttView() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     disabled={status === "connected"}
-                    className="flex-1 rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+                    className="flex-1 rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
                   />
                 </div>
               )}
@@ -214,16 +214,16 @@ export function MqttView() {
 
       {/* Error */}
       {error && (
-        <div className="border-b border-[var(--color-border)] bg-red-500/10 px-3 py-2 text-xs text-red-400">
+        <div className="border-b border-(--color-border) bg-red-500/10 px-3 py-2 text-xs text-red-400">
           {error}
         </div>
       )}
 
       {/* Subscribe + Publish panels */}
-      <div className="grid grid-cols-2 border-b border-[var(--color-border)]">
+      <div className="grid grid-cols-2 border-b border-(--color-border)">
         {/* Subscribe */}
-        <div className="border-r border-[var(--color-border)] p-2">
-          <div className="mb-1.5 text-[10px] font-medium uppercase text-[var(--color-text-dimmed)]">
+        <div className="border-r border-(--color-border) p-2">
+          <div className="mb-1.5 text-[10px] font-medium uppercase text-(--color-text-dimmed)">
             Subscribe
           </div>
           <div className="flex items-center gap-1.5">
@@ -233,7 +233,7 @@ export function MqttView() {
               onChange={(e) => setSubTopic(e.target.value)}
               placeholder="Topic (e.g. sensor/#)"
               disabled={status !== "connected"}
-              className="flex-1 rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+              className="flex-1 rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSubscribe();
               }}
@@ -242,7 +242,7 @@ export function MqttView() {
               value={subQos}
               onChange={(e) => setSubQos(Number(e.target.value))}
               disabled={status !== "connected"}
-              className="rounded bg-[var(--color-elevated)] px-1.5 py-1 text-xs text-[var(--color-text-primary)] outline-none disabled:opacity-50"
+              className="rounded bg-(--color-elevated) px-1.5 py-1 text-xs text-(--color-text-primary) outline-none disabled:opacity-50"
             >
               <option value={0}>QoS 0</option>
               <option value={1}>QoS 1</option>
@@ -281,7 +281,7 @@ export function MqttView() {
 
         {/* Publish */}
         <div className="p-2">
-          <div className="mb-1.5 text-[10px] font-medium uppercase text-[var(--color-text-dimmed)]">
+          <div className="mb-1.5 text-[10px] font-medium uppercase text-(--color-text-dimmed)">
             Publish
           </div>
           <div className="flex items-center gap-1.5">
@@ -291,19 +291,19 @@ export function MqttView() {
               onChange={(e) => setPubTopic(e.target.value)}
               placeholder="Topic"
               disabled={status !== "connected"}
-              className="flex-1 rounded bg-[var(--color-elevated)] px-2 py-1 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+              className="flex-1 rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
             />
             <select
               value={pubQos}
               onChange={(e) => setPubQos(Number(e.target.value))}
               disabled={status !== "connected"}
-              className="rounded bg-[var(--color-elevated)] px-1.5 py-1 text-xs text-[var(--color-text-primary)] outline-none disabled:opacity-50"
+              className="rounded bg-(--color-elevated) px-1.5 py-1 text-xs text-(--color-text-primary) outline-none disabled:opacity-50"
             >
               <option value={0}>QoS 0</option>
               <option value={1}>QoS 1</option>
               <option value={2}>QoS 2</option>
             </select>
-            <label className="flex items-center gap-1 text-[10px] text-[var(--color-text-muted)]">
+            <label className="flex items-center gap-1 text-[10px] text-(--color-text-muted)">
               <input
                 type="checkbox"
                 checked={pubRetain}
@@ -320,7 +320,7 @@ export function MqttView() {
               onChange={(e) => setPubPayload(e.target.value)}
               placeholder="Message payload"
               disabled={status !== "connected"}
-              className="flex-1 resize-none rounded bg-[var(--color-elevated)] p-2 font-mono text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
+              className="flex-1 resize-none rounded bg-(--color-elevated) p-2 font-mono text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50"
               rows={2}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -342,7 +342,7 @@ export function MqttView() {
       </div>
 
       {/* Stats bar */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-muted)]">
+      <div className="flex items-center justify-between border-b border-(--color-border) px-3 py-1 text-xs text-(--color-text-muted)">
         <div className="flex items-center gap-3">
           <span>Messages: {messages.length}</span>
           <span className="text-green-500">Sent: {sentCount}</span>
@@ -355,7 +355,7 @@ export function MqttView() {
             value={topicFilter}
             onChange={(e) => setTopicFilter(e.target.value)}
             placeholder="Filter by topic..."
-            className="w-40 rounded bg-[var(--color-elevated)] px-2 py-0.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+            className="w-40 rounded bg-(--color-elevated) px-2 py-0.5 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
           />
           <label className="flex items-center gap-1 cursor-pointer">
             <input
@@ -368,7 +368,7 @@ export function MqttView() {
           </label>
           <button
             onClick={clearMessages}
-            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-[var(--color-elevated)]"
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-(--color-elevated)"
             title="Clear log"
           >
             <Trash2 className="h-3 w-3" />
@@ -379,7 +379,7 @@ export function MqttView() {
       {/* Message log */}
       <div ref={logRef} className="flex-1 overflow-auto">
         {filteredMessages.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-sm text-[var(--color-text-dimmed)]">
+          <div className="flex items-center justify-center py-8 text-sm text-(--color-text-dimmed)">
             {status === "connected"
               ? "No messages yet — subscribe to a topic"
               : "Connect to a broker to start"}
@@ -397,7 +397,7 @@ export function MqttView() {
 function MessageRow({ msg }: { msg: MqttMessage }) {
   return (
     <div
-      className={`flex gap-2 border-b border-[var(--color-border)] px-3 py-2 text-sm ${
+      className={`flex gap-2 border-b border-(--color-border) px-3 py-2 text-sm ${
         msg.direction === "sent" ? "bg-green-500/5" : "bg-blue-500/5"
       }`}
     >
@@ -413,18 +413,18 @@ function MessageRow({ msg }: { msg: MqttMessage }) {
           <span className="rounded bg-purple-500/15 px-1.5 py-0.5 text-[10px] font-medium text-purple-400">
             {msg.topic}
           </span>
-          <span className="text-[10px] text-[var(--color-text-dimmed)]">
+          <span className="text-[10px] text-(--color-text-dimmed)">
             QoS {msg.qos}
           </span>
           {msg.retain && (
             <span className="text-[10px] text-yellow-500">retained</span>
           )}
         </div>
-        <pre className="whitespace-pre-wrap break-all font-mono text-xs text-[var(--color-text-primary)]">
+        <pre className="whitespace-pre-wrap break-all font-mono text-xs text-(--color-text-primary)">
           {msg.payload}
         </pre>
       </div>
-      <div className="shrink-0 text-[10px] text-[var(--color-text-dimmed)]">
+      <div className="shrink-0 text-[10px] text-(--color-text-dimmed)">
         {new Date(msg.timestamp).toLocaleTimeString()}
       </div>
     </div>

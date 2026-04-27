@@ -67,12 +67,12 @@ export function SaveAsDialog({
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl">
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
-            <Dialog.Title className="text-sm font-medium text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-4 py-3">
+            <Dialog.Title className="text-sm font-medium text-(--color-text-primary)">
               {t("request.saveRequest")}
             </Dialog.Title>
-            <Dialog.Close className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)]">
+            <Dialog.Close className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated)">
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
@@ -80,7 +80,7 @@ export function SaveAsDialog({
           <div className="space-y-4 p-4">
             {/* Request name */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--color-text-secondary)]">
+              <label className="text-xs font-medium text-(--color-text-secondary)">
                 {t("request.requestName")}
               </label>
               <input
@@ -89,13 +89,13 @@ export function SaveAsDialog({
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("request.requestNamePlaceholder")}
                 autoFocus
-                className="w-full rounded bg-[var(--color-elevated)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                className="w-full rounded bg-(--color-elevated) px-3 py-2 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && canSave) handleSave();
                 }}
               />
               {name.trim() && (
-                <p className="text-[11px] text-[var(--color-text-dimmed)]">
+                <p className="text-[11px] text-(--color-text-dimmed)">
                   {t("request.filename")} {filename}.yaml
                 </p>
               )}
@@ -103,18 +103,18 @@ export function SaveAsDialog({
 
             {/* Location picker */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[var(--color-text-secondary)]">
+              <label className="text-xs font-medium text-(--color-text-secondary)">
                 Save Location
               </label>
               {collections.length === 0 ? (
-                <div className="rounded border border-dashed border-[var(--color-border)] p-4 text-center">
-                  <FolderOpen className="mx-auto mb-2 h-6 w-6 text-[var(--color-text-dimmed)]" />
-                  <p className="text-xs text-[var(--color-text-muted)]">
+                <div className="rounded border border-dashed border-(--color-border) p-4 text-center">
+                  <FolderOpen className="mx-auto mb-2 h-6 w-6 text-(--color-text-dimmed)" />
+                  <p className="text-xs text-(--color-text-muted)">
                     No collections open. Open a collection first.
                   </p>
                 </div>
               ) : (
-                <div className="max-h-48 overflow-auto rounded border border-[var(--color-border)] bg-[var(--color-bg)]">
+                <div className="max-h-48 overflow-auto rounded border border-(--color-border) bg-(--color-bg)">
                   {collections.map((node) => (
                     <FolderTreeNode
                       key={node.path}
@@ -136,14 +136,14 @@ export function SaveAsDialog({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-4 py-3">
-            <Dialog.Close className="rounded px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]">
+          <div className="flex justify-end gap-2 border-t border-(--color-border) px-4 py-3">
+            <Dialog.Close className="rounded px-3 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)">
               {t("common.cancel")}
             </Dialog.Close>
             <button
               onClick={handleSave}
               disabled={!canSave}
-              className="rounded bg-[var(--color-accent)] px-4 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+              className="rounded bg-(--color-accent) px-4 py-1.5 text-sm font-medium text-white hover:bg-(--color-accent-hover) disabled:opacity-50"
             >
               {t("common.save")}
             </button>
@@ -188,21 +188,21 @@ function FolderTreeNode({
         }}
         className={`flex w-full items-center gap-1.5 px-2 py-1.5 text-left text-sm transition-colors ${
           isSelected
-            ? "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
-            : "text-[var(--color-text-primary)] hover:bg-[var(--color-elevated)]"
+            ? "bg-(--color-accent)/10 text-(--color-accent)"
+            : "text-(--color-text-primary) hover:bg-(--color-elevated)"
         }`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
         {children.length > 0 ? (
           isExpanded ? (
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
           ) : (
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
           )
         ) : (
           <span className="w-3.5" />
         )}
-        <FolderOpen className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
+        <FolderOpen className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
         <span className="truncate">{node.name}</span>
       </button>
       {isExpanded &&

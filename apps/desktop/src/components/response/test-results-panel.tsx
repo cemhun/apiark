@@ -15,7 +15,7 @@ export function TestResultsPanel({
 
   if (totalTests === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-[var(--color-text-dimmed)]">
+      <div className="flex flex-1 items-center justify-center text-sm text-(--color-text-dimmed)">
         No test results. Add assertions or test scripts to see results here.
       </div>
     );
@@ -24,8 +24,8 @@ export function TestResultsPanel({
   return (
     <div className="space-y-3">
       {/* Summary bar */}
-      <div className="flex items-center gap-3 rounded bg-[var(--color-elevated)] px-3 py-2">
-        <span className="text-sm font-medium text-[var(--color-text-primary)]">
+      <div className="flex items-center gap-3 rounded bg-(--color-elevated) px-3 py-2">
+        <span className="text-sm font-medium text-(--color-text-primary)">
           {totalTests} test{totalTests !== 1 ? "s" : ""}
         </span>
         {passedTests > 0 && (
@@ -43,7 +43,7 @@ export function TestResultsPanel({
       {/* Assertion results */}
       {assertionResults.length > 0 && (
         <div>
-          <h4 className="mb-1.5 text-xs font-medium text-[var(--color-text-muted)]">
+          <h4 className="mb-1.5 text-xs font-medium text-(--color-text-muted)">
             Assertions
           </h4>
           <div className="space-y-1">
@@ -57,7 +57,7 @@ export function TestResultsPanel({
       {/* JS test results */}
       {testResults.length > 0 && (
         <div>
-          <h4 className="mb-1.5 text-xs font-medium text-[var(--color-text-muted)]">
+          <h4 className="mb-1.5 text-xs font-medium text-(--color-text-muted)">
             Tests
           </h4>
           <div className="space-y-1">
@@ -82,10 +82,10 @@ function AssertionResultRow({ result }: { result: AssertionResult }) {
         )}
       </span>
       <div className="min-w-0 flex-1">
-        <span className="text-[var(--color-text-primary)]">
+        <span className="text-(--color-text-primary)">
           {result.path}{" "}
-          <span className="text-[var(--color-text-muted)]">{result.operator}</span>{" "}
-          <span className="font-mono text-[var(--color-text-secondary)]">
+          <span className="text-(--color-text-muted)">{result.operator}</span>{" "}
+          <span className="font-mono text-(--color-text-secondary)">
             {formatValue(result.expected)}
           </span>
         </span>
@@ -110,7 +110,7 @@ function TestResultRow({ result }: { result: TestResult }) {
         )}
       </span>
       <div className="min-w-0 flex-1">
-        <span className="text-[var(--color-text-primary)]">{result.name}</span>
+        <span className="text-(--color-text-primary)">{result.name}</span>
         {!result.passed && result.error && (
           <div className="mt-0.5 text-xs text-red-400">{result.error}</div>
         )}

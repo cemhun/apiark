@@ -42,11 +42,11 @@ export function WelcomeScreen({
   };
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-primary)]">
+    <div className="flex h-screen flex-col items-center justify-center bg-(--color-bg) text-(--color-text-primary)">
       <div className="flex max-w-md flex-col items-center gap-8 text-center">
         <div>
           <h1 className="text-2xl font-bold">{t("onboarding.welcome")}</h1>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+          <p className="mt-2 text-sm text-(--color-text-secondary)">
             {t("onboarding.tagline")}
           </p>
         </div>
@@ -55,12 +55,12 @@ export function WelcomeScreen({
           <button
             onClick={handleStartFresh}
             disabled={loading}
-            className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-4 py-3 text-left transition hover:border-blue-500/50 hover:bg-[var(--color-border)]"
+            className="flex items-center gap-3 rounded-lg border border-(--color-border) bg-(--color-elevated) px-4 py-3 text-left transition hover:border-blue-500/50 hover:bg-(--color-border)"
           >
             <Plus className="h-5 w-5 shrink-0 text-blue-400" />
             <div>
               <div className="text-sm font-medium">{t("onboarding.startScratch")}</div>
-              <div className="text-xs text-[var(--color-text-dimmed)]">
+              <div className="text-xs text-(--color-text-dimmed)">
                 {t("onboarding.startScratchDesc")}
               </div>
             </div>
@@ -68,12 +68,12 @@ export function WelcomeScreen({
 
           <button
             onClick={handleImport}
-            className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-4 py-3 text-left transition hover:border-blue-500/50 hover:bg-[var(--color-border)]"
+            className="flex items-center gap-3 rounded-lg border border-(--color-border) bg-(--color-elevated) px-4 py-3 text-left transition hover:border-blue-500/50 hover:bg-(--color-border)"
           >
             <Download className="h-5 w-5 shrink-0 text-green-400" />
             <div>
               <div className="text-sm font-medium">{t("onboarding.importExisting")}</div>
-              <div className="text-xs text-[var(--color-text-dimmed)]">
+              <div className="text-xs text-(--color-text-dimmed)">
                 {t("onboarding.importExistingDesc")}
               </div>
             </div>
@@ -85,7 +85,7 @@ export function WelcomeScreen({
             await updateSettings({ onboardingComplete: true });
             onComplete();
           }}
-          className="text-xs text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
+          className="text-xs text-(--color-text-dimmed) hover:text-(--color-text-secondary)"
         >
           {t("common.skipForNow")}
         </button>

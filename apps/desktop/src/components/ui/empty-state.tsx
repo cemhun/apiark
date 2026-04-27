@@ -12,11 +12,11 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center animate-fade-in">
-      <div className="text-[var(--color-text-dimmed)]">{icon}</div>
+      <div className="text-(--color-text-dimmed)">{icon}</div>
       <div>
-        <p className="text-sm font-medium text-[var(--color-text-muted)]">{title}</p>
+        <p className="text-sm font-medium text-(--color-text-muted)">{title}</p>
         {description && (
-          <p className="mt-1 text-xs text-[var(--color-text-dimmed)]">{description}</p>
+          <p className="mt-1 text-xs text-(--color-text-dimmed)">{description}</p>
         )}
       </div>
       {action && <div className="mt-1">{action}</div>}

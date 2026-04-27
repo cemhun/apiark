@@ -48,8 +48,8 @@ export function GitPanel() {
   if (collections.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 p-6 text-center">
-        <FolderGit2 className="h-8 w-8 text-[var(--color-text-dimmed)]" />
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <FolderGit2 className="h-8 w-8 text-(--color-text-dimmed)" />
+        <p className="text-sm text-(--color-text-muted)">
           Open a collection to use Git
         </p>
       </div>
@@ -60,8 +60,8 @@ export function GitPanel() {
   if (status && !status.isRepo) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 p-6 text-center">
-        <FolderGit2 className="h-8 w-8 text-[var(--color-text-dimmed)]" />
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <FolderGit2 className="h-8 w-8 text-(--color-text-dimmed)" />
+        <p className="text-sm text-(--color-text-muted)">
           This collection is not a Git repository
         </p>
         <button
@@ -102,7 +102,7 @@ export function GitPanel() {
         <select
           value={collectionPath ?? ""}
           onChange={(e) => setCollection(e.target.value)}
-          className="w-full rounded bg-[var(--color-elevated)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none"
+          className="w-full rounded bg-(--color-elevated) px-2 py-1.5 text-xs text-(--color-text-primary) outline-none"
         >
           {collections.map((c) => (
             <option key={c.path} value={c.path}>
@@ -113,25 +113,25 @@ export function GitPanel() {
       )}
 
       {/* Branch & status */}
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] p-3">
+      <div className="rounded-lg border border-(--color-border) bg-(--color-elevated) p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <GitBranch className="h-4 w-4 text-orange-400" />
-            <span className="text-sm font-medium text-[var(--color-text-primary)]">
+            <span className="text-sm font-medium text-(--color-text-primary)">
               {status?.branch || "main"}
             </span>
           </div>
           <button
             onClick={() => loadStatus()}
             disabled={loading}
-            className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-border)]"
+            className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-border)"
             title="Refresh"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           </button>
         </div>
         {(status?.ahead ?? 0) > 0 || (status?.behind ?? 0) > 0 ? (
-          <div className="mt-1 flex gap-3 text-[10px] text-[var(--color-text-muted)]">
+          <div className="mt-1 flex gap-3 text-[10px] text-(--color-text-muted)">
             {(status?.ahead ?? 0) > 0 && (
               <span className="flex items-center gap-0.5">
                 <ArrowUp className="h-2.5 w-2.5" /> {status?.ahead} ahead
@@ -150,14 +150,14 @@ export function GitPanel() {
           <button
             onClick={() => pull()}
             disabled={loading}
-            className="flex flex-1 items-center justify-center gap-1 rounded bg-[var(--color-surface)] px-2 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-1 rounded bg-(--color-surface) px-2 py-1.5 text-xs text-(--color-text-secondary) hover:bg-(--color-border) disabled:opacity-50"
           >
             <ArrowDown className="h-3 w-3" /> Pull
           </button>
           <button
             onClick={() => push()}
             disabled={loading}
-            className="flex flex-1 items-center justify-center gap-1 rounded bg-[var(--color-surface)] px-2 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-1 rounded bg-(--color-surface) px-2 py-1.5 text-xs text-(--color-text-secondary) hover:bg-(--color-border) disabled:opacity-50"
           >
             <ArrowUp className="h-3 w-3" /> Push
           </button>
@@ -173,14 +173,14 @@ export function GitPanel() {
 
       {/* Staged changes */}
       {stagedChanges.length > 0 && (
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)]">
+        <div className="rounded-lg border border-(--color-border) bg-(--color-elevated)">
           <div className="flex items-center justify-between px-3 py-1.5">
             <span className="text-[10px] font-semibold uppercase text-green-400">
               Staged ({stagedChanges.length})
             </span>
             <button
               onClick={handleUnstageAll}
-              className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+              className="text-[10px] text-(--color-text-muted) hover:text-(--color-text-secondary)"
             >
               Unstage all
             </button>
@@ -188,15 +188,15 @@ export function GitPanel() {
           {stagedChanges.map((change) => (
             <div
               key={change.path}
-              className="flex items-center gap-2 border-t border-[var(--color-border)] px-3 py-1.5"
+              className="flex items-center gap-2 border-t border-(--color-border) px-3 py-1.5"
             >
               <StatusIcon status={change.status} />
-              <span className="flex-1 truncate text-xs text-[var(--color-text-primary)]">
+              <span className="flex-1 truncate text-xs text-(--color-text-primary)">
                 {change.path}
               </span>
               <button
                 onClick={() => unstage([change.path])}
-                className="rounded p-0.5 text-[var(--color-text-muted)] hover:text-red-400"
+                className="rounded p-0.5 text-(--color-text-muted) hover:text-red-400"
                 title="Unstage"
               >
                 <Minus className="h-3 w-3" />
@@ -208,14 +208,14 @@ export function GitPanel() {
 
       {/* Unstaged changes */}
       {unstagedChanges.length > 0 && (
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)]">
+        <div className="rounded-lg border border-(--color-border) bg-(--color-elevated)">
           <div className="flex items-center justify-between px-3 py-1.5">
-            <span className="text-[10px] font-semibold uppercase text-[var(--color-text-muted)]">
+            <span className="text-[10px] font-semibold uppercase text-(--color-text-muted)">
               Changes ({unstagedChanges.length})
             </span>
             <button
               onClick={handleStageAll}
-              className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+              className="text-[10px] text-(--color-text-muted) hover:text-(--color-text-secondary)"
             >
               Stage all
             </button>
@@ -223,15 +223,15 @@ export function GitPanel() {
           {unstagedChanges.map((change) => (
             <div
               key={change.path}
-              className="flex items-center gap-2 border-t border-[var(--color-border)] px-3 py-1.5"
+              className="flex items-center gap-2 border-t border-(--color-border) px-3 py-1.5"
             >
               <StatusIcon status={change.status} />
-              <span className="flex-1 truncate text-xs text-[var(--color-text-primary)]">
+              <span className="flex-1 truncate text-xs text-(--color-text-primary)">
                 {change.path}
               </span>
               <button
                 onClick={() => stage([change.path])}
-                className="rounded p-0.5 text-[var(--color-text-muted)] hover:text-green-400"
+                className="rounded p-0.5 text-(--color-text-muted) hover:text-green-400"
                 title="Stage"
               >
                 <Plus className="h-3 w-3" />
@@ -243,9 +243,9 @@ export function GitPanel() {
 
       {/* Clean state */}
       {status?.isClean && (
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-3 py-4 text-center">
+        <div className="rounded-lg border border-(--color-border) bg-(--color-elevated) px-3 py-4 text-center">
           <Check className="mx-auto h-5 w-5 text-green-500" />
-          <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+          <p className="mt-1 text-xs text-(--color-text-muted)">
             Working tree clean
           </p>
         </div>
@@ -253,12 +253,12 @@ export function GitPanel() {
 
       {/* Commit box */}
       {stagedChanges.length > 0 && (
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] p-2">
+        <div className="rounded-lg border border-(--color-border) bg-(--color-elevated) p-2">
           <textarea
             value={commitMessage}
             onChange={(e) => setCommitMessage(e.target.value)}
             placeholder="Commit message..."
-            className="w-full resize-none rounded bg-[var(--color-surface)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-orange-500"
+            className="w-full resize-none rounded bg-(--color-surface) px-2 py-1.5 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-orange-500"
             rows={2}
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -283,10 +283,10 @@ export function GitPanel() {
       )}
 
       {/* Log */}
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)]">
+      <div className="rounded-lg border border-(--color-border) bg-(--color-elevated)">
         <button
           onClick={() => setShowLog(!showLog)}
-          className="flex w-full items-center gap-1.5 px-3 py-2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+          className="flex w-full items-center gap-1.5 px-3 py-2 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
         >
           {showLog ? (
             <ChevronDown className="h-3 w-3" />
@@ -301,23 +301,23 @@ export function GitPanel() {
             {log.map((entry) => (
               <div
                 key={entry.hash}
-                className="border-t border-[var(--color-border)] px-3 py-1.5"
+                className="border-t border-(--color-border) px-3 py-1.5"
               >
                 <div className="flex items-center gap-2">
                   <code className="text-[10px] text-orange-400">
                     {entry.hash}
                   </code>
-                  <span className="flex-1 truncate text-xs text-[var(--color-text-primary)]">
+                  <span className="flex-1 truncate text-xs text-(--color-text-primary)">
                     {entry.message}
                   </span>
                 </div>
-                <div className="mt-0.5 text-[10px] text-[var(--color-text-dimmed)]">
+                <div className="mt-0.5 text-[10px] text-(--color-text-dimmed)">
                   {entry.author} · {entry.date}
                 </div>
               </div>
             ))}
             {log.length === 0 && (
-              <div className="border-t border-[var(--color-border)] px-3 py-3 text-center text-xs text-[var(--color-text-dimmed)]">
+              <div className="border-t border-(--color-border) px-3 py-3 text-center text-xs text-(--color-text-dimmed)">
                 No commits yet
               </div>
             )}

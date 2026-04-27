@@ -136,43 +136,43 @@ export function MonitorDialog() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex h-[600px] w-[900px] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+      <div className="flex h-[600px] w-[900px] flex-col overflow-hidden rounded-lg border border-(--color-border) bg-(--color-surface)">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-primary)]">
+        <div className="flex items-center justify-between border-b border-(--color-border) px-4 py-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-(--color-text-primary)">
             <Clock className="h-4 w-4" /> {t("monitor.title")}
           </h2>
-          <button onClick={closeDialog} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+          <button onClick={closeDialog} className="text-(--color-text-muted) hover:text-(--color-text-primary)">
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
           {/* Left: create + list */}
-          <div className="flex w-[340px] flex-col border-r border-[var(--color-border)]">
+          <div className="flex w-[340px] flex-col border-r border-(--color-border)">
             {/* Create form */}
-            <div className="space-y-2 border-b border-[var(--color-border)] p-3">
+            <div className="space-y-2 border-b border-(--color-border) p-3">
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("monitor.create")}
-                className="w-full rounded bg-[var(--color-elevated)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none"
+                className="w-full rounded bg-(--color-elevated) px-2 py-1.5 text-xs text-(--color-text-primary) outline-none"
               />
               <select
                 value={collectionPath}
                 onChange={(e) => setCollectionPath(e.target.value)}
-                className="w-full rounded bg-[var(--color-elevated)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none"
+                className="w-full rounded bg-(--color-elevated) px-2 py-1.5 text-xs text-(--color-text-primary) outline-none"
               >
                 {collections.map((c) => (
                   <option key={c.path} value={c.path}>{c.name}</option>
                 ))}
               </select>
               <div>
-                <label className="block text-xs text-[var(--color-text-muted)]">Schedule</label>
+                <label className="block text-xs text-(--color-text-muted)">Schedule</label>
                 <select
                   value={cronExpression}
                   onChange={(e) => setCronExpression(e.target.value)}
-                  className="w-full rounded bg-[var(--color-elevated)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none"
+                  className="w-full rounded bg-(--color-elevated) px-2 py-1.5 text-xs text-(--color-text-primary) outline-none"
                 >
                   {CRON_PRESETS.map((p) => (
                     <option key={p.value} value={p.value}>{p.label}</option>
@@ -183,15 +183,15 @@ export function MonitorDialog() {
                 value={environmentName}
                 onChange={(e) => setEnvironmentName(e.target.value)}
                 placeholder="Environment (optional)"
-                className="w-full rounded bg-[var(--color-elevated)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none"
+                className="w-full rounded bg-(--color-elevated) px-2 py-1.5 text-xs text-(--color-text-primary) outline-none"
               />
               <input
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
                 placeholder="Webhook URL (optional)"
-                className="w-full rounded bg-[var(--color-elevated)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] outline-none"
+                className="w-full rounded bg-(--color-elevated) px-2 py-1.5 text-xs text-(--color-text-primary) outline-none"
               />
-              <label className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+              <label className="flex items-center gap-2 text-xs text-(--color-text-secondary)">
                 <input
                   type="checkbox"
                   checked={notifyOnFailure}
@@ -213,7 +213,7 @@ export function MonitorDialog() {
             {/* Monitor list */}
             <div className="flex-1 overflow-auto">
               {monitors.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-xs text-[var(--color-text-dimmed)]">
+                <div className="flex h-full items-center justify-center text-xs text-(--color-text-dimmed)">
                   No monitors configured
                 </div>
               ) : (
@@ -221,8 +221,8 @@ export function MonitorDialog() {
                   <div
                     key={m.id}
                     onClick={() => selectMonitor(m.id)}
-                    className={`flex cursor-pointer items-center justify-between border-b border-[var(--color-border)] px-3 py-2 ${
-                      selectedMonitorId === m.id ? "bg-[var(--color-elevated)]" : ""
+                    className={`flex cursor-pointer items-center justify-between border-b border-(--color-border) px-3 py-2 ${
+                      selectedMonitorId === m.id ? "bg-(--color-elevated)" : ""
                     }`}
                   >
                     <div className="min-w-0 flex-1">
@@ -236,18 +236,18 @@ export function MonitorDialog() {
                                 : "bg-gray-500"
                           }`}
                         />
-                        <p className="truncate text-xs font-medium text-[var(--color-text-primary)]">
+                        <p className="truncate text-xs font-medium text-(--color-text-primary)">
                           {m.name}
                         </p>
                       </div>
-                      <p className="text-xs text-[var(--color-text-muted)]">
+                      <p className="text-xs text-(--color-text-muted)">
                         {m.runCount} runs · {m.enabled ? "Active" : "Paused"}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => { e.stopPropagation(); handleToggle(m.id); }}
-                        className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)]"
+                        className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated)"
                         title={m.enabled ? t("monitor.enabled") : t("monitor.disabled")}
                       >
                         {m.enabled ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
@@ -270,11 +270,11 @@ export function MonitorDialog() {
           <div className="flex flex-1 flex-col overflow-hidden">
             {selectedMonitor ? (
               <>
-                <div className="border-b border-[var(--color-border)] px-3 py-2">
-                  <h3 className="text-xs font-medium text-[var(--color-text-primary)]">
+                <div className="border-b border-(--color-border) px-3 py-2">
+                  <h3 className="text-xs font-medium text-(--color-text-primary)">
                     {selectedMonitor.name}
                   </h3>
-                  <p className="text-xs text-[var(--color-text-muted)]">
+                  <p className="text-xs text-(--color-text-muted)">
                     {selectedMonitor.cronExpression} · {selectedMonitor.enabled ? "Active" : "Paused"}
                     {selectedMonitor.lastRun && ` · Last: ${new Date(selectedMonitor.lastRun).toLocaleString()}`}
                   </p>
@@ -283,13 +283,13 @@ export function MonitorDialog() {
                 {/* Results history */}
                 <div className="flex-1 overflow-auto">
                   {selectedResults.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-xs text-[var(--color-text-dimmed)]">
+                    <div className="flex h-full items-center justify-center text-xs text-(--color-text-dimmed)">
                       No results yet — waiting for first run
                     </div>
                   ) : (
                     <table className="w-full text-xs">
-                      <thead className="sticky top-0 bg-[var(--color-surface)]">
-                        <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-muted)]">
+                      <thead className="sticky top-0 bg-(--color-surface)">
+                        <tr className="border-b border-(--color-border) text-left text-(--color-text-muted)">
                           <th className="px-3 py-1.5">Time</th>
                           <th className="px-3 py-1.5">Status</th>
                           <th className="px-3 py-1.5">Requests</th>
@@ -300,8 +300,8 @@ export function MonitorDialog() {
                       </thead>
                       <tbody>
                         {selectedResults.map((r) => (
-                          <tr key={r.id} className="border-b border-[var(--color-border)]">
-                            <td className="px-3 py-1.5 text-[var(--color-text-secondary)]">
+                          <tr key={r.id} className="border-b border-(--color-border)">
+                            <td className="px-3 py-1.5 text-(--color-text-secondary)">
                               {new Date(r.timestamp).toLocaleString()}
                             </td>
                             <td className="px-3 py-1.5">
@@ -315,10 +315,10 @@ export function MonitorDialog() {
                                 {r.status.toUpperCase()}
                               </span>
                             </td>
-                            <td className="px-3 py-1.5 text-[var(--color-text-primary)]">{r.totalRequests}</td>
+                            <td className="px-3 py-1.5 text-(--color-text-primary)">{r.totalRequests}</td>
                             <td className="px-3 py-1.5 text-green-400">{r.totalPassed}</td>
                             <td className="px-3 py-1.5 text-red-400">{r.totalFailed}</td>
-                            <td className="px-3 py-1.5 text-[var(--color-text-muted)]">{r.totalTimeMs}ms</td>
+                            <td className="px-3 py-1.5 text-(--color-text-muted)">{r.totalTimeMs}ms</td>
                           </tr>
                         ))}
                       </tbody>
@@ -327,7 +327,7 @@ export function MonitorDialog() {
                 </div>
               </>
             ) : (
-              <div className="flex flex-1 items-center justify-center text-xs text-[var(--color-text-dimmed)]">
+              <div className="flex flex-1 items-center justify-center text-xs text-(--color-text-dimmed)">
                 Select a monitor to view results
               </div>
             )}

@@ -10,28 +10,28 @@ const iconMap = {
 
 const styleMap = {
   error: {
-    container: "border-[var(--color-error)] bg-[var(--color-error)]/15",
-    icon: "text-[var(--color-error)]",
-    text: "text-[var(--color-error)]",
-    close: "hover:bg-[var(--color-error)]/20 text-[var(--color-error)]",
+    container: "border-(--color-error) bg-(--color-error)/15",
+    icon: "text-(--color-error)",
+    text: "text-(--color-error)",
+    close: "hover:bg-(--color-error)/20 text-(--color-error)",
   },
   warning: {
-    container: "border-[var(--color-warning)] bg-[var(--color-warning)]/15",
-    icon: "text-[var(--color-warning)]",
-    text: "text-[var(--color-warning)]",
-    close: "hover:bg-[var(--color-warning)]/20 text-[var(--color-warning)]",
+    container: "border-(--color-warning) bg-(--color-warning)/15",
+    icon: "text-(--color-warning)",
+    text: "text-(--color-warning)",
+    close: "hover:bg-(--color-warning)/20 text-(--color-warning)",
   },
   info: {
-    container: "border-[var(--color-accent)] bg-[var(--color-accent)]/15",
-    icon: "text-[var(--color-accent)]",
-    text: "text-[var(--color-accent)]",
-    close: "hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)]",
+    container: "border-(--color-accent) bg-(--color-accent)/15",
+    icon: "text-(--color-accent)",
+    text: "text-(--color-accent)",
+    close: "hover:bg-(--color-accent)/20 text-(--color-accent)",
   },
   success: {
-    container: "border-[var(--color-success)] bg-[var(--color-success)]/15",
-    icon: "text-[var(--color-success)]",
-    text: "text-[var(--color-success)]",
-    close: "hover:bg-[var(--color-success)]/20 text-[var(--color-success)]",
+    container: "border-(--color-success) bg-(--color-success)/15",
+    icon: "text-(--color-success)",
+    text: "text-(--color-success)",
+    close: "hover:bg-(--color-success)/20 text-(--color-success)",
   },
 };
 

@@ -129,17 +129,17 @@ function SortableTab({
         onContextMenu={handleContextMenu}
         className={`group relative flex shrink-0 items-center gap-2 rounded-t-lg px-4 py-2 text-[13px] transition-all ${
           isActive
-            ? "bg-[var(--color-card)] text-[var(--color-text-primary)] shadow-[0_-1px_4px_rgba(0,0,0,0.1)]"
-            : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+            ? "bg-(--color-card) text-(--color-text-primary) shadow-[0_-1px_4px_rgba(0,0,0,0.1)]"
+            : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
         }`}
       >
         {tab.pinned && (
-          <Pin className="h-3 w-3 shrink-0 rotate-45 text-[var(--color-accent)]" />
+          <Pin className="h-3 w-3 shrink-0 rotate-45 text-(--color-accent)" />
         )}
         <TabBadge tab={tab} />
         <span className="max-w-[140px] truncate">{tab.name}</span>
         {tab.isDirty && (
-          <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-accent)]" />
+          <span className="h-2 w-2 shrink-0 rounded-full bg-(--color-accent)" />
         )}
         {!tab.pinned && (
           <span
@@ -147,7 +147,7 @@ function SortableTab({
               e.stopPropagation();
               onClose();
             }}
-            className="ml-0.5 rounded-md p-0.5 opacity-0 transition-opacity hover:bg-[var(--color-border)] group-hover:opacity-100"
+            className="ml-0.5 rounded-md p-0.5 opacity-0 transition-opacity hover:bg-(--color-border) group-hover:opacity-100"
           >
             <X className="h-3 w-3" />
           </span>
@@ -156,7 +156,7 @@ function SortableTab({
       {contextMenu && (
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[180px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] py-1 shadow-xl"
+          className="fixed z-50 min-w-[180px] overflow-hidden rounded-lg border border-(--color-border) bg-(--color-elevated) py-1 shadow-xl"
           style={{ left: contextMenu.x, top: contextMenu.y }}
         >
           {[
@@ -170,12 +170,12 @@ function SortableTab({
             { label: t("tabs.moveToNewWindow"), action: onDetach },
           ].map((item, i) =>
             item === null ? (
-              <div key={i} className="my-1 border-t border-[var(--color-border)]" />
+              <div key={i} className="my-1 border-t border-(--color-border)" />
             ) : (
               <button
                 key={item.label}
                 onClick={() => { item.action(); setContextMenu(null); }}
-                className="flex w-full px-3 py-1.5 text-left text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-accent-glow)]"
+                className="flex w-full px-3 py-1.5 text-left text-sm text-(--color-text-primary) hover:bg-(--color-accent-glow)"
               >
                 {item.label}
               </button>
@@ -218,7 +218,7 @@ function NewTabDropdown() {
     <div ref={ref} className="relative flex items-center">
       <button
         onClick={() => setOpen(!open)}
-        className="ml-1 flex shrink-0 items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-[var(--color-accent-hover)] active:scale-95"
+        className="ml-1 flex shrink-0 items-center gap-1.5 rounded-lg bg-(--color-accent) px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-(--color-accent-hover) active:scale-95"
         title="New Tab"
       >
         <Plus className="h-4 w-4" strokeWidth={2.5} />
@@ -226,7 +226,7 @@ function NewTabDropdown() {
         <ChevronDown className="h-3 w-3 opacity-70" />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 min-w-[180px] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] py-1 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-2 min-w-[180px] overflow-hidden rounded-xl border border-(--color-border) bg-(--color-elevated) py-1 shadow-xl">
           {items.map((item) => (
             <button
               key={item.label}
@@ -234,21 +234,21 @@ function NewTabDropdown() {
                 item.action();
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-accent-glow)]"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-(--color-text-primary) transition-colors hover:bg-(--color-accent-glow)"
             >
-              <item.icon className={`h-4 w-4 ${item.color ?? "text-[var(--color-text-muted)]"}`} />
+              <item.icon className={`h-4 w-4 ${item.color ?? "text-(--color-text-muted)"}`} />
               {item.label}
             </button>
           ))}
-          <div className="my-1 border-t border-[var(--color-border)]" />
+          <div className="my-1 border-t border-(--color-border)" />
           <button
             onClick={() => {
               window.dispatchEvent(new CustomEvent("apiark:open-curl-import"));
               setOpen(false);
             }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-accent-glow)]"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-(--color-text-primary) transition-colors hover:bg-(--color-accent-glow)"
           >
-            <Terminal className="h-4 w-4 text-[var(--color-text-muted)]" />
+            <Terminal className="h-4 w-4 text-(--color-text-muted)" />
             {t("tabs.importCurl")}
           </button>
         </div>
@@ -282,27 +282,27 @@ function EnvironmentDropdown() {
     <div ref={ref} className="relative flex items-center">
       <button
         onClick={() => setOpen(!open)}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] transition-all hover:border-[var(--color-accent)]/40 hover:text-[var(--color-text-primary)] active:scale-95"
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-(--color-border) bg-(--color-elevated) px-3 py-1.5 text-xs font-medium text-(--color-text-secondary) transition-all hover:border-(--color-accent)/40 hover:text-(--color-text-primary) active:scale-95"
         title={t("environment.title")}
       >
-        <FlaskConical className="h-3.5 w-3.5 text-[var(--color-accent)]" />
+        <FlaskConical className="h-3.5 w-3.5 text-(--color-accent)" />
         <span className="max-w-[120px] truncate">{label}</span>
         <ChevronDown className={`h-3 w-3 opacity-60 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 min-w-[180px] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] py-1 shadow-xl">
-          <p className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--color-text-dimmed)]">
+        <div className="absolute right-0 top-full z-50 mt-2 min-w-[180px] overflow-hidden rounded-xl border border-(--color-border) bg-(--color-elevated) py-1 shadow-xl">
+          <p className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-(--color-text-dimmed)">
             {t("environment.title")}
           </p>
           <button
             onClick={() => { setActiveEnvironment(null); setOpen(false); }}
-            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-accent-glow)] ${
+            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-(--color-accent-glow) ${
               activeEnvironmentName === null
-                ? "font-medium text-[var(--color-accent)]"
-                : "text-[var(--color-text-secondary)]"
+                ? "font-medium text-(--color-accent)"
+                : "text-(--color-text-secondary)"
             }`}
           >
-            {activeEnvironmentName === null && <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />}
+            {activeEnvironmentName === null && <span className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />}
             {activeEnvironmentName !== null && <span className="h-1.5 w-1.5 rounded-full" />}
             {t("environment.noEnvironment")}
           </button>
@@ -310,18 +310,18 @@ function EnvironmentDropdown() {
             <button
               key={env.name}
               onClick={() => { setActiveEnvironment(env.name); setOpen(false); }}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-accent-glow)] ${
+              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-(--color-accent-glow) ${
                 activeEnvironmentName === env.name
-                  ? "font-medium text-[var(--color-accent)]"
-                  : "text-[var(--color-text-primary)]"
+                  ? "font-medium text-(--color-accent)"
+                  : "text-(--color-text-primary)"
               }`}
             >
-              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeEnvironmentName === env.name ? "bg-[var(--color-accent)]" : "bg-[var(--color-text-dimmed)]"}`} />
+              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeEnvironmentName === env.name ? "bg-(--color-accent)" : "bg-(--color-text-dimmed)"}`} />
               <span className="truncate">{env.name}</span>
             </button>
           ))}
           {environments.length === 0 && (
-            <p className="px-3 py-2 text-xs text-[var(--color-text-dimmed)]">
+            <p className="px-3 py-2 text-xs text-(--color-text-dimmed)">
               {t("sidebar.noEnvironmentsYet")}
             </p>
           )}
@@ -385,7 +385,7 @@ export function TabBar() {
   if (tabs.length === 0) return null;
 
   return (
-    <div data-tour="tabs" ref={tabBarRef} className="flex items-end gap-1 bg-[var(--color-surface)] px-2 pt-2">
+    <div data-tour="tabs" ref={tabBarRef} className="flex items-end gap-1 border-b border-(--color-border) bg-(--color-surface) px-2 pt-2">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -413,7 +413,7 @@ export function TabBar() {
             ))}
             <button
               onClick={() => useTabStore.getState().newTab()}
-              className="mb-0.5 ml-1 shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+              className="mb-0.5 ml-1 shrink-0 rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
               title="New Tab (Ctrl+T)"
             >
               <Plus className="h-4 w-4" />
@@ -431,7 +431,7 @@ export function TabBar() {
                 save();
               }
             }}
-            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-[var(--color-elevated)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-(--color-elevated) px-3 py-1.5 text-xs font-medium text-(--color-text-secondary) transition-colors hover:bg-(--color-border) hover:text-(--color-text-primary)"
             title="Save (Ctrl+S)"
           >
             <Save className="h-3.5 w-3.5" />

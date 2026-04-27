@@ -75,7 +75,7 @@ export function SocketIoView() {
       <Breadcrumb />
 
       {/* Connection bar */}
-      <div className="flex items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+      <div className="flex items-center gap-2 border-b border-(--color-border) bg-(--color-surface) px-3 py-2">
         <span className="rounded bg-pink-500/15 px-1.5 py-0.5 text-[10px] font-bold text-pink-400">
           SIO
         </span>
@@ -85,17 +85,17 @@ export function SocketIoView() {
           onChange={(e) => setUrl(e.target.value)}
           placeholder="http://localhost:3000"
           disabled={status === "connected"}
-          className="flex-1 rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
+          className="flex-1 rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
         />
         <div className="flex items-center gap-1">
-          <span className="text-xs text-[var(--color-text-dimmed)]">ns:</span>
+          <span className="text-xs text-(--color-text-dimmed)">ns:</span>
           <input
             type="text"
             value={namespace}
             onChange={(e) => setNamespace(e.target.value)}
             placeholder="/"
             disabled={status === "connected"}
-            className="w-24 rounded bg-[var(--color-elevated)] px-2 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
+            className="w-24 rounded bg-(--color-elevated) px-2 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
           />
         </div>
         <div className="flex items-center gap-1.5">
@@ -108,7 +108,7 @@ export function SocketIoView() {
                   : "bg-gray-500"
             }`}
           />
-          <span className="text-xs text-[var(--color-text-muted)] capitalize">{status}</span>
+          <span className="text-xs text-(--color-text-muted) capitalize">{status}</span>
         </div>
         <button
           onClick={handleConnect}
@@ -134,10 +134,10 @@ export function SocketIoView() {
       </div>
 
       {/* Headers (collapsible) */}
-      <div className="border-b border-[var(--color-border)]">
+      <div className="border-b border-(--color-border)">
         <button
           onClick={() => setShowHeaders(!showHeaders)}
-          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+          className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
         >
           {showHeaders ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           Headers
@@ -159,17 +159,17 @@ export function SocketIoView() {
 
       {/* Server info (collapsible, shown when connected) */}
       {serverInfo && (
-        <div className="border-b border-[var(--color-border)]">
+        <div className="border-b border-(--color-border)">
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+            className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
           >
             {showSettings ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             Server Info
           </button>
           {showSettings && (
-            <div className="flex gap-4 px-3 pb-2 text-xs text-[var(--color-text-muted)]">
-              <span>SID: <code className="text-[var(--color-text-secondary)]">{serverInfo.sid}</code></span>
+            <div className="flex gap-4 px-3 pb-2 text-xs text-(--color-text-muted)">
+              <span>SID: <code className="text-(--color-text-secondary)">{serverInfo.sid}</code></span>
               <span>Ping: {serverInfo.pingInterval}ms</span>
               <span>Timeout: {serverInfo.pingTimeout}ms</span>
             </div>
@@ -179,14 +179,14 @@ export function SocketIoView() {
 
       {/* Error */}
       {error && (
-        <div className="border-b border-[var(--color-border)] bg-red-500/10 px-3 py-2 text-xs text-red-400">
+        <div className="border-b border-(--color-border) bg-red-500/10 px-3 py-2 text-xs text-red-400">
           {error}
         </div>
       )}
 
       {/* Emit panel */}
-      <div className="border-b border-[var(--color-border)] bg-[var(--color-surface)] p-2">
-        <div className="mb-1.5 text-[10px] font-medium uppercase text-[var(--color-text-dimmed)]">
+      <div className="border-b border-(--color-border) bg-(--color-surface) p-2">
+        <div className="mb-1.5 text-[10px] font-medium uppercase text-(--color-text-dimmed)">
           Emit Event
         </div>
         <div className="flex items-center gap-1.5 mb-1.5">
@@ -196,7 +196,7 @@ export function SocketIoView() {
             onChange={(e) => setEventName(e.target.value)}
             placeholder="Event name (e.g. message, chat)"
             disabled={status !== "connected"}
-            className="flex-1 rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
+            className="flex-1 rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
           />
         </div>
         <div className="flex items-end gap-1.5">
@@ -205,7 +205,7 @@ export function SocketIoView() {
             onChange={(e) => setEventArgs(e.target.value)}
             placeholder='Arguments (JSON) e.g. "hello" or {"msg": "hi"} or ["a", 1]'
             disabled={status !== "connected"}
-            className="flex-1 resize-none rounded bg-[var(--color-elevated)] p-2 font-mono text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
+            className="flex-1 resize-none rounded bg-(--color-elevated) p-2 font-mono text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50"
             rows={2}
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -226,7 +226,7 @@ export function SocketIoView() {
       </div>
 
       {/* Stats bar */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-muted)]">
+      <div className="flex items-center justify-between border-b border-(--color-border) px-3 py-1 text-xs text-(--color-text-muted)">
         <div className="flex items-center gap-3">
           <span>Events: {events.length}</span>
           <span className="text-green-500">Emitted: {sentCount}</span>
@@ -241,7 +241,7 @@ export function SocketIoView() {
             value={listenFilter}
             onChange={(e) => setListenFilter(e.target.value)}
             placeholder="Filter events..."
-            className="w-36 rounded bg-[var(--color-elevated)] px-2 py-0.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+            className="w-36 rounded bg-(--color-elevated) px-2 py-0.5 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
           />
           <label className="flex items-center gap-1 cursor-pointer">
             <input
@@ -254,7 +254,7 @@ export function SocketIoView() {
           </label>
           <button
             onClick={clearEvents}
-            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-[var(--color-elevated)]"
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-(--color-elevated)"
             title="Clear log"
           >
             <Trash2 className="h-3 w-3" />
@@ -265,7 +265,7 @@ export function SocketIoView() {
       {/* Event log */}
       <div ref={logRef} className="flex-1 overflow-auto">
         {filteredEvents.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-sm text-[var(--color-text-dimmed)]">
+          <div className="flex items-center justify-center py-8 text-sm text-(--color-text-dimmed)">
             {status === "connected" ? "No events yet — emit or listen" : "Connect to start"}
           </div>
         ) : (
@@ -281,7 +281,7 @@ export function SocketIoView() {
 function EventRow({ event }: { event: SioEvent }) {
   return (
     <div
-      className={`flex gap-2 border-b border-[var(--color-border)] px-3 py-2 text-sm ${
+      className={`flex gap-2 border-b border-(--color-border) px-3 py-2 text-sm ${
         event.direction === "sent" ? "bg-green-500/5" : "bg-blue-500/5"
       }`}
     >
@@ -298,18 +298,18 @@ function EventRow({ event }: { event: SioEvent }) {
             {event.eventName}
           </span>
           {event.namespace !== "/" && (
-            <span className="text-[10px] text-[var(--color-text-dimmed)]">
+            <span className="text-[10px] text-(--color-text-dimmed)">
               {event.namespace}
             </span>
           )}
         </div>
         {event.args && (
-          <pre className="whitespace-pre-wrap break-all font-mono text-xs text-[var(--color-text-primary)]">
+          <pre className="whitespace-pre-wrap break-all font-mono text-xs text-(--color-text-primary)">
             {event.args}
           </pre>
         )}
       </div>
-      <div className="shrink-0 text-[10px] text-[var(--color-text-dimmed)]">
+      <div className="shrink-0 text-[10px] text-(--color-text-dimmed)">
         {new Date(event.timestamp).toLocaleTimeString()}
       </div>
     </div>

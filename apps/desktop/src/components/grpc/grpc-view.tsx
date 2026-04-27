@@ -188,7 +188,7 @@ export function GrpcView() {
         extraActions={
           <button
             onClick={handleLoadProto}
-            className="flex items-center gap-1 rounded-lg bg-[var(--color-elevated)] px-2.5 py-2 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+            className="flex items-center gap-1 rounded-lg bg-(--color-elevated) px-2.5 py-2 text-xs text-(--color-text-secondary) hover:bg-(--color-border)"
           >
             <Upload className="h-3 w-3" />
             {t("grpc.loadProto")}
@@ -198,7 +198,7 @@ export function GrpcView() {
           <button
             onClick={handleSend}
             disabled={grpc.loading || !grpc.selectedMethod}
-            className="flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+            className="flex items-center gap-2 rounded-lg bg-(--color-accent) px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-(--color-accent-hover) disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
           >
             {grpc.loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -212,10 +212,10 @@ export function GrpcView() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel: service/method selection + metadata + request */}
-        <div className="flex w-1/2 flex-col border-r border-[var(--color-border)]">
+        <div className="flex w-1/2 flex-col border-r border-(--color-border)">
           {/* Service selector */}
           {grpc.services.length > 0 && (
-            <div className="border-b border-[var(--color-border)] px-3 py-2">
+            <div className="border-b border-(--color-border) px-3 py-2">
               <select
                 value={grpc.selectedService ?? ""}
                 onChange={(e) => {
@@ -226,7 +226,7 @@ export function GrpcView() {
                   });
                   setMethodFilter("");
                 }}
-                className="w-full rounded bg-[var(--color-elevated)] px-2 py-1 text-xs text-[var(--color-text-primary)] outline-none"
+                className="w-full rounded bg-(--color-elevated) px-2 py-1 text-xs text-(--color-text-primary) outline-none"
               >
                 {grpc.services.map((s) => (
                   <option key={s.fullName} value={s.fullName}>{s.fullName}</option>
@@ -247,10 +247,10 @@ export function GrpcView() {
           )}
 
           {/* Metadata (collapsible) */}
-          <div className="border-b border-[var(--color-border)]">
+          <div className="border-b border-(--color-border)">
             <button
               onClick={() => setShowMetadata(!showMetadata)}
-              className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+              className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
             >
               {showMetadata ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               Metadata
@@ -276,12 +276,12 @@ export function GrpcView() {
               /* Multi-message input for client/bidi streaming */
               <>
                 <div className="mb-1 flex items-center justify-between">
-                  <label className="text-xs font-medium text-[var(--color-text-muted)]">
+                  <label className="text-xs font-medium text-(--color-text-muted)">
                     Messages ({clientMessages.length})
                   </label>
                   <button
                     onClick={() => setClientMessages([...clientMessages, "{}"])}
-                    className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)]"
+                    className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-(--color-text-muted) hover:bg-(--color-elevated)"
                   >
                     <Plus className="h-3 w-3" />
                     Add
@@ -291,13 +291,13 @@ export function GrpcView() {
                   {clientMessages.map((msg, i) => (
                     <div key={i} className="relative">
                       <div className="mb-0.5 flex items-center justify-between">
-                        <span className="text-[10px] text-[var(--color-text-dimmed)]">
+                        <span className="text-[10px] text-(--color-text-dimmed)">
                           Message #{i + 1}
                         </span>
                         {clientMessages.length > 1 && (
                           <button
                             onClick={() => setClientMessages(clientMessages.filter((_, j) => j !== i))}
-                            className="rounded p-0.5 text-[var(--color-text-dimmed)] hover:text-red-400"
+                            className="rounded p-0.5 text-(--color-text-dimmed) hover:text-red-400"
                           >
                             <X className="h-2.5 w-2.5" />
                           </button>
@@ -310,7 +310,7 @@ export function GrpcView() {
                           updated[i] = e.target.value;
                           setClientMessages(updated);
                         }}
-                        className="w-full resize-none rounded bg-[var(--color-elevated)] p-2 font-mono text-xs text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full resize-none rounded bg-(--color-elevated) p-2 font-mono text-xs text-(--color-text-primary) outline-none focus:ring-1 focus:ring-blue-500"
                         placeholder='{ "field": "value" }'
                         rows={3}
                         spellCheck={false}
@@ -322,13 +322,13 @@ export function GrpcView() {
             ) : (
               /* Single message input for unary/server streaming */
               <>
-                <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">
+                <label className="mb-1 block text-xs font-medium text-(--color-text-muted)">
                   {t("grpc.requestBody")}
                 </label>
                 <textarea
                   value={grpc.requestJson}
                   onChange={(e) => updateGrpc({ requestJson: e.target.value })}
-                  className="h-full w-full resize-none rounded bg-[var(--color-elevated)] p-3 font-mono text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-blue-500"
+                  className="h-full w-full resize-none rounded bg-(--color-elevated) p-3 font-mono text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder='{ "field": "value" }'
                   spellCheck={false}
                 />
@@ -346,7 +346,7 @@ export function GrpcView() {
           ) : hasStreamResponse && (streaming || streamMessages.length > 0) ? (
             /* Streaming response view */
             <div className="flex flex-1 flex-col overflow-hidden">
-              <div className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
+              <div className="flex items-center justify-between border-b border-(--color-border) bg-(--color-surface) px-3 py-1.5">
                 <div className="flex items-center gap-2">
                   {streaming ? (
                     <span className="flex items-center gap-1.5 text-xs text-amber-400">
@@ -358,18 +358,18 @@ export function GrpcView() {
                       Stream complete
                     </span>
                   )}
-                  <span className="text-xs text-[var(--color-text-muted)]">
+                  <span className="text-xs text-(--color-text-muted)">
                     {streamMessages.length} message{streamMessages.length !== 1 ? "s" : ""}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-1 cursor-pointer text-xs text-[var(--color-text-muted)]">
+                  <label className="flex items-center gap-1 cursor-pointer text-xs text-(--color-text-muted)">
                     <input type="checkbox" checked={autoScroll} onChange={(e) => setAutoScroll(e.target.checked)} className="h-3 w-3" />
                     Auto-scroll
                   </label>
                   <button
                     onClick={() => setStreamMessages([])}
-                    className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)]"
+                    className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated)"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>
@@ -379,7 +379,7 @@ export function GrpcView() {
                 {streamMessages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`border-b border-[var(--color-border)] px-3 py-2 ${
+                    className={`border-b border-(--color-border) px-3 py-2 ${
                       msg.direction === "sent" ? "bg-green-500/5" : ""
                     }`}
                   >
@@ -389,12 +389,12 @@ export function GrpcView() {
                       ) : (
                         <ArrowDown className="h-3 w-3 text-blue-500" />
                       )}
-                      <span className="text-[10px] text-[var(--color-text-dimmed)]">
+                      <span className="text-[10px] text-(--color-text-dimmed)">
                         #{msg.index} · {msg.timeMs}ms · {msg.direction ?? "received"}
                       </span>
                     </div>
                     {msg.body && (
-                      <pre className="whitespace-pre-wrap break-all font-mono text-xs text-[var(--color-text-primary)]">
+                      <pre className="whitespace-pre-wrap break-all font-mono text-xs text-(--color-text-primary)">
                         {tryFormatJson(msg.body)}
                       </pre>
                     )}
@@ -405,19 +405,19 @@ export function GrpcView() {
           ) : grpc.response ? (
             /* Unary response view */
             <div className="flex flex-1 flex-col overflow-hidden">
-              <div className="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+              <div className="flex items-center gap-3 border-b border-(--color-border) bg-(--color-surface) px-3 py-2">
                 <span className={`text-sm font-semibold ${grpc.response.statusCode === 0 ? "text-green-500" : "text-red-400"}`}>
                   {grpc.response.statusCode === 0 ? "OK" : `Error ${grpc.response.statusCode}`}
                 </span>
-                <span className="text-xs text-[var(--color-text-muted)]">{grpc.response.timeMs}ms</span>
+                <span className="text-xs text-(--color-text-muted)">{grpc.response.timeMs}ms</span>
               </div>
 
               {/* Response metadata/trailers */}
               {responseMetadata.length > 0 && (
-                <div className="border-b border-[var(--color-border)]">
+                <div className="border-b border-(--color-border)">
                   <button
                     onClick={() => setShowResponseMeta(!showResponseMeta)}
-                    className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                    className="flex w-full items-center gap-1 px-3 py-1.5 text-xs text-(--color-text-muted) hover:text-(--color-text-secondary)"
                   >
                     {showResponseMeta ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                     Response Metadata
@@ -428,8 +428,8 @@ export function GrpcView() {
                       <div className="space-y-0.5">
                         {responseMetadata.map((entry, i) => (
                           <div key={i} className="grid grid-cols-[1fr_2fr] gap-2 text-xs">
-                            <span className="truncate font-medium text-[var(--color-text-secondary)]">{entry.key}</span>
-                            <span className="truncate font-mono text-[var(--color-text-primary)]">{entry.value}</span>
+                            <span className="truncate font-medium text-(--color-text-secondary)">{entry.key}</span>
+                            <span className="truncate font-mono text-(--color-text-primary)">{entry.value}</span>
                           </div>
                         ))}
                       </div>
@@ -439,24 +439,24 @@ export function GrpcView() {
               )}
 
               <div className="flex-1 overflow-auto p-3">
-                <pre className="whitespace-pre-wrap break-all font-mono text-sm text-[var(--color-text-primary)]">
+                <pre className="whitespace-pre-wrap break-all font-mono text-sm text-(--color-text-primary)">
                   {tryFormatJson(grpc.response.body)}
                 </pre>
               </div>
             </div>
           ) : grpc.loading ? (
-            <div className="flex flex-1 items-center justify-center text-sm text-[var(--color-text-muted)]">
+            <div className="flex flex-1 items-center justify-center text-sm text-(--color-text-muted)">
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
                 Sending gRPC request...
               </div>
             </div>
           ) : grpc.services.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center text-sm text-[var(--color-text-dimmed)]">
+            <div className="flex flex-1 items-center justify-center text-sm text-(--color-text-dimmed)">
               {t("grpc.loadProtoToStart")}
             </div>
           ) : (
-            <div className="flex flex-1 items-center justify-center text-sm text-[var(--color-text-dimmed)]">
+            <div className="flex flex-1 items-center justify-center text-sm text-(--color-text-dimmed)">
               {t("grpc.selectMethodToSend")}
             </div>
           )}
@@ -507,22 +507,22 @@ function MethodBrowser({
   const sortedTypes = CALL_TYPE_ORDER.filter((ct) => grouped[ct] && grouped[ct].length > 0);
 
   return (
-    <div className="border-b border-[var(--color-border)]">
+    <div className="border-b border-(--color-border)">
       {/* Search filter */}
       {showFilter && (
-        <div className="flex items-center gap-1.5 border-b border-[var(--color-border)] px-3 py-1.5">
-          <Search className="h-3 w-3 text-[var(--color-text-dimmed)]" />
+        <div className="flex items-center gap-1.5 border-b border-(--color-border) px-3 py-1.5">
+          <Search className="h-3 w-3 text-(--color-text-dimmed)" />
           <input
             type="text"
             value={filter}
             onChange={(e) => onFilterChange(e.target.value)}
             placeholder="Filter methods..."
-            className="flex-1 bg-transparent text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+            className="flex-1 bg-transparent text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
           />
           {filter && (
             <button
               onClick={() => onFilterChange("")}
-              className="rounded p-0.5 text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
+              className="rounded p-0.5 text-(--color-text-dimmed) hover:text-(--color-text-secondary)"
             >
               <X className="h-3 w-3" />
             </button>
@@ -533,7 +533,7 @@ function MethodBrowser({
       {/* Grouped method list */}
       <div className="max-h-48 overflow-auto">
         {filtered.length === 0 ? (
-          <div className="px-3 py-2 text-xs text-[var(--color-text-dimmed)]">
+          <div className="px-3 py-2 text-xs text-(--color-text-dimmed)">
             No methods match &quot;{filter}&quot;
           </div>
         ) : (
@@ -541,7 +541,7 @@ function MethodBrowser({
             <div key={ct}>
               {/* Group header -- only show if multiple groups */}
               {sortedTypes.length > 1 && (
-                <div className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-dimmed)]">
+                <div className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-(--color-text-dimmed)">
                   <CallTypeBadge callType={ct} />
                   <span>{CALL_TYPE_GROUP_LABELS[ct]}</span>
                 </div>
@@ -550,22 +550,22 @@ function MethodBrowser({
                 <button
                   key={m.name}
                   onClick={() => onSelectMethod(m.name)}
-                  className={`flex w-full flex-col gap-0.5 px-3 py-1.5 text-left transition-colors hover:bg-[var(--color-elevated)] ${
+                  className={`flex w-full flex-col gap-0.5 px-3 py-1.5 text-left transition-colors hover:bg-(--color-elevated) ${
                     m.name === selectedMethod
-                      ? "bg-[var(--color-elevated)] border-l-2 border-l-[var(--color-accent)]"
+                      ? "bg-(--color-elevated) border-l-2 border-l-(--color-accent)"
                       : "border-l-2 border-l-transparent"
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     {sortedTypes.length <= 1 && <CallTypeBadge callType={m.callType} />}
-                    <span className="text-xs font-medium text-[var(--color-text-primary)]">{m.name}</span>
+                    <span className="text-xs font-medium text-(--color-text-primary)">{m.name}</span>
                   </div>
-                  <div className="flex items-center gap-3 pl-0.5 text-[10px] text-[var(--color-text-dimmed)]">
+                  <div className="flex items-center gap-3 pl-0.5 text-[10px] text-(--color-text-dimmed)">
                     <span>
-                      <span className="text-[var(--color-text-muted)]">In:</span> {m.inputType}
+                      <span className="text-(--color-text-muted)">In:</span> {m.inputType}
                     </span>
                     <span>
-                      <span className="text-[var(--color-text-muted)]">Out:</span> {m.outputType}
+                      <span className="text-(--color-text-muted)">Out:</span> {m.outputType}
                     </span>
                   </div>
                 </button>

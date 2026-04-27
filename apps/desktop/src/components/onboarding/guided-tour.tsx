@@ -266,27 +266,27 @@ export function GuidedTour({ onComplete }: { onComplete: () => void }) {
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="absolute z-10 w-80 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-2xl transition-all duration-300"
+        className="absolute z-10 w-80 rounded-lg border border-(--color-border) bg-(--color-surface) p-4 shadow-2xl transition-all duration-300"
         style={{ top: tooltipPos.top, left: tooltipPos.left }}
       >
         {/* Close button */}
         <button
           onClick={onComplete}
-          className="absolute right-2 top-2 rounded p-1 text-[var(--color-text-dimmed)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-secondary)]"
+          className="absolute right-2 top-2 rounded p-1 text-(--color-text-dimmed) hover:bg-(--color-elevated) hover:text-(--color-text-secondary)"
         >
           <X className="h-3.5 w-3.5" />
         </button>
 
         {/* Step counter */}
-        <div className="mb-1 text-xs text-[var(--color-text-dimmed)]">
+        <div className="mb-1 text-xs text-(--color-text-dimmed)">
           {step + 1} {t("tour.of")} {TOUR_STEPS.length}
         </div>
 
         {/* Content */}
-        <h3 className="mb-1 text-sm font-semibold text-[var(--color-text-primary)]">
+        <h3 className="mb-1 text-sm font-semibold text-(--color-text-primary)">
           {t(currentStep.titleKey)}
         </h3>
-        <p className="mb-4 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+        <p className="mb-4 text-xs leading-relaxed text-(--color-text-secondary)">
           {currentStep.description}
         </p>
 
@@ -294,7 +294,7 @@ export function GuidedTour({ onComplete }: { onComplete: () => void }) {
         <div className="flex items-center justify-between">
           <button
             onClick={onComplete}
-            className="text-xs text-[var(--color-text-dimmed)] hover:text-[var(--color-text-secondary)]"
+            className="text-xs text-(--color-text-dimmed) hover:text-(--color-text-secondary)"
           >
             {t("tour.skip")}
           </button>
@@ -302,7 +302,7 @@ export function GuidedTour({ onComplete }: { onComplete: () => void }) {
             {step > 0 && (
               <button
                 onClick={() => setStep((s) => s - 1)}
-                className="flex items-center gap-1 rounded bg-[var(--color-elevated)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+                className="flex items-center gap-1 rounded bg-(--color-elevated) px-3 py-1.5 text-xs text-(--color-text-secondary) hover:bg-(--color-border)"
               >
                 <ChevronLeft className="h-3 w-3" />
                 {t("tour.back")}
@@ -337,7 +337,7 @@ export function GuidedTour({ onComplete }: { onComplete: () => void }) {
                   ? "w-4 bg-blue-500"
                   : i < step
                     ? "w-1.5 bg-blue-500/50"
-                    : "w-1.5 bg-[var(--color-border)]"
+                    : "w-1.5 bg-(--color-border)"
               }`}
             />
           ))}

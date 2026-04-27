@@ -73,7 +73,7 @@ export function PanelDivider({ direction, panelRef, containerRef, onResizeEnd, o
     >
       {/* Visible line */}
       <div
-        className={`absolute bg-[var(--color-border)] transition-colors group-hover:bg-[var(--color-accent)] group-active:bg-[var(--color-accent)] ${
+        className={`absolute bg-(--color-border) transition-colors group-hover:bg-(--color-accent) group-active:bg-(--color-accent) ${
           isHorizontal
             ? "inset-y-0 left-[2px] w-0.5 rounded-full"
             : "inset-x-0 top-[2px] h-0.5 rounded-full"

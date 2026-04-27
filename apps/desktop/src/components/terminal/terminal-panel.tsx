@@ -149,10 +149,10 @@ export function TerminalPanel() {
   return (
     <div className="relative flex h-full flex-col">
       {!alive && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[var(--color-bg)]/80">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-(--color-bg)/80">
           <button
             onClick={handleRestart}
-            className="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)]"
+            className="rounded-lg bg-(--color-accent) px-4 py-2 text-sm font-medium text-white hover:bg-(--color-accent-hover)"
           >
             Restart Terminal
           </button>

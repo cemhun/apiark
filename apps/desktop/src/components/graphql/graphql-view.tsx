@@ -143,7 +143,7 @@ export function GraphQLView() {
             <button
               onClick={handleFetchSchema}
               disabled={fetchingSchema || !tab.url.trim()}
-              className="flex items-center gap-1 rounded-lg bg-[var(--color-elevated)] px-2.5 py-2 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] disabled:opacity-50"
+              className="flex items-center gap-1 rounded-lg bg-(--color-elevated) px-2.5 py-2 text-xs text-(--color-text-secondary) hover:bg-(--color-border) disabled:opacity-50"
               title={t("graphql.fetchSchema")}
             >
               <Download className="h-3 w-3" />
@@ -162,7 +162,7 @@ export function GraphQLView() {
                         : "bg-gray-500"
                   }`}
                 />
-                <span className="text-xs text-[var(--color-text-muted)] capitalize">
+                <span className="text-xs text-(--color-text-muted) capitalize">
                   {subStatus}
                 </span>
               </div>
@@ -202,8 +202,8 @@ export function GraphQLView() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Query editor */}
-        <div className="flex min-h-0 w-1/2 flex-col border-r border-[var(--color-border)]">
-          <div className="flex shrink-0 gap-0 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="flex min-h-0 w-1/2 flex-col border-r border-(--color-border)">
+          <div className="flex shrink-0 gap-0 border-b border-(--color-border) bg-(--color-surface)">
             {(["query", "variables", "headers", "auth"] as const).map(
               (t) => (
                 <button
@@ -211,8 +211,8 @@ export function GraphQLView() {
                   onClick={() => setActiveTab(t)}
                   className={`px-4 py-2 text-sm capitalize transition-colors ${
                     activeTab === t
-                      ? "border-b-2 border-purple-500 text-[var(--color-text-primary)]"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                      ? "border-b-2 border-purple-500 text-(--color-text-primary)"
+                      : "text-(--color-text-muted) hover:text-(--color-text-secondary)"
                   }`}
                 >
                   {t}
@@ -226,7 +226,7 @@ export function GraphQLView() {
               <div className="flex min-h-0 flex-1 flex-col gap-2">
                 <div className="flex shrink-0 items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <label className="text-xs font-medium text-[var(--color-text-secondary)]">
+                    <label className="text-xs font-medium text-(--color-text-secondary)">
                       {t("graphql.query")}
                     </label>
                     {isSubscription && (
@@ -242,7 +242,7 @@ export function GraphQLView() {
                       setGraphQLOperationName(e.target.value)
                     }
                     placeholder={t("graphql.operationName")}
-                    className="rounded bg-[var(--color-elevated)] px-2 py-1 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+                    className="rounded bg-(--color-elevated) px-2 py-1 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
                   />
                 </div>
                 <div className="min-h-0 flex-1">
@@ -259,7 +259,7 @@ export function GraphQLView() {
 
             {activeTab === "variables" && (
               <div className="flex min-h-0 flex-1 flex-col gap-2">
-                <label className="shrink-0 text-xs font-medium text-[var(--color-text-secondary)]">
+                <label className="shrink-0 text-xs font-medium text-(--color-text-secondary)">
                   {t("graphql.variablesJson")}
                 </label>
                 <div className="min-h-0 flex-1">
@@ -296,22 +296,22 @@ export function GraphQLView() {
           </div>
 
           {schemaTypes.length > 0 && (
-            <div className="max-h-32 overflow-auto border-t border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
-              <p className="mb-1 text-xs font-medium text-[var(--color-text-secondary)]">
+            <div className="max-h-32 overflow-auto border-t border-(--color-border) bg-(--color-surface) px-3 py-2">
+              <p className="mb-1 text-xs font-medium text-(--color-text-secondary)">
                 Schema Types ({schemaTypes.length})
               </p>
               <div className="flex flex-wrap gap-1">
                 {schemaTypes.slice(0, 50).map((t) => (
                   <span
                     key={t.name}
-                    className="rounded bg-[var(--color-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]"
+                    className="rounded bg-(--color-elevated) px-1.5 py-0.5 text-[10px] text-(--color-text-muted)"
                     title={t.kind}
                   >
                     {t.name}
                   </span>
                 ))}
                 {schemaTypes.length > 50 && (
-                  <span className="text-[10px] text-[var(--color-text-dimmed)]">
+                  <span className="text-[10px] text-(--color-text-dimmed)">
                     +{schemaTypes.length - 50} more
                   </span>
                 )}
@@ -362,13 +362,13 @@ function SubscriptionPanel({
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Error */}
       {error && (
-        <div className="border-b border-[var(--color-border)] bg-red-500/10 px-3 py-2 text-xs text-red-400">
+        <div className="border-b border-(--color-border) bg-red-500/10 px-3 py-2 text-xs text-red-400">
           {error}
         </div>
       )}
 
       {/* Stats bar */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-muted)]">
+      <div className="flex items-center justify-between border-b border-(--color-border) px-3 py-1.5 text-xs text-(--color-text-muted)">
         <div className="flex items-center gap-3">
           {status === "subscribed" ? (
             <span className="flex items-center gap-1.5 text-green-500">
@@ -396,7 +396,7 @@ function SubscriptionPanel({
           </label>
           <button
             onClick={clearMessages}
-            className="rounded p-1 hover:bg-[var(--color-elevated)]"
+            className="rounded p-1 hover:bg-(--color-elevated)"
             title="Clear messages"
           >
             <Trash2 className="h-3 w-3" />
@@ -407,7 +407,7 @@ function SubscriptionPanel({
       {/* Messages */}
       <div ref={logRef} className="flex-1 overflow-auto">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-sm text-[var(--color-text-dimmed)]">
+          <div className="flex items-center justify-center py-8 text-sm text-(--color-text-dimmed)">
             {status === "subscribed"
               ? "Waiting for events..."
               : "Subscribe to start receiving events"}
@@ -416,11 +416,11 @@ function SubscriptionPanel({
           messages.map((msg) => (
             <div
               key={msg.id}
-              className="border-b border-[var(--color-border)] px-3 py-2"
+              className="border-b border-(--color-border) px-3 py-2"
             >
               <div className="mb-1 flex items-center gap-2">
                 <ArrowDown className="h-3 w-3 text-purple-500" />
-                <span className="text-[10px] text-[var(--color-text-dimmed)]">
+                <span className="text-[10px] text-(--color-text-dimmed)">
                   {new Date(msg.timestamp).toLocaleTimeString()}
                 </span>
                 {msg.errors && (
@@ -429,7 +429,7 @@ function SubscriptionPanel({
                   </span>
                 )}
               </div>
-              <pre className="whitespace-pre-wrap break-all font-mono text-xs text-[var(--color-text-primary)]">
+              <pre className="whitespace-pre-wrap break-all font-mono text-xs text-(--color-text-primary)">
                 {msg.data}
               </pre>
               {msg.errors && (
@@ -479,7 +479,7 @@ function AuthEditorCompact({
               break;
           }
         }}
-        className="rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-purple-500"
+        className="rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-purple-500"
       >
         <option value="none">{t("auth.none")}</option>
         <option value="bearer">{t("auth.bearer")}</option>
@@ -493,7 +493,7 @@ function AuthEditorCompact({
           value={auth.token}
           onChange={(e) => onChange({ ...auth, token: e.target.value })}
           placeholder={t("auth.token")}
-          className="w-full rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-purple-500"
+          className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500"
         />
       )}
 
@@ -506,7 +506,7 @@ function AuthEditorCompact({
               onChange({ ...auth, username: e.target.value })
             }
             placeholder={t("auth.username")}
-            className="w-full rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+            className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
           />
           <input
             type="password"
@@ -515,7 +515,7 @@ function AuthEditorCompact({
               onChange({ ...auth, password: e.target.value })
             }
             placeholder={t("auth.password")}
-            className="w-full rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none"
+            className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
           />
         </div>
       )}

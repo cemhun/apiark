@@ -213,9 +213,9 @@ export function CodeEditor({
   const showPlaceholder = placeholder && !value;
 
   return (
-    <div className="relative overflow-hidden rounded border border-[var(--color-border)]" style={{ height }}>
+    <div className="relative overflow-hidden rounded border border-(--color-border)" style={{ height }}>
       {showPlaceholder && (
-        <div className="pointer-events-none absolute top-2 z-10 text-sm text-[var(--color-text-dimmed)]" style={{ left: contentLeft }}>
+        <div className="pointer-events-none absolute top-2 z-10 text-sm text-(--color-text-dimmed)" style={{ left: contentLeft }}>
           {placeholder}
         </div>
       )}
@@ -228,7 +228,7 @@ export function CodeEditor({
         theme={monacoTheme}
         loading={
           <div className="flex h-full items-center justify-center">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-accent)]" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-(--color-border) border-t-(--color-accent)" />
           </div>
         }
         options={{

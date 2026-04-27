@@ -64,14 +64,14 @@ export function CollectionRunnerDialog({
     <Dialog.Root open={open} onOpenChange={handleClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[700px] max-h-[80vh] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none flex flex-col">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[700px] max-h-[80vh] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
-            <Dialog.Title className="text-sm font-semibold text-[var(--color-text-primary)]">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-4 py-3">
+            <Dialog.Title className="text-sm font-semibold text-(--color-text-primary)">
               Collection Runner
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)]">
+              <button className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated)">
                 <X className="h-4 w-4" />
               </button>
             </Dialog.Close>
@@ -79,14 +79,14 @@ export function CollectionRunnerDialog({
 
           {/* Config */}
           {!summary && !isRunning && (
-            <div className="border-b border-[var(--color-border)] px-4 py-3 space-y-3">
+            <div className="border-b border-(--color-border) px-4 py-3 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs text-[var(--color-text-muted)]">Collection</label>
+                  <label className="mb-1 block text-xs text-(--color-text-muted)">Collection</label>
                   <select
                     value={collectionPath}
                     onChange={(e) => setCollectionPath(e.target.value)}
-                    className="w-full rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] outline-none"
+                    className="w-full rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) outline-none"
                   >
                     {collections.map((c) => (
                       <option key={c.path} value={c.path}>{c.name}</option>
@@ -94,11 +94,11 @@ export function CollectionRunnerDialog({
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-[var(--color-text-muted)]">Environment</label>
+                  <label className="mb-1 block text-xs text-(--color-text-muted)">Environment</label>
                   <select
                     value={environmentName}
                     onChange={(e) => setEnvironmentName(e.target.value)}
-                    className="w-full rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] outline-none"
+                    className="w-full rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) outline-none"
                   >
                     <option value="">{t("body.none")}</option>
                     {environments.map((e) => (
@@ -110,27 +110,27 @@ export function CollectionRunnerDialog({
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs text-[var(--color-text-muted)]">Delay (ms)</label>
+                  <label className="mb-1 block text-xs text-(--color-text-muted)">Delay (ms)</label>
                   <input
                     type="number"
                     min={0}
                     value={delayMs}
                     onChange={(e) => setDelayMs(Number(e.target.value))}
-                    className="w-full rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] outline-none"
+                    className="w-full rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-[var(--color-text-muted)]">Iterations</label>
+                  <label className="mb-1 block text-xs text-(--color-text-muted)">Iterations</label>
                   <input
                     type="number"
                     min={1}
                     value={iterations}
                     onChange={(e) => setIterations(Math.max(1, Number(e.target.value)))}
-                    className="w-full rounded bg-[var(--color-elevated)] px-2.5 py-1.5 text-sm text-[var(--color-text-primary)] outline-none"
+                    className="w-full rounded bg-(--color-elevated) px-2.5 py-1.5 text-sm text-(--color-text-primary) outline-none"
                   />
                 </div>
                 <div className="flex items-end">
-                  <label className="flex items-center gap-2 pb-1.5 text-sm text-[var(--color-text-secondary)]">
+                  <label className="flex items-center gap-2 pb-1.5 text-sm text-(--color-text-secondary)">
                     <input
                       type="checkbox"
                       checked={stopOnError}
@@ -155,11 +155,11 @@ export function CollectionRunnerDialog({
 
           {/* Progress */}
           {isRunning && (
-            <div className="border-b border-[var(--color-border)] px-4 py-3">
-              <div className="mb-2 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+            <div className="border-b border-(--color-border) px-4 py-3">
+              <div className="mb-2 flex items-center justify-between text-xs text-(--color-text-muted)">
                 <span>Running... {totalProgress} / {totalExpected || "?"}</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded bg-[var(--color-elevated)]">
+              <div className="h-2 w-full overflow-hidden rounded bg-(--color-elevated)">
                 <div
                   className="h-full bg-blue-500 transition-all"
                   style={{ width: totalExpected > 0 ? `${(totalProgress / totalExpected) * 100}%` : "0%" }}
@@ -170,8 +170,8 @@ export function CollectionRunnerDialog({
 
           {/* Summary bar */}
           {summary && (
-            <div className="flex items-center gap-4 border-b border-[var(--color-border)] px-4 py-2 text-xs">
-              <span className="text-[var(--color-text-secondary)]">
+            <div className="flex items-center gap-4 border-b border-(--color-border) px-4 py-2 text-xs">
+              <span className="text-(--color-text-secondary)">
                 Total: <strong>{summary.totalRequests}</strong>
               </span>
               <span className="text-green-500">
@@ -180,20 +180,20 @@ export function CollectionRunnerDialog({
               <span className="text-red-500">
                 Failed: <strong>{summary.totalFailed}</strong>
               </span>
-              <span className="text-[var(--color-text-muted)]">
+              <span className="text-(--color-text-muted)">
                 Time: <strong>{summary.totalTimeMs}ms</strong>
               </span>
               <div className="ml-auto flex gap-2">
                 <button
                   onClick={() => downloadFile(exportAsJson(summary), "results.json")}
-                  className="flex items-center gap-1 rounded bg-[var(--color-elevated)] px-2 py-1 text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+                  className="flex items-center gap-1 rounded bg-(--color-elevated) px-2 py-1 text-(--color-text-secondary) hover:bg-(--color-border)"
                 >
                   <Download className="h-3 w-3" />
                   JSON
                 </button>
                 <button
                   onClick={() => downloadFile(exportAsJUnit(summary), "results.xml")}
-                  className="flex items-center gap-1 rounded bg-[var(--color-elevated)] px-2 py-1 text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]"
+                  className="flex items-center gap-1 rounded bg-(--color-elevated) px-2 py-1 text-(--color-text-secondary) hover:bg-(--color-border)"
                 >
                   <Download className="h-3 w-3" />
                   JUnit
@@ -204,7 +204,7 @@ export function CollectionRunnerDialog({
 
           {/* Error */}
           {error && (
-            <div className="border-b border-[var(--color-border)] bg-red-500/10 px-4 py-2 text-sm text-red-400">
+            <div className="border-b border-(--color-border) bg-red-500/10 px-4 py-2 text-sm text-red-400">
               {error}
             </div>
           )}
@@ -215,7 +215,7 @@ export function CollectionRunnerDialog({
               summary.iterations.map((iter) => (
                 <div key={iter.iteration}>
                   {summary.iterations.length > 1 && (
-                    <div className="sticky top-0 bg-[var(--color-surface)] px-4 py-1 text-xs font-medium text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+                    <div className="sticky top-0 bg-(--color-surface) px-4 py-1 text-xs font-medium text-(--color-text-muted) border-b border-(--color-border)">
                       Iteration {iter.iteration + 1}
                     </div>
                   )}

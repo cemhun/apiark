@@ -32,13 +32,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[520px] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[520px] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-4">
-            <Dialog.Title className="text-lg font-semibold text-[var(--color-text-primary)]">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-6 py-4">
+            <Dialog.Title className="text-lg font-semibold text-(--color-text-primary)">
               {t("settings.title")}
             </Dialog.Title>
-            <Dialog.Close className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)]">
+            <Dialog.Close className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary)">
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
@@ -46,13 +46,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <div className="space-y-6 p-6">
             {/* Appearance Section */}
             <section>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
                 {t("settings.appearance")}
               </h3>
 
               {/* Theme */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.theme")}
                 </label>
                 <div className="flex gap-2">
@@ -62,8 +62,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       onClick={() => update({ theme: themeOption })}
                       className={`rounded px-4 py-2 text-sm capitalize transition-colors ${
                         settings.theme === themeOption
-                          ? "bg-[var(--color-accent)] text-white"
-                          : "bg-[var(--color-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                          ? "bg-(--color-accent) text-white"
+                          : "bg-(--color-elevated) text-(--color-text-secondary) hover:text-(--color-text-primary)"
                       }`}
                     >
                       {themeOption === "black" ? t("settings.black") : themeOption}
@@ -74,7 +74,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Accent Color */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.accentColor")}
                 </label>
                 <div className="flex gap-2">
@@ -94,7 +94,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       title={a.name.charAt(0).toUpperCase() + a.name.slice(1)}
                       className={`h-7 w-7 rounded-full transition-all ${
                         settings.accentColor === a.name
-                          ? "scale-110 ring-2 ring-offset-2 ring-offset-[var(--color-surface)]"
+                          ? "scale-110 ring-2 ring-offset-2 ring-offset-(--color-surface)"
                           : "hover:scale-110 opacity-70 hover:opacity-100"
                       }`}
                       style={{
@@ -109,7 +109,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Layout */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.panelLayout")}
                 </label>
                 <div className="flex gap-2">
@@ -123,8 +123,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       onClick={() => update({ layout: l.value })}
                       className={`rounded-lg border px-4 py-2 text-sm transition-all ${
                         settings.layout === l.value
-                          ? "border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
-                          : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-dimmed)]"
+                          ? "border-(--color-accent) bg-(--color-accent)/10 text-(--color-accent)"
+                          : "border-(--color-border) text-(--color-text-muted) hover:border-(--color-text-dimmed)"
                       }`}
                     >
                       {l.label}
@@ -135,7 +135,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Sidebar width */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.sidebarWidth")}: {settings.sidebarWidth}px
                 </label>
                 <input
@@ -145,13 +145,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   step={4}
                   value={settings.sidebarWidth}
                   onChange={(e) => update({ sidebarWidth: Number(e.target.value) })}
-                  className="w-full accent-[var(--color-accent)]"
+                  className="w-full accent-(--color-accent)"
                 />
               </div>
 
               {/* Font Size */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.fontSize")}: {settings.fontSize ?? 14}px
                 </label>
                 <input
@@ -161,9 +161,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   step={1}
                   value={settings.fontSize ?? 14}
                   onChange={(e) => update({ fontSize: Number(e.target.value) })}
-                  className="w-full accent-[var(--color-accent)]"
+                  className="w-full accent-(--color-accent)"
                 />
-                <div className="mt-1 flex justify-between text-xs text-[var(--color-text-dimmed)]">
+                <div className="mt-1 flex justify-between text-xs text-(--color-text-dimmed)">
                   <span>11px</span>
                   <span>20px</span>
                 </div>
@@ -171,7 +171,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Language */}
               <div>
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.language")}
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -184,8 +184,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       }}
                       className={`rounded px-3 py-1.5 text-sm transition-colors ${
                         i18n.language === lang.code
-                          ? "bg-[var(--color-accent)] text-white"
-                          : "bg-[var(--color-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                          ? "bg-(--color-accent) text-white"
+                          : "bg-(--color-elevated) text-(--color-text-secondary) hover:text-(--color-text-primary)"
                       }`}
                     >
                       {lang.label}
@@ -197,13 +197,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
             {/* Network Section */}
             <section>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
                 {t("settings.network")}
               </h3>
 
               {/* SSL Verification */}
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-sm text-[var(--color-text-secondary)]">
+                <label className="text-sm text-(--color-text-secondary)">
                   {t("settings.sslVerification")}
                 </label>
                 <ToggleSwitch
@@ -214,7 +214,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Follow Redirects */}
               <div className="mb-3 flex items-center justify-between">
-                <label className="text-sm text-[var(--color-text-secondary)]">
+                <label className="text-sm text-(--color-text-secondary)">
                   {t("settings.followRedirects")}
                 </label>
                 <ToggleSwitch
@@ -225,7 +225,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Timeout */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.timeout")}
                 </label>
                 <input
@@ -234,13 +234,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   step={1000}
                   value={settings.timeoutMs}
                   onChange={(e) => update({ timeoutMs: Number(e.target.value) || 30000 })}
-                  className="w-full rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-(--color-accent)"
                 />
               </div>
 
               {/* Proxy */}
               <div>
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.proxyUrl")}
                 </label>
                 <input
@@ -248,7 +248,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   value={settings.proxyUrl ?? ""}
                   onChange={(e) => update({ proxyUrl: e.target.value || null })}
                   placeholder="http://proxy.example.com:8080"
-                  className="mb-2 w-full rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  className="mb-2 w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
                 />
                 {settings.proxyUrl && (
                   <div className="flex gap-2">
@@ -257,14 +257,14 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       value={settings.proxyUsername ?? ""}
                       onChange={(e) => update({ proxyUsername: e.target.value || null })}
                       placeholder={t("settings.proxyUsername")}
-                      className="flex-1 rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                      className="flex-1 rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
                     />
                     <input
                       type="password"
                       value={settings.proxyPassword ?? ""}
                       onChange={(e) => update({ proxyPassword: e.target.value || null })}
                       placeholder={t("settings.proxyPassword")}
-                      className="flex-1 rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                      className="flex-1 rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
                     />
                   </div>
                 )}
@@ -273,13 +273,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
             {/* Certificates Section */}
             <section>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
                 {t("settings.certificates")}
               </h3>
 
               {/* Custom CA Certificate */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.caCert")}
                 </label>
                 <FilePathInput
@@ -292,7 +292,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Client Certificate */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.clientCert")}
                 </label>
                 <FilePathInput
@@ -305,7 +305,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
               {/* Client Key */}
               <div className="mb-4">
-                <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                <label className="mb-2 block text-sm text-(--color-text-secondary)">
                   {t("settings.clientKey")}
                 </label>
                 <FilePathInput
@@ -319,7 +319,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               {/* PFX Passphrase */}
               {settings.clientCertPath?.match(/\.(pfx|p12)$/i) && (
                 <div className="mb-4">
-                  <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+                  <label className="mb-2 block text-sm text-(--color-text-secondary)">
                     {t("settings.pfxPassphrase")}
                   </label>
                   <input
@@ -327,7 +327,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     value={settings.clientCertPassphrase ?? ""}
                     onChange={(e) => update({ clientCertPassphrase: e.target.value || null })}
                     placeholder="Passphrase (optional)"
-                    className="w-full rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                    className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
                   />
                 </div>
               )}
@@ -335,12 +335,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
             {/* AI Section */}
             <section id="settings-ai">
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
                 AI Assistant
               </h3>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-sm text-[var(--color-text-secondary)]">
+                  <label className="mb-1 block text-sm text-(--color-text-secondary)">
                     API Endpoint
                   </label>
                   <input
@@ -348,14 +348,14 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     value={settings.aiEndpoint ?? ""}
                     onChange={(e) => update({ aiEndpoint: e.target.value.trim() || null })}
                     placeholder="https://api.openai.com/v1"
-                    className="w-full rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-dimmed)]"
+                    className="w-full rounded border border-(--color-border) bg-(--color-bg) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder:text-(--color-text-dimmed)"
                   />
-                  <p className="mt-0.5 text-xs text-[var(--color-text-dimmed)]">
+                  <p className="mt-0.5 text-xs text-(--color-text-dimmed)">
                     Any OpenAI-compatible endpoint (OpenAI, Ollama, LM Studio, etc.)
                   </p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-[var(--color-text-secondary)]">
+                  <label className="mb-1 block text-sm text-(--color-text-secondary)">
                     API Key
                   </label>
                   <input
@@ -363,11 +363,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     value={settings.aiApiKey ?? ""}
                     onChange={(e) => update({ aiApiKey: e.target.value || null })}
                     placeholder="sk-..."
-                    className="w-full rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-dimmed)]"
+                    className="w-full rounded border border-(--color-border) bg-(--color-bg) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder:text-(--color-text-dimmed)"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-[var(--color-text-secondary)]">
+                  <label className="mb-1 block text-sm text-(--color-text-secondary)">
                     Model
                   </label>
                   <input
@@ -375,7 +375,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     value={settings.aiModel ?? ""}
                     onChange={(e) => update({ aiModel: e.target.value || null })}
                     placeholder="gpt-4o-mini"
-                    className="w-full rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-dimmed)]"
+                    className="w-full rounded border border-(--color-border) bg-(--color-bg) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder:text-(--color-text-dimmed)"
                   />
                 </div>
               </div>
@@ -482,20 +482,20 @@ function UpdateSection({
 
   return (
     <section>
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
         {t("settings.updates")}
       </h3>
 
       {isSystemPackage && (
-        <div className="mb-4 rounded-lg bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 p-3">
-          <p className="text-sm text-[var(--color-text-secondary)]">
+        <div className="mb-4 rounded-lg bg-(--color-warning)/10 border border-(--color-warning)/20 p-3">
+          <p className="text-sm text-(--color-text-secondary)">
             Auto-update isn't available for system package installs (.deb/.rpm).
             Use your package manager or download from{" "}
             <a
               href="https://github.com/berbicanes/apiark/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--color-accent)] hover:underline inline-flex items-center gap-1"
+              className="text-(--color-accent) hover:underline inline-flex items-center gap-1"
             >
               GitHub Releases <ExternalLink className="h-3 w-3" />
             </a>
@@ -504,7 +504,7 @@ function UpdateSection({
       )}
 
       <div className="mb-4">
-        <label className="mb-2 block text-sm text-[var(--color-text-secondary)]">
+        <label className="mb-2 block text-sm text-(--color-text-secondary)">
           {t("settings.updateChannel")}
         </label>
         <div className="flex gap-2">
@@ -514,8 +514,8 @@ function UpdateSection({
               onClick={() => update({ updateChannel: channel })}
               className={`rounded px-4 py-2 text-sm capitalize transition-colors ${
                 settings.updateChannel === channel
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-elevated)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                  ? "bg-(--color-accent) text-white"
+                  : "bg-(--color-elevated) text-(--color-text-secondary) hover:text-(--color-text-primary)"
               }`}
             >
               {channel}
@@ -528,7 +528,7 @@ function UpdateSection({
         <button
           onClick={checkForUpdates}
           disabled={checking || installing}
-          className="flex items-center gap-1.5 rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)] disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-border) hover:text-(--color-text-primary) disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} />
           {checking ? "Checking..." : t("settings.checkForUpdates")}
@@ -537,7 +537,7 @@ function UpdateSection({
         {pendingUpdate && !installing && !isSystemPackage && (
           <button
             onClick={installUpdate}
-            className="flex items-center gap-1.5 rounded bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
+            className="flex items-center gap-1.5 rounded bg-(--color-accent) px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
           >
             <Download className="h-3.5 w-3.5" />
             Install v{pendingUpdate.version}
@@ -549,7 +549,7 @@ function UpdateSection({
             href={`https://github.com/berbicanes/apiark/releases/tag/v${pendingUpdate.version}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
+            className="flex items-center gap-1.5 rounded bg-(--color-accent) px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             Download v{pendingUpdate.version}
@@ -557,18 +557,18 @@ function UpdateSection({
         )}
 
         {updateStatus && (
-          <span className="text-xs text-[var(--color-text-muted)]">{updateStatus}</span>
+          <span className="text-xs text-(--color-text-muted)">{updateStatus}</span>
         )}
       </div>
 
       {backups.length > 0 && (
         <div className="mt-3">
-          <label className="mb-1 block text-xs text-[var(--color-text-muted)]">
+          <label className="mb-1 block text-xs text-(--color-text-muted)">
             Saved rollback versions ({backups.length})
           </label>
           <div className="space-y-1">
             {backups.map((b) => (
-              <div key={b} className="text-xs text-[var(--color-text-secondary)]">
+              <div key={b} className="text-xs text-(--color-text-secondary)">
                 {b}
               </div>
             ))}
@@ -626,12 +626,12 @@ function BackupSection() {
 
   return (
     <section>
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
         {t("settings.backup")}
       </h3>
 
       <div className="mb-3 flex items-center justify-between">
-        <label className="text-sm text-[var(--color-text-secondary)]">
+        <label className="text-sm text-(--color-text-secondary)">
           {t("settings.includeHistory")}
         </label>
         <button
@@ -639,7 +639,7 @@ function BackupSection() {
           aria-checked={includeHistory}
           onClick={() => setIncludeHistory(!includeHistory)}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
-            includeHistory ? "bg-[var(--color-accent)]" : "bg-[var(--color-border)]"
+            includeHistory ? "bg-(--color-accent)" : "bg-(--color-border)"
           }`}
         >
           <span
@@ -653,14 +653,14 @@ function BackupSection() {
       <div className="flex gap-2">
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+          className="flex items-center gap-1.5 rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-border) hover:text-(--color-text-primary)"
         >
           <Download className="h-3.5 w-3.5" />
           {t("settings.exportState")}
         </button>
         <button
           onClick={handleImport}
-          className="flex items-center gap-1.5 rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+          className="flex items-center gap-1.5 rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-secondary) hover:bg-(--color-border) hover:text-(--color-text-primary)"
         >
           <Upload className="h-3.5 w-3.5" />
           {t("settings.importState")}
@@ -668,30 +668,30 @@ function BackupSection() {
       </div>
 
       {status && (
-        <p className="mt-2 text-xs text-[var(--color-text-muted)]">{status}</p>
+        <p className="mt-2 text-xs text-(--color-text-muted)">{status}</p>
       )}
 
       {/* Import confirmation dialog */}
       <Dialog.Root open={!!importConfirm} onOpenChange={(v) => { if (!v) setImportConfirm(null); }}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/50" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 z-[60] w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] p-5 shadow-2xl">
-            <Dialog.Title className="mb-2 text-sm font-semibold text-[var(--color-text-primary)]">
+          <Dialog.Content className="fixed left-1/2 top-1/2 z-[60] w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--color-border) bg-(--color-elevated) p-5 shadow-2xl">
+            <Dialog.Title className="mb-2 text-sm font-semibold text-(--color-text-primary)">
               {t("settings.importState")}
             </Dialog.Title>
-            <p className="mb-5 text-sm text-[var(--color-text-secondary)]">
+            <p className="mb-5 text-sm text-(--color-text-secondary)">
               This will merge settings and replace history. Continue?
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setImportConfirm(null)}
-                className="rounded-lg px-4 py-1.5 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
+                className="rounded-lg px-4 py-1.5 text-sm text-(--color-text-muted) hover:bg-(--color-surface)"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmImport}
-                className="rounded-lg bg-[var(--color-accent)] px-4 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)]"
+                className="rounded-lg bg-(--color-accent) px-4 py-1.5 text-sm font-medium text-white hover:bg-(--color-accent-hover)"
               >
                 Import
               </button>
@@ -731,11 +731,11 @@ function FilePathInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 rounded bg-[var(--color-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+        className="flex-1 rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
       />
       <button
         onClick={browse}
-        className="rounded bg-[var(--color-elevated)] px-2 py-1.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+        className="rounded bg-(--color-elevated) px-2 py-1.5 text-(--color-text-secondary) hover:bg-(--color-border) hover:text-(--color-text-primary)"
         title="Browse..."
       >
         <FolderOpen className="h-4 w-4" />
@@ -757,7 +757,7 @@ function ToggleSwitch({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
-        checked ? "bg-[var(--color-accent)]" : "bg-[var(--color-border)]"
+        checked ? "bg-(--color-accent)" : "bg-(--color-border)"
       }`}
     >
       <span
@@ -772,16 +772,16 @@ function ToggleSwitch({
 function DesignTokensSection() {
   return (
     <section>
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
         Design Tokens
       </h3>
-      <p className="mb-3 text-xs text-[var(--color-text-dimmed)]">
+      <p className="mb-3 text-xs text-(--color-text-dimmed)">
         Active color palette for the current theme. Useful for theme creators and plugin developers.
       </p>
       <div className="space-y-3">
         {tokenSwatchGroups.map((group) => (
           <div key={group.label}>
-            <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-[var(--color-text-dimmed)]">
+            <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-wider text-(--color-text-dimmed)">
               {group.label}
             </span>
             <div className="flex flex-wrap gap-2">
@@ -792,10 +792,10 @@ function DesignTokensSection() {
                   title={swatch.value}
                 >
                   <div
-                    className="h-6 w-6 rounded-full border border-[var(--color-border)]"
+                    className="h-6 w-6 rounded-full border border-(--color-border)"
                     style={{ backgroundColor: swatch.value }}
                   />
-                  <span className="text-[9px] leading-tight text-[var(--color-text-dimmed)]">
+                  <span className="text-[9px] leading-tight text-(--color-text-dimmed)">
                     {swatch.name}
                   </span>
                 </div>
@@ -821,12 +821,12 @@ function KeyboardShortcutsSection() {
 
   return (
     <section>
-      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
         {t("settings.shortcuts")}
       </h3>
 
       {conflicts.length > 0 && (
-        <div className="mb-3 rounded bg-[var(--color-warning)]/10 px-3 py-2 text-xs text-[var(--color-warning)]">
+        <div className="mb-3 rounded bg-(--color-warning)/10 px-3 py-2 text-xs text-(--color-warning)">
           Some shortcuts have conflicting bindings. Only one action will trigger per key combination.
         </div>
       )}
@@ -841,15 +841,15 @@ function KeyboardShortcutsSection() {
           return (
             <div
               key={action.id}
-              className="flex items-center justify-between rounded px-2 py-1.5 hover:bg-[var(--color-elevated)]"
+              className="flex items-center justify-between rounded px-2 py-1.5 hover:bg-(--color-elevated)"
             >
-              <span className={`text-xs ${hasConflict ? "text-[var(--color-warning)]" : "text-[var(--color-text-secondary)]"}`}>
+              <span className={`text-xs ${hasConflict ? "text-(--color-warning)" : "text-(--color-text-secondary)"}`}>
                 {action.description}
               </span>
               <div className="flex items-center gap-1.5">
                 {isRecording ? (
                   <span
-                    className="rounded border border-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] text-[var(--color-accent)] animate-pulse"
+                    className="rounded border border-(--color-accent) bg-(--color-accent)/10 px-2 py-0.5 text-[10px] text-(--color-accent) animate-pulse"
                     tabIndex={0}
                     ref={(el) => {
                       if (el) {
@@ -882,8 +882,8 @@ function KeyboardShortcutsSection() {
                         key={i}
                         className={`rounded border px-1.5 py-0.5 font-mono text-[10px] ${
                           hasConflict
-                            ? "border-[var(--color-warning)]/50 bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
-                            : "border-[var(--color-border)] bg-[var(--color-elevated)] text-[var(--color-text-muted)]"
+                            ? "border-(--color-warning)/50 bg-(--color-warning)/10 text-(--color-warning)"
+                            : "border-(--color-border) bg-(--color-elevated) text-(--color-text-muted)"
                         }`}
                       >
                         {part}
@@ -894,7 +894,7 @@ function KeyboardShortcutsSection() {
                 {!isRecording && (
                   <button
                     onClick={() => setRecordingId(action.id)}
-                    className="rounded px-1.5 py-0.5 text-[10px] text-[var(--color-text-dimmed)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-secondary)]"
+                    className="rounded px-1.5 py-0.5 text-[10px] text-(--color-text-dimmed) hover:bg-(--color-border) hover:text-(--color-text-secondary)"
                   >
                     Rebind
                   </button>
@@ -906,12 +906,12 @@ function KeyboardShortcutsSection() {
       </div>
 
       <div className="mt-3 flex items-center justify-between">
-        <span className="text-[10px] text-[var(--color-text-dimmed)]">
+        <span className="text-[10px] text-(--color-text-dimmed)">
           Escape always exits Zen mode (not customizable)
         </span>
         <button
           onClick={resetAll}
-          className="flex items-center gap-1 rounded bg-[var(--color-elevated)] px-2.5 py-1 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+          className="flex items-center gap-1 rounded bg-(--color-elevated) px-2.5 py-1 text-xs text-(--color-text-secondary) hover:bg-(--color-border) hover:text-(--color-text-primary)"
         >
           <RefreshCw className="h-3 w-3" />
           Reset to Defaults

@@ -132,8 +132,8 @@ function VariableEditor({
           type="button"
           className={`inline rounded px-0.5 font-mono transition-colors ${
             isUnresolved
-              ? "text-[var(--color-warning)] bg-[var(--color-warning)]/10 hover:bg-[var(--color-warning)]/20"
-              : "text-[var(--color-accent)] bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/20"
+              ? "text-(--color-warning) bg-(--color-warning)/10 hover:bg-(--color-warning)/20"
+              : "text-(--color-accent) bg-(--color-accent)/10 hover:bg-(--color-accent)/20"
           }`}
           title={
             isUnresolved
@@ -146,17 +146,17 @@ function VariableEditor({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          className="z-50 w-72 rounded-xl border border-[var(--color-border)] bg-[var(--color-elevated)] p-3 shadow-xl"
+          className="z-50 w-72 rounded-xl border border-(--color-border) bg-(--color-elevated) p-3 shadow-xl"
           sideOffset={8}
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <p className="mb-1.5 text-xs font-medium text-[var(--color-text-secondary)]">
-            <span className="font-mono text-[var(--color-accent)]">{`{{${varName}}}`}</span>
+          <p className="mb-1.5 text-xs font-medium text-(--color-text-secondary)">
+            <span className="font-mono text-(--color-accent)">{`{{${varName}}}`}</span>
           </p>
           {!activeEnvName ? (
-            <div className="flex items-start gap-2 rounded-lg bg-[var(--color-warning)]/10 px-2.5 py-2 text-xs text-[var(--color-text-secondary)]">
-              <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-[var(--color-warning)]" />
+            <div className="flex items-start gap-2 rounded-lg bg-(--color-warning)/10 px-2.5 py-2 text-xs text-(--color-text-secondary)">
+              <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-(--color-warning)" />
               <span>Select an environment from the header dropdown first.</span>
             </div>
           ) : (
@@ -177,12 +177,12 @@ function VariableEditor({
                   }
                 }}
                 disabled={saving}
-                className="flex-1 rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none transition-colors focus:border-[var(--color-accent)]/50 disabled:opacity-50"
+                className="flex-1 rounded border border-(--color-border) bg-(--color-bg) px-2 py-1.5 text-xs text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none transition-colors focus:border-(--color-accent)/50 disabled:opacity-50"
               />
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="shrink-0 rounded-md bg-[var(--color-accent)] p-1.5 text-white transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+                className="shrink-0 rounded-md bg-(--color-accent) p-1.5 text-white transition-colors hover:bg-(--color-accent-hover) disabled:opacity-50"
                 title={t("common.save")}
               >
                 {saving ? (
@@ -194,11 +194,11 @@ function VariableEditor({
             </div>
           )}
           {activeEnvName && (
-            <p className="mt-2 text-[10px] text-[var(--color-text-dimmed)]">
+            <p className="mt-2 text-[10px] text-(--color-text-dimmed)">
               Saves to <span className="font-mono">{activeEnvName}</span> environment. Press Enter to save.
             </p>
           )}
-          <Popover.Arrow className="fill-[var(--color-border)]" />
+          <Popover.Arrow className="fill-(--color-border)" />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
@@ -317,7 +317,7 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
   }, [send]);
 
   return (
-    <div data-tour="url-bar" className="flex items-center gap-3 bg-[var(--color-card)] px-4 py-3">
+    <div data-tour="url-bar" className="flex items-center gap-3 bg-(--color-card) px-4 py-3">
       {/* Method selector — show static badge for non-HTTP protocols */}
       {tab.protocol === "graphql" ? (
         <span className="rounded-lg bg-violet-500/15 px-3 py-2 text-sm font-bold text-violet-400">
@@ -339,10 +339,10 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
         <select
           value={tab.method}
           onChange={(e) => setMethod(e.target.value as HttpMethod)}
-          className={`${METHOD_COLORS[tab.method]} ${METHOD_BG[tab.method]} cursor-pointer rounded-lg px-3 py-2 text-sm font-bold outline-none transition-colors focus:ring-2 focus:ring-[var(--color-accent)]/50`}
+          className={`${METHOD_COLORS[tab.method]} ${METHOD_BG[tab.method]} cursor-pointer rounded-lg px-3 py-2 text-sm font-bold outline-none transition-colors focus:ring-2 focus:ring-(--color-accent)/50`}
         >
           {METHODS.map((m) => (
-            <option key={m} value={m} className="text-[var(--color-text-primary)] bg-[var(--color-elevated)]">
+            <option key={m} value={m} className="text-(--color-text-primary) bg-(--color-elevated)">
               {m}
             </option>
           ))}
@@ -361,11 +361,11 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
           onBlur={() => setInputFocused(false)}
           disabled={urlDisabled}
           placeholder={t("request.urlPlaceholder")}
-          className={`w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-elevated)] px-4 py-2 text-sm outline-none transition-all focus:border-[var(--color-accent)]/50 focus:ring-2 focus:ring-[var(--color-accent)]/20 disabled:opacity-60 ${
+          className={`w-full rounded-lg border border-(--color-border) bg-(--color-elevated) px-4 py-2 text-sm outline-none transition-all focus:border-(--color-accent)/50 focus:ring-2 focus:ring-(--color-accent)/20 disabled:opacity-60 ${
             hasVariablesInUrl && !inputFocused
-              ? "text-transparent caret-[var(--color-text-primary)]"
-              : "text-[var(--color-text-primary)]"
-          } placeholder-[var(--color-text-dimmed)]`}
+              ? "text-transparent caret-(--color-text-primary)"
+              : "text-(--color-text-primary)"
+          } placeholder-(--color-text-dimmed)`}
         />
         {/* Colored overlay — visible when input is NOT focused and URL has variables */}
         {hasVariablesInUrl && !inputFocused && (
@@ -376,7 +376,7 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
             <div className="flex items-center overflow-hidden whitespace-nowrap">
               {urlSegments.map((seg, i) =>
                 seg.type === "text" ? (
-                  <span key={i} className="text-[var(--color-text-primary)]">
+                  <span key={i} className="text-(--color-text-primary)">
                     {seg.value}
                   </span>
                 ) : (
@@ -406,7 +406,7 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
             data-tour="send-btn"
             onClick={send}
             disabled={tab.loading || !tab.url.trim()}
-            className="flex items-center gap-2 rounded-lg bg-[var(--color-accent)] px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+            className="flex items-center gap-2 rounded-lg bg-(--color-accent) px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-(--color-accent-hover) disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
           >
             {tab.loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

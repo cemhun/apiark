@@ -74,13 +74,13 @@ export function CurlImportDialog({ open, onOpenChange }: CurlImportDialogProps) 
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl focus:outline-none">
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-4">
-            <Dialog.Title className="flex items-center gap-2 text-lg font-semibold text-[var(--color-text-primary)]">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
+          <div className="flex items-center justify-between border-b border-(--color-border) px-6 py-4">
+            <Dialog.Title className="flex items-center gap-2 text-lg font-semibold text-(--color-text-primary)">
               <Upload className="h-5 w-5" />
               Import cURL
             </Dialog.Title>
-            <Dialog.Close className="rounded p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-elevated)] hover:text-[var(--color-text-primary)]">
+            <Dialog.Close className="rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary)">
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
@@ -90,7 +90,7 @@ export function CurlImportDialog({ open, onOpenChange }: CurlImportDialogProps) 
               value={curlInput}
               onChange={(e) => setCurlInput(e.target.value)}
               placeholder={'Paste your cURL command here...\n\ncurl -X POST https://api.example.com/users \\\n  -H \'Content-Type: application/json\' \\\n  -d \'{"name": "John"}\''}
-              className="h-48 w-full resize-y rounded bg-[var(--color-elevated)] p-3 font-mono text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-dimmed)] outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+              className="h-48 w-full resize-y rounded bg-(--color-elevated) p-3 font-mono text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-(--color-accent)"
               spellCheck={false}
             />
 
@@ -99,13 +99,13 @@ export function CurlImportDialog({ open, onOpenChange }: CurlImportDialogProps) 
             )}
 
             <div className="mt-4 flex justify-end gap-2">
-              <Dialog.Close className="rounded px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-elevated)]">
+              <Dialog.Close className="rounded px-4 py-2 text-sm text-(--color-text-secondary) hover:bg-(--color-elevated)">
                 Cancel
               </Dialog.Close>
               <button
                 onClick={handleImport}
                 disabled={!curlInput.trim() || importing}
-                className="rounded bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded bg-(--color-accent) px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {importing ? "Importing..." : "Import"}
               </button>
