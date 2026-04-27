@@ -302,6 +302,20 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
     }
   };
 
+  // Global Cmd/Ctrl+Enter — send from anywhere (e.g. response body, editors)
+  useEffect(() => {
+    const onGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        // Don't double-fire if the url input itself is focused (it handles it via onKeyDown)
+        const active = document.activeElement as HTMLElement | null;
+        if (active && active.tagName === "INPUT" && active.closest("[data-tour='url-bar']")) return;
+        send();
+      }
+    };
+    window.addEventListener("keydown", onGlobalKeyDown);
+    return () => window.removeEventListener("keydown", onGlobalKeyDown);
+  }, [send]);
+
   return (
     <div data-tour="url-bar" className="flex items-center gap-3 bg-[var(--color-card)] px-4 py-3">
       {/* Method selector — show static badge for non-HTTP protocols */}

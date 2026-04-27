@@ -165,6 +165,8 @@ interface CodeEditorProps {
   minimap?: boolean;
   lineNumbers?: boolean;
   placeholder?: string;
+  /** Called when Cmd/Ctrl+Enter is pressed inside the editor */
+  onCmdEnter?: () => void;
 }
 
 export function CodeEditor({
@@ -176,9 +178,12 @@ export function CodeEditor({
   minimap = false,
   lineNumbers = true,
   placeholder,
+  onCmdEnter,
 }: CodeEditorProps) {
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof Monaco | null>(null);
+  const onCmdEnterRef = useRef(onCmdEnter);
+  onCmdEnterRef.current = onCmdEnter;
   const resolvedTheme = useResolvedTheme();
   const monacoTheme = getMonacoTheme(resolvedTheme);
 
@@ -193,6 +198,10 @@ export function CodeEditor({
     setContentLeft(editor.getLayoutInfo().contentLeft);
     editor.onDidLayoutChange((layout) => {
       setContentLeft(layout.contentLeft);
+    });
+    // Cmd/Ctrl+Enter inside Monaco — send request
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      onCmdEnterRef.current?.();
     });
   }, [monacoTheme]);
 

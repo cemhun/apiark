@@ -22,8 +22,9 @@ import {
   Cookie,
   X,
   FolderX,
+  Copy,
 } from "lucide-react";
-import { getCollectionDefaults, updateCollectionDefaults } from "@/lib/tauri-api";
+import { getCollectionDefaults, updateCollectionDefaults, readRequestFile, saveRequestFile } from "@/lib/tauri-api";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CookieJarDialog } from "@/components/collection/cookie-jar-dialog";
 import { exportCollectionToFile } from "@/lib/export-collection";
@@ -511,6 +512,26 @@ function TreeNodeRow({
     setRenaming(true);
   };
 
+  const handleClone = async () => {
+    closeContextMenu();
+    if (node.type !== "request") return;
+    try {
+      const source = await readRequestFile(node.path);
+      const dir = node.path.substring(0, node.path.lastIndexOf("/"));
+      const baseFilename = node.path.split("/").pop()?.replace(/\.(yaml|yml)$/, "") ?? node.name;
+      const cloneFilename = `${baseFilename}-clone`;
+      const cloneName = `${node.name}-clone`;
+      const newPath = await createRequest(dir, cloneFilename, cloneName);
+      await saveRequestFile(newPath, { ...source, name: cloneName });
+      await useCollectionStore.getState().refreshCollection(collectionPath);
+      await openTab(newPath, collectionPath);
+    } catch (err) {
+      import("@/stores/toast-store").then(({ useToastStore }) =>
+        useToastStore.getState().showError(`Failed to clone request: ${err}`),
+      );
+    }
+  };
+
   const submitRename = async () => {
     setRenaming(false);
     if (!renameValue.trim() || renameValue === node.name) return;
@@ -605,6 +626,7 @@ function TreeNodeRow({
             onClose={closeContextMenu}
             items={[
               { label: t("common.rename"), icon: Pencil, onClick: handleRename },
+              { label: t("common.clone", "Clone"), icon: Copy, onClick: handleClone },
               { label: t("common.delete"), icon: Trash2, onClick: handleDelete, danger: true },
             ]}
           />

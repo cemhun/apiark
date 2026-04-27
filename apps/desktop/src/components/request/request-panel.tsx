@@ -10,7 +10,7 @@ import { Plus, Trash2, FileUp, Wand2, AlignJustify, LayoutList } from "lucide-re
 
 /** Extract :paramName path variables from a URL */
 function extractPathVariables(url: string): string[] {
-  const matches = url.match(/:([\w]+)/g);
+  const matches = url.match(/:([a-zA-Z_][\w]*)/g);
   if (!matches) return [];
   return [...new Set(matches.map((m) => m.slice(1)))];
 }
@@ -55,6 +55,7 @@ export function RequestPanel() {
     setPostResponseScript,
     setTestScript,
     setAssertions,
+    send,
   } = useTabStore();
 
   const pathVars = useMemo(() => tab ? extractPathVariables(tab.url) : [], [tab?.url]);
@@ -128,7 +129,7 @@ export function RequestPanel() {
         )}
 
         {activeTab === "body" && (
-          <BodyEditor body={body} onChange={setBody} />
+          <BodyEditor body={body} onChange={setBody} onCmdEnter={send} />
         )}
 
         {activeTab === "auth" && (
@@ -189,7 +190,7 @@ function PathVariablesEditor({
     // Remove :param from the URL
     const updated = url
       .replace(new RegExp(`/:${param}(?=/|$)`), "")
-      .replace(new RegExp(`:${param}(?=/|$)`), "");
+      .replace(new RegExp(`(?<![\\w]):${param}(?=/|$)`), "");
     onUrlChange(updated || "/");
     const next = { ...values };
     delete next[param];
@@ -570,9 +571,11 @@ function HeadersEditor({
 function BodyEditor({
   body,
   onChange,
+  onCmdEnter,
 }: {
   body: RequestBody;
   onChange: (body: RequestBody) => void;
+  onCmdEnter?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -625,6 +628,7 @@ function BodyEditor({
             language={body.type === "json" ? "json" : body.type === "xml" ? "xml" : "plaintext"}
             height="100%"
             placeholder={body.type === "json" ? '{\n  "key": "value"\n}' : ""}
+            onCmdEnter={onCmdEnter}
           />
         </div>
       )}
