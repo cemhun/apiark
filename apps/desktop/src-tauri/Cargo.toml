@@ -24,7 +24,7 @@ tauri-plugin-fs = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-updater = "2"
 tauri-plugin-deep-link = "2"
-reqwest = { version = "0.12", features = ["json", "cookies", "rustls-tls", "multipart", "stream"] }
+reqwest = { version = "0.13", features = ["json", "cookies", "rustls", "webpki-roots", "multipart", "stream", "form"] }
 url = "2"
 tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "sync", "time", "io-util", "net", "fs"] }
 serde = { version = "1", features = ["derive"] }
@@ -38,14 +38,14 @@ tracing-appender = "0.2"
 uuid = { version = "1", features = ["v4"] }
 chrono = "0.4"
 regex = "1"
-rand = "0.8"
+rand = "0.9"
 rusqlite = { version = "0.31", features = ["bundled"] }
 rquickjs = { version = "0.9", features = ["parallel", "loader"] }
 dirs = "5"
 csv = "1"
-tokio-tungstenite = { version = "0.24", features = ["rustls-tls-webpki-roots"] }
+tokio-tungstenite = { version = "0.26", features = ["rustls-tls-webpki-roots"] }
 futures-util = "0.3"
-axum = "0.7"
+axum = "0.8"
 sha2 = "0.10"
 base64 = "0.22"
 urlencoding = "2"
@@ -65,15 +65,15 @@ hyper-util = "0.1"
 http-body = "1"
 tower = "0.5"
 fake = { version = "3", features = ["derive"] }
-cron = "0.15"
-zip = { version = "2", default-features = false, features = ["deflate"] }
+cron = "0.16"
+zip = { version = "2", default-features = false, features = ["deflate-miniz"] }
 md4 = "0.10"
 des = "0.8"
 walkdir = "2"
-rumqttc = "0.24"
-rcgen = "0.13"
+rumqttc = "0.25"
+rcgen = "0.14"
 time = "0.3"
-portable-pty = "0.8"
+portable-pty = "0.9"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

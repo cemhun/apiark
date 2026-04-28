@@ -52,10 +52,10 @@ fn resolve_dynamic(name: &str) -> Option<String> {
         }
         "$randomString" => {
             use rand::Rng;
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let s: String = (0..16)
                 .map(|_| {
-                    let idx = rng.gen_range(0..36);
+                    let idx = rng.random_range(0..36);
                     if idx < 10 {
                         (b'0' + idx) as char
                     } else {
@@ -67,9 +67,9 @@ fn resolve_dynamic(name: &str) -> Option<String> {
         }
         "$randomEmail" => {
             use rand::Rng;
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let user: String = (0..8)
-                .map(|_| (b'a' + rng.gen_range(0..26)) as char)
+                .map(|_| (b'a' + rng.random_range(0..26)) as char)
                 .collect();
             Some(format!("{user}@example.com"))
         }

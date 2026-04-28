@@ -152,7 +152,7 @@ impl WsManager {
                     // Outgoing message from frontend
                     Some(msg) = msg_rx.recv() => {
                         let size = msg.len() as u64;
-                        if ws_sender.send(tungstenite::Message::Text(msg.clone())).await.is_err() {
+                        if ws_sender.send(tungstenite::Message::Text(msg.clone().into())).await.is_err() {
                             break;
                         }
                         let _ = app_clone.emit("ws:message", WsMessage {
