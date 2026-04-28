@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import monacoEditorPlugin from "vite-plugin-monaco-editor";
 import path from "path";
 
 const host = process.env.TAURI_DEV_HOST;
@@ -10,10 +9,6 @@ export default defineConfig(async () => ({
   plugins: [
     react(),
     tailwindcss(),
-    (monacoEditorPlugin as unknown as typeof monacoEditorPlugin.default).default({
-      languageWorkers: ["editorWorkerService", "json", "typescript", "html", "css"],
-      customWorkers: [],
-    }),
   ],
   resolve: {
     alias: {

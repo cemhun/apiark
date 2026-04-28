@@ -75,9 +75,9 @@ export function HistoryPanel() {
   });
 
   return (
-    <div className="px-2">
+    <div className="flex h-full flex-col px-2 py-1">
       {/* Search + clear */}
-      <div className="mb-1 flex items-center gap-1">
+      <div className="mb-1 flex shrink-0 items-center gap-1">
         <div className="flex flex-1 items-center rounded bg-(--color-elevated) px-2">
           <Search className="h-3 w-3 text-(--color-text-dimmed)" />
           <input
@@ -101,21 +101,23 @@ export function HistoryPanel() {
 
       {/* Entries */}
       {loading ? (
-        <HistorySkeleton />
+        <div className="flex-1"><HistorySkeleton /></div>
       ) : entries.length === 0 ? (
         searchQuery ? (
           <p className="py-2 text-center text-xs text-(--color-text-dimmed)">{t("history.noResults")}</p>
         ) : (
-          <EmptyState
-            icon={<ClockEmptyIcon size={32} />}
-            title={t("history.noHistory")}
-            description={t("history.noHistory")}
-          />
+          <div className="flex flex-1 items-center justify-center">
+            <EmptyState
+              icon={<ClockEmptyIcon size={32} />}
+              title={t("history.noHistory")}
+              description={t("history.noHistory")}
+            />
+          </div>
         )
       ) : (
         <div
           ref={parentRef}
-          className="max-h-[300px] overflow-y-auto"
+          className="min-h-0 flex-1 overflow-y-auto"
         >
           <div
             style={{

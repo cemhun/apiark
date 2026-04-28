@@ -5,7 +5,7 @@ import { useResolvedTheme } from "@/hooks/use-theme";
 import { useSettingsStore } from "@/stores/settings-store";
 
 // Configure Monaco to use the local monaco-editor package instead of fetching from CDN.
-// The vite-plugin-monaco-editor handles bundling workers automatically.
+// Workers are created via blob URLs automatically by Monaco in Vite 8+.
 import * as monacoEditor from "monaco-editor";
 loader.config({ monaco: monacoEditor });
 

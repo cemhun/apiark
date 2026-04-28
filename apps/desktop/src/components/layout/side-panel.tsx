@@ -101,9 +101,9 @@ export function SidePanel({
       )}
 
       {/* Panel content */}
-      <div className="flex-1 overflow-y-auto">
-        {activeView === "collections" && <CollectionsPanel onOpenImport={onOpenImport} />}
-        {activeView === "environments" && <EnvironmentsPanel envSelectorRef={envSelectorRef} />}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {activeView === "collections" && <div className="flex-1 overflow-y-auto"><CollectionsPanel onOpenImport={onOpenImport} /></div>}
+        {activeView === "environments" && <div className="flex-1 overflow-y-auto"><EnvironmentsPanel envSelectorRef={envSelectorRef} /></div>}
         {activeView === "history" && <HistoryPanel />}
         {activeView === "mock" && <ToolPanel description={t("mock.createDesc")} actionLabel={t("mock.newMockServer")} onAction={onOpenMock} />}
         {activeView === "monitor" && <ToolPanel description={t("monitor.createDesc")} actionLabel={t("monitor.newMonitor")} onAction={onOpenMonitor} />}
