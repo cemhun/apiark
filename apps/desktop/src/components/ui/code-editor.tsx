@@ -1,7 +1,8 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import Editor, { type OnMount, loader } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
 import { useResolvedTheme } from "@/hooks/use-theme";
+import { useSettingsStore } from "@/stores/settings-store";
 
 // Configure Monaco to use the local monaco-editor package instead of fetching from CDN.
 // The vite-plugin-monaco-editor handles bundling workers automatically.
@@ -186,6 +187,7 @@ export function CodeEditor({
   onCmdEnterRef.current = onCmdEnter;
   const resolvedTheme = useResolvedTheme();
   const monacoTheme = getMonacoTheme(resolvedTheme);
+  const fontSize = useSettingsStore((s) => s.settings.fontSize) ?? 14;
 
   const [contentLeft, setContentLeft] = useState(56);
 
@@ -209,6 +211,11 @@ export function CodeEditor({
   if (monacoRef.current && themesRegistered) {
     monacoRef.current.editor.setTheme(monacoTheme);
   }
+
+  // Update Monaco font size when the setting changes
+  useEffect(() => {
+    editorRef.current?.updateOptions({ fontSize });
+  }, [fontSize]);
 
   const showPlaceholder = placeholder && !value;
 
@@ -236,7 +243,7 @@ export function CodeEditor({
           lineNumbers: lineNumbers ? "on" : "off",
           readOnly,
           scrollBeyondLastLine: false,
-          fontSize: 13,
+          fontSize: fontSize,
           fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace",
           tabSize: 2,
           wordWrap: "on",

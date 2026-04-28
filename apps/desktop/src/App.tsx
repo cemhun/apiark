@@ -207,6 +207,23 @@ function App() {
       const action = matchShortcut(e);
       if (!action) return;
 
+      // Don't fire shortcuts when focus is inside a dialog/modal or a plain text input
+      // (except for the URL bar and CodeMirror editors where we want capture-phase interception).
+      // This prevents e.g. Cmd+Enter in a "New Collection" name input from sending a request.
+      if (action === "send") {
+        const active = document.activeElement as HTMLElement | null;
+        if (active) {
+          const tag = active.tagName.toLowerCase();
+          const inDialog = !!active.closest("[role='dialog']");
+          const isUrlBar = !!active.closest("[data-tour='url-bar']");
+          // Block send when focused on a plain input/textarea inside a dialog
+          if (inDialog && (tag === "input" || tag === "textarea" || tag === "select")) return;
+          // Block send when focused on a plain input that is NOT the URL bar or a CodeMirror editor
+          const isCodeMirror = !!active.closest(".cm-editor");
+          if (!isUrlBar && !isCodeMirror && (tag === "input" || tag === "textarea")) return;
+        }
+      }
+
       e.preventDefault();
 
       switch (action) {
@@ -268,8 +285,9 @@ function App() {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // Use capture phase so we fire before CodeMirror / other editors that call stopPropagation
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [newTab, closeTab, save, send, undoTab, redoTab, activeTab, zenMode, matchShortcut]);
 
   // Listen for terminal toggle from command palette
