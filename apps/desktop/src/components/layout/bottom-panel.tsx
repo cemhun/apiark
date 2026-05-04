@@ -19,17 +19,21 @@ interface BottomPanelProps {
 export function BottomPanel({ terminalOpen, onTerminalOpenChange }: BottomPanelProps) {
   const { t } = useTranslation();
   const consoleOpen = useConsoleStore((s) => s.open);
-  const [activeTab, setActiveTab] = useState<BottomTab>("console");
+  const [activeTab, setActiveTab] = useState<BottomTab>(() =>
+    terminalOpen && !consoleOpen ? "terminal" : "console"
+  );
   const [height, setHeight] = useState(250);
   const [resizing, setResizing] = useState(false);
 
   const isOpen = (activeTab === "console" && consoleOpen) || (activeTab === "terminal" && terminalOpen);
 
-  // If one panel opens, show it
   useEffect(() => {
-    if (consoleOpen && !terminalOpen) setActiveTab("console");
-    if (terminalOpen && !consoleOpen) setActiveTab("terminal");
-  }, [consoleOpen, terminalOpen]);
+    if (terminalOpen) setActiveTab("terminal");
+  }, [terminalOpen]);
+
+  useEffect(() => {
+    if (consoleOpen) setActiveTab("console");
+  }, [consoleOpen]);
 
   const toggleTab = useCallback((tab: BottomTab) => {
     if (activeTab === tab && isOpen) {
@@ -111,11 +115,12 @@ export function BottomPanel({ terminalOpen, onTerminalOpenChange }: BottomPanelP
         </button>
       </div>
 
-      {/* Content */}
+      {/* Content — keep TerminalPanel always mounted to preserve PTY session */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === "console" ? (
+        <div className={activeTab === "console" ? "block h-full" : "hidden"}>
           <ConsoleContent />
-        ) : (
+        </div>
+        <div className={activeTab === "terminal" ? "block h-full" : "hidden"}>
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center text-sm text-(--color-text-dimmed)">
@@ -125,7 +130,7 @@ export function BottomPanel({ terminalOpen, onTerminalOpenChange }: BottomPanelP
           >
             <TerminalPanel />
           </Suspense>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -12,24 +12,23 @@ export function TerminalPanel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<Terminal | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
   const [alive, setAlive] = useState(false);
 
-  const createTerminal = useCallback(async () => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Clean up previous
-    if (termRef.current) {
-      termRef.current.dispose();
-      termRef.current = null;
-    }
+  const initTerminal = useCallback(async (container: HTMLDivElement) => {
+    // Dispose any existing terminal
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    termRef.current?.dispose();
+    termRef.current = null;
 
     const term = new Terminal({
       cursorBlink: true,
       fontSize: 13,
-      fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace",
+      fontFamily: "'MesloLGS NF', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace",
       theme: getTerminalTheme(),
       allowProposedApi: true,
+      scrollback: 5000,
     });
 
     const fitAddon = new FitAddon();
@@ -38,13 +37,11 @@ export function TerminalPanel() {
     term.loadAddon(webLinksAddon);
     term.open(container);
 
-    // Small delay to let the DOM settle before fitting
-    requestAnimationFrame(() => {
-      fitAddon.fit();
-    });
-
     termRef.current = term;
     fitRef.current = fitAddon;
+
+    // Fit after layout settles
+    setTimeout(() => { fitAddon.fit(); }, 50);
 
     // Create PTY session on Rust side
     try {
@@ -62,9 +59,7 @@ export function TerminalPanel() {
     // Listen for output from PTY
     const unlistenOutput: UnlistenFn = await listen<string>(
       `terminal-output-${TERMINAL_ID}`,
-      (event) => {
-        term.write(event.payload);
-      },
+      (event) => { term.write(event.payload); },
     );
 
     const unlistenExit: UnlistenFn = await listen(
@@ -80,34 +75,34 @@ export function TerminalPanel() {
       invoke("terminal_write", { id: TERMINAL_ID, data }).catch(() => {});
     });
 
-    // Store cleanup refs on the terminal object
-    (term as any)._cleanup = () => {
+    cleanupRef.current = () => {
       onData.dispose();
       unlistenOutput();
       unlistenExit();
     };
   }, []);
 
-  // Initialize terminal on mount
+  // Initialize once on mount
   useEffect(() => {
-    createTerminal();
+    const container = containerRef.current;
+    if (!container) return;
+    initTerminal(container);
 
     return () => {
-      if (termRef.current) {
-        (termRef.current as any)._cleanup?.();
-        termRef.current.dispose();
-        termRef.current = null;
-      }
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+      termRef.current?.dispose();
+      termRef.current = null;
       invoke("terminal_close", { id: TERMINAL_ID }).catch(() => {});
     };
-  }, [createTerminal]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Resize handler
   useEffect(() => {
     const observer = new ResizeObserver(() => {
       if (fitRef.current && termRef.current) {
         fitRef.current.fit();
-        // Sync new size with PTY
         invoke("terminal_resize", {
           id: TERMINAL_ID,
           cols: termRef.current.cols,
@@ -138,13 +133,9 @@ export function TerminalPanel() {
 
   const handleRestart = useCallback(async () => {
     await invoke("terminal_close", { id: TERMINAL_ID }).catch(() => {});
-    if (termRef.current) {
-      (termRef.current as any)._cleanup?.();
-      termRef.current.dispose();
-      termRef.current = null;
-    }
-    await createTerminal();
-  }, [createTerminal]);
+    const container = containerRef.current;
+    if (container) await initTerminal(container);
+  }, [initTerminal]);
 
   return (
     <div className="relative flex h-full flex-col">

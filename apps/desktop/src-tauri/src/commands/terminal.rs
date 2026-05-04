@@ -11,7 +11,9 @@ pub struct TerminalManager {
 
 struct TerminalSession {
     writer: Box<dyn Write + Send>,
-    pair: portable_pty::PtyPair,
+    master: Box<dyn portable_pty::MasterPty + Send>,
+    /// Keep child alive — dropping it would kill the shell process
+    _child: Box<dyn portable_pty::Child + Send + Sync>,
 }
 
 impl TerminalManager {
@@ -48,10 +50,14 @@ pub fn terminal_create(
     let shell = if cfg!(target_os = "windows") {
         std::env::var("COMSPEC").unwrap_or_else(|_| "powershell.exe".to_string())
     } else {
-        std::env::var("SHELL").unwrap_or_else(|_| "/bin/bash".to_string())
+        std::env::var("SHELL").unwrap_or_else(|_| "/bin/zsh".to_string())
     };
 
     let mut cmd = CommandBuilder::new(&shell);
+
+    // Pass -i (interactive) so shell reads rc files and stays alive
+    #[cfg(not(target_os = "windows"))]
+    cmd.arg("-i");
 
     // Set working directory
     if let Some(dir) = cwd {
@@ -60,26 +66,28 @@ pub fn terminal_create(
         cmd.cwd(home);
     }
 
-    // Spawn the shell process
-    let _child = pair
+    // Spawn the shell — slave is consumed/dropped here after spawn
+    let child = pair
         .slave
         .spawn_command(cmd)
         .map_err(|e| format!("Failed to spawn shell: {e}"))?;
 
-    let writer = pair
-        .master
+    // slave is now dropped (goes out of scope with pair.slave after spawn)
+    // Only keep the master
+    let master = pair.master;
+
+    let writer = master
         .take_writer()
         .map_err(|e| format!("Failed to get PTY writer: {e}"))?;
 
-    let mut reader = pair
-        .master
+    let mut reader = master
         .try_clone_reader()
         .map_err(|e| format!("Failed to get PTY reader: {e}"))?;
 
-    // Store session
+    // Store session — slave is NOT stored, so it's dropped here
     {
         let mut sessions = manager.sessions.lock().map_err(|e| e.to_string())?;
-        sessions.insert(id.clone(), TerminalSession { writer, pair });
+        sessions.insert(id.clone(), TerminalSession { writer, master, _child: child });
     }
 
     // Spawn reader thread to emit output events
@@ -88,12 +96,22 @@ pub fn terminal_create(
         let mut buf = [0u8; 4096];
         loop {
             match reader.read(&mut buf) {
-                Ok(0) => break,
+                Ok(0) => {
+                    // On macOS PTY, Ok(0) can be a spurious read — only
+                    // treat it as EOF after a brief check; real EOF comes
+                    // as Err(EIO) on macOS.
+                    std::thread::sleep(std::time::Duration::from_millis(10));
+                    continue;
+                }
                 Ok(n) => {
                     let data = String::from_utf8_lossy(&buf[..n]).to_string();
                     let _ = app.emit(&format!("terminal-output-{event_id}"), data);
                 }
-                Err(_) => break,
+                Err(e) => {
+                    // EIO (errno 5) is the normal "shell exited" signal on macOS PTY
+                    tracing::debug!("PTY reader closed: {e}");
+                    break;
+                }
             }
         }
         // Terminal exited
@@ -132,7 +150,6 @@ pub fn terminal_resize(
         .get(&id)
         .ok_or_else(|| "Terminal session not found".to_string())?;
     session
-        .pair
         .master
         .resize(PtySize {
             rows,

@@ -207,6 +207,10 @@ function App() {
       const action = matchShortcut(e);
       if (!action) return;
 
+      // Never intercept keystrokes when focus is inside the xterm terminal
+      const active = document.activeElement as HTMLElement | null;
+      if (active?.closest(".xterm-helper-textarea, .xterm")) return;
+
       // Don't fire shortcuts when focus is inside a dialog/modal or a plain text input
       // (except for the URL bar and CodeMirror editors where we want capture-phase interception).
       // This prevents e.g. Cmd+Enter in a "New Collection" name input from sending a request.
