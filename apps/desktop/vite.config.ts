@@ -15,6 +15,24 @@ export default defineConfig(async () => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 2000,
+    rolldownOptions: {
+      output: {
+        manualChunks: (id: string) => {
+          if (id.includes("monaco-editor") || id.includes("@monaco-editor")) return "monaco";
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) return "react";
+          if (id.includes("@radix-ui")) return "radix";
+          if (id.includes("@dnd-kit")) return "dnd-kit";
+          if (id.includes("@stoplight")) return "spectral";
+          if (id.includes("@xterm")) return "xterm";
+          if (id.includes("node_modules/i18next") || id.includes("react-i18next")) return "i18n";
+          if (id.includes("node_modules/zustand")) return "zustand";
+          if (id.includes("@tauri-apps")) return "tauri";
+        },
+      },
+    },
+  },
   clearScreen: false,
   server: {
     port: 1420,

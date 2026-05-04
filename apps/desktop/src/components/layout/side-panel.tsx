@@ -633,10 +633,13 @@ function CollectionHeader({
 
   return (
     <div>
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => toggleExpand(collection.path)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") toggleExpand(collection.path); }}
         onContextMenu={onContextMenu}
-        className="group flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-sm hover:bg-(--color-elevated)"
+        className="group flex w-full cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-left text-sm hover:bg-(--color-elevated)"
       >
         {isExpanded ? (
           <ChevronDown className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
@@ -696,7 +699,7 @@ function CollectionHeader({
             </button>
           </span>
         )}
-      </button>
+      </div>
       {isExpanded && (
         <CollectionTree
           nodes={
