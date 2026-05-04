@@ -59,6 +59,28 @@ pub fn terminal_create(
     #[cfg(not(target_os = "windows"))]
     cmd.arg("-i");
 
+    // Set TERM so the shell knows it's in a proper terminal emulator.
+    // Without this, macOS LaunchServices launches the app with TERM unset,
+    // causing zsh to fall back to dumb-terminal mode where it echoes input
+    // itself in addition to the PTY echo — resulting in double characters
+    // and broken backspace in the installed DMG.
+    cmd.env("TERM", "xterm-256color");
+    cmd.env("COLORTERM", "truecolor");
+
+    // Ensure Homebrew and common tool paths are available in the GUI app
+    // environment (LaunchServices doesn't source shell profiles).
+    #[cfg(target_os = "macos")]
+    {
+        let current_path = std::env::var("PATH").unwrap_or_default();
+        let extra = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+        let new_path = if current_path.is_empty() {
+            extra.to_string()
+        } else {
+            format!("{extra}:{current_path}")
+        };
+        cmd.env("PATH", new_path);
+    }
+
     // Set working directory
     if let Some(dir) = cwd {
         cmd.cwd(dir);

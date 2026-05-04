@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
+import { Unicode11Addon } from "@xterm/addon-unicode11";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import "@xterm/xterm/css/xterm.css";
@@ -24,18 +25,24 @@ export function TerminalPanel() {
 
     const term = new Terminal({
       cursorBlink: true,
+      cursorStyle: "bar",
       fontSize: 13,
       fontFamily: "'MesloLGS NF', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace",
       theme: getTerminalTheme(),
       allowProposedApi: true,
       scrollback: 5000,
+      macOptionIsMeta: true,
     });
 
     const fitAddon = new FitAddon();
     const webLinksAddon = new WebLinksAddon();
+    const unicode11Addon = new Unicode11Addon();
     term.loadAddon(fitAddon);
     term.loadAddon(webLinksAddon);
+    term.loadAddon(unicode11Addon);
     term.open(container);
+    // Activate Unicode 11 so wide glyphs (prompt arrows, emoji) are measured correctly
+    term.unicode.activeVersion = "11";
 
     termRef.current = term;
     fitRef.current = fitAddon;
