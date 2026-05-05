@@ -29,20 +29,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { CookieJarDialog } from "@/components/collection/cookie-jar-dialog";
 import { exportCollectionToFile } from "@/lib/export-collection";
 import { saveFolderOrder } from "@/lib/tauri-api";
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 // Global event to ensure only one context menu is open at a time
@@ -65,64 +51,47 @@ interface FlatNode {
   depth: number;
   collectionPath: string;
   collectionName: string;
-  /** Parent directory path for DnD sibling grouping */
   parentDir: string;
 }
 
 // ── Utility functions ──
 
-/** Get the order key for a node (file stem for requests, folder name for folders) */
 function getOrderKey(node: CollectionNode): string {
   const path = node.path;
   const name = path.substring(path.lastIndexOf("/") + 1);
-  if (node.type === "request") {
-    return name.replace(/\.(yaml|yml)$/, "");
-  }
+  if (node.type === "request") return name.replace(/\.(yaml|yml)$/, "");
   return name;
 }
 
-/** Fuzzy subsequence match with scoring.
- * Returns a score > 0 if query is a fuzzy match for text, 0 otherwise.
- * Bonuses for consecutive matches and word-boundary matches. */
 function fuzzyScore(text: string, query: string): number {
   const t = text.toLowerCase();
   const q = query.toLowerCase();
-  let score = 0;
-  let ti = 0;
+  let score = 0, ti = 0;
   let prevMatched = false;
   for (let qi = 0; qi < q.length; qi++) {
     let found = false;
     while (ti < t.length) {
       if (t[ti] === q[qi]) {
         score += 1;
-        // Consecutive match bonus
         if (prevMatched) score += 2;
-        // Word boundary bonus (start of string, after space/hyphen/underscore)
         if (ti === 0 || /[\s\-_/.]/.test(t[ti - 1])) score += 3;
-        prevMatched = true;
-        ti++;
-        found = true;
-        break;
+        prevMatched = true; ti++; found = true; break;
       }
-      prevMatched = false;
-      ti++;
+      prevMatched = false; ti++;
     }
     if (!found) return 0;
   }
   return score;
 }
 
-/** Check if a node or its children match a search query (fuzzy) */
 function nodeMatchesSearch(node: CollectionNode, query: string): boolean {
   if (!query) return true;
   if (fuzzyScore(node.name, query) > 0) return true;
-  if (node.type !== "request" && node.children.length > 0) {
+  if (node.type !== "request" && node.children.length > 0)
     return node.children.some((child) => nodeMatchesSearch(child, query));
-  }
   return false;
 }
 
-/** Flatten the tree into a virtual list, respecting expanded state and search */
 function flattenTree(
   nodes: CollectionNode[],
   expandedPaths: Set<string>,
@@ -133,40 +102,20 @@ function flattenTree(
   parentDir: string,
   result: FlatNode[],
 ): void {
-  const filtered = searchQuery
-    ? nodes.filter((n) => nodeMatchesSearch(n, searchQuery))
-    : nodes;
-
+  const filtered = searchQuery ? nodes.filter((n) => nodeMatchesSearch(n, searchQuery)) : nodes;
   for (const node of filtered) {
-    // Skip folder nodes — flatten their children at the same depth
     if (node.type === "folder") {
-      flattenTree(
-        node.children,
-        expandedPaths,
-        collectionPath,
-        collectionName,
-        searchQuery,
-        depth,
-        parentDir,
-        result,
-      );
+      flattenTree(node.children, expandedPaths, collectionPath, collectionName, searchQuery, depth, parentDir, result);
       continue;
     }
-
     result.push({ node, depth, collectionPath, collectionName, parentDir });
-
     if (node.type !== "request") {
       const isExpanded = expandedPaths.has(node.path) || !!searchQuery;
       if (isExpanded && node.children.length > 0) {
         flattenTree(
-          node.children,
-          expandedPaths,
-          collectionPath,
+          node.children, expandedPaths, collectionPath,
           node.type === "collection" ? node.name : collectionName,
-          searchQuery,
-          depth + 1,
-          node.path,
-          result,
+          searchQuery, depth + 1, node.path, result,
         );
       }
     }
@@ -196,24 +145,9 @@ export function CollectionTree({
   const internalParentRef = useRef<HTMLDivElement>(null);
   const scrollRef = externalParentRef ?? internalParentRef;
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    }),
-  );
-
   const flatNodes = useMemo(() => {
     const result: FlatNode[] = [];
-    flattenTree(
-      nodes,
-      expandedPaths,
-      collectionPath,
-      collectionName,
-      searchQuery,
-      0,
-      collectionPath,
-      result,
-    );
+    flattenTree(nodes, expandedPaths, collectionPath, collectionName, searchQuery, 0, collectionPath, result);
     return result;
   }, [nodes, expandedPaths, collectionPath, collectionName, searchQuery]);
 
@@ -224,146 +158,191 @@ export function CollectionTree({
     overscan: 15,
   });
 
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || active.id === over.id) return;
+  // ── Manual drag state ──
+  // draggingIdx: index in flatNodes of the item being dragged
+  // overIdx: index where the drop indicator should appear (item the cursor is over)
+  const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+  // Overlay position (follows mouse)
+  const [overlayPos, setOverlayPos] = useState({ x: 0, y: 0 });
 
-      const activeFlat = flatNodes.find((f) => f.node.path === active.id);
-      const overFlat = flatNodes.find((f) => f.node.path === over.id);
-      if (!activeFlat || !overFlat) return;
+  const dragStateRef = useRef<{
+    idx: number;
+    startY: number;
+    scrollTop: number;
+  } | null>(null);
 
-      // Only allow reordering within the same parent
-      if (activeFlat.parentDir !== overFlat.parentDir) return;
+  const flatNodesRef = useRef(flatNodes);
+  flatNodesRef.current = flatNodes;
 
-      // Get all siblings at the same parent
-      const siblings = flatNodes.filter(
-        (f) => f.parentDir === activeFlat.parentDir && f.depth === activeFlat.depth,
+  // Compute which flatNode index the mouse Y corresponds to
+  const getIdxFromClientY = useCallback((clientY: number): number | null => {
+    const scroll = scrollRef.current;
+    if (!scroll) return null;
+    const rect = scroll.getBoundingClientRect();
+    const relativeY = clientY - rect.top + scroll.scrollTop;
+    const idx = Math.floor(relativeY / ROW_HEIGHT);
+    const clamped = Math.max(0, Math.min(flatNodesRef.current.length - 1, idx));
+    return clamped;
+  }, [scrollRef]);
+
+  const handleDragStart = useCallback((idx: number, e: React.PointerEvent) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStateRef.current = {
+      idx,
+      startY: e.clientY,
+      scrollTop: scrollRef.current?.scrollTop ?? 0,
+    };
+    setDraggingIdx(idx);
+    setOverIdx(idx);
+    setOverlayPos({ x: e.clientX, y: e.clientY });
+  }, [scrollRef]);
+
+  useEffect(() => {
+    if (draggingIdx === null) return;
+
+    const onMove = (e: PointerEvent) => {
+      setOverlayPos({ x: e.clientX, y: e.clientY });
+      const idx = getIdxFromClientY(e.clientY);
+      if (idx === null) return;
+      const nodes = flatNodesRef.current;
+      const dragFlat = nodes[draggingIdx];
+      const overFlat = nodes[idx];
+      // Only allow within same parent
+      if (dragFlat && overFlat && dragFlat.parentDir === overFlat.parentDir) {
+        setOverIdx(idx);
+      }
+    };
+
+    const onUp = async (e: PointerEvent) => {
+      const fromIdx = draggingIdx;
+      const toIdx = overIdx;
+      setDraggingIdx(null);
+      setOverIdx(null);
+      dragStateRef.current = null;
+
+      if (toIdx === null || fromIdx === toIdx) return;
+
+      const nodes = flatNodesRef.current;
+      const dragFlat = nodes[fromIdx];
+      const overFlat = nodes[toIdx];
+      if (!dragFlat || !overFlat || dragFlat.parentDir !== overFlat.parentDir) return;
+
+      const siblings = nodes.filter(
+        (f) => f.parentDir === dragFlat.parentDir && f.depth === dragFlat.depth,
       );
-
-      const fromIdx = siblings.findIndex((f) => f.node.path === active.id);
-      const toIdx = siblings.findIndex((f) => f.node.path === over.id);
-      if (fromIdx === -1 || toIdx === -1) return;
+      const from = siblings.findIndex((f) => f.node.path === dragFlat.node.path);
+      const to = siblings.findIndex((f) => f.node.path === overFlat.node.path);
+      if (from === -1 || to === -1 || from === to) return;
 
       const reordered = [...siblings];
-      const [moved] = reordered.splice(fromIdx, 1);
-      reordered.splice(toIdx, 0, moved);
+      const [moved] = reordered.splice(from, 1);
+      reordered.splice(to, 0, moved);
 
       const order = reordered.map((f) => getOrderKey(f.node));
       try {
-        await saveFolderOrder(activeFlat.parentDir, order);
+        await saveFolderOrder(dragFlat.parentDir, order);
         await refreshCollection(collectionPath);
       } catch (err) {
         import("@/stores/toast-store").then(({ useToastStore }) =>
           useToastStore.getState().showError(`Failed to reorder items: ${err}`),
         );
       }
-    },
-    [flatNodes, refreshCollection, collectionPath],
-  );
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp, { once: true });
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [draggingIdx, overIdx, getIdxFromClientY, refreshCollection, collectionPath]);
 
   if (flatNodes.length === 0) return null;
 
   const needsOwnScroll = !externalParentRef;
+  const draggingFlat = draggingIdx !== null ? flatNodes[draggingIdx] : null;
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
+  const listContent = (
+    <div
+      style={{
+        height: `${virtualizer.getTotalSize()}px`,
+        width: "100%",
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
-      <SortableContext
-        items={flatNodes.map((f) => f.node.path)}
-        strategy={verticalListSortingStrategy}
-      >
-        {needsOwnScroll ? (
-          <div ref={internalParentRef} style={{ overflowX: "hidden", overflowY: "auto", maxHeight: "100%" }}>
-            <div
-              style={{
-                height: `${virtualizer.getTotalSize()}px`,
-                width: "100%",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              {virtualizer.getVirtualItems().map((virtualRow) => {
-                const flat = flatNodes[virtualRow.index];
-                return (
-                  <VirtualRow
-                    key={flat.node.path}
-                    flat={flat}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        ) : (
+      {virtualizer.getVirtualItems().map((virtualRow) => {
+        const flat = flatNodes[virtualRow.index];
+        const isDragging = draggingIdx === virtualRow.index;
+        const isOver = overIdx === virtualRow.index && draggingIdx !== null && draggingIdx !== virtualRow.index;
+        return (
           <div
+            key={flat.node.path}
             style={{
-              height: `${virtualizer.getTotalSize()}px`,
+              position: "absolute",
+              top: 0,
+              left: 0,
               width: "100%",
-              position: "relative",
-              overflow: "hidden",
+              height: `${virtualRow.size}px`,
+              transform: `translateY(${virtualRow.start}px)`,
+              opacity: isDragging ? 0 : 1,
             }}
           >
-            {virtualizer.getVirtualItems().map((virtualRow) => {
-              const flat = flatNodes[virtualRow.index];
-              return (
-                <VirtualRow
-                  key={flat.node.path}
-                  flat={flat}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                />
-              );
-            })}
+            {/* Drop indicator */}
+            {isOver && (
+              <div style={{
+                position: "absolute",
+                top: 0, left: 8, right: 8,
+                height: 2, borderRadius: 2,
+                backgroundColor: "var(--color-accent)",
+                boxShadow: "0 0 6px var(--color-accent)",
+                pointerEvents: "none",
+                zIndex: 20,
+              }} />
+            )}
+            <TreeNodeRow
+              flat={flat}
+              onDragHandlePointerDown={(e) => handleDragStart(virtualRow.index, e)}
+            />
           </div>
-        )}
-      </SortableContext>
-    </DndContext>
+        );
+      })}
+    </div>
   );
-}
-
-// ── Virtual row wrapper with DnD ──
-
-function VirtualRow({ flat, style }: { flat: FlatNode; style: React.CSSProperties }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: flat.node.path });
-
-  const dndStyle: React.CSSProperties = {
-    ...style,
-    transform: CSS.Transform.toString(transform ? { ...transform, x: 0 } : null) || style.transform as string,
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
 
   return (
-    <div ref={setNodeRef} style={dndStyle}>
-      <TreeNodeRow
-        flat={flat}
-        dragHandleProps={{ ...attributes, ...listeners }}
-      />
-    </div>
+    <>
+      {needsOwnScroll ? (
+        <div ref={internalParentRef} style={{ overflowX: "hidden", overflowY: "auto", maxHeight: "100%" }}>
+          {listContent}
+        </div>
+      ) : (
+        listContent
+      )}
+
+      {/* Drag overlay — follows cursor */}
+      {draggingFlat && createPortal(
+        <div style={{
+          position: "fixed",
+          left: overlayPos.x + 12,
+          top: overlayPos.y - ROW_HEIGHT / 2,
+          pointerEvents: "none",
+          zIndex: 9999,
+          minWidth: 200,
+          maxWidth: 320,
+          background: "var(--color-elevated)",
+          border: "1px solid var(--color-accent)",
+          borderRadius: 6,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.35)",
+          opacity: 0.97,
+        }}>
+          <TreeNodeRow flat={draggingFlat} onDragHandlePointerDown={() => {}} />
+        </div>,
+        document.body,
+      )}
+    </>
   );
 }
 
@@ -371,10 +350,10 @@ function VirtualRow({ flat, style }: { flat: FlatNode; style: React.CSSPropertie
 
 function TreeNodeRow({
   flat,
-  dragHandleProps,
+  onDragHandlePointerDown,
 }: {
   flat: FlatNode;
-  dragHandleProps: Record<string, unknown>;
+  onDragHandlePointerDown: (e: React.PointerEvent) => void;
 }) {
   const { t } = useTranslation();
   const { node, depth, collectionPath, collectionName } = flat;
@@ -553,8 +532,8 @@ function TreeNodeRow({
           onContextMenu={handleContextMenu}
         >
           <span
-            className="shrink-0 cursor-grab opacity-0 group-hover:opacity-50 hover:!opacity-100"
-            {...dragHandleProps}
+            className="shrink-0 cursor-grab opacity-0 group-hover:opacity-50 hover:opacity-100!"
+            onPointerDown={onDragHandlePointerDown}
           >
             <GripVertical className="h-3 w-3 text-(--color-text-muted)" />
           </span>
@@ -656,8 +635,8 @@ function TreeNodeRow({
       >
         {node.type !== "collection" && (
           <span
-            className="shrink-0 cursor-grab opacity-0 group-hover:opacity-50 hover:!opacity-100"
-            {...dragHandleProps}
+            className="shrink-0 cursor-grab opacity-0 group-hover:opacity-50 hover:opacity-100!"
+            onPointerDown={onDragHandlePointerDown}
             onClick={(e) => e.stopPropagation()}
           >
             <GripVertical className="h-3 w-3 text-(--color-text-muted)" />
@@ -933,7 +912,7 @@ function CookieSettingsDialog({
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-95 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
           <div className="flex items-center justify-between border-b border-(--color-border) px-5 py-3">
             <Dialog.Title className="text-sm font-semibold text-(--color-text-primary)">
               {t("sidebar.cookieSettings")}
@@ -1199,7 +1178,7 @@ function ContextMenu({
       <div className="fixed inset-0 z-40" onMouseDown={onClose} />
       <div
         ref={menuRef}
-        className="fixed z-50 min-w-[160px] max-h-[80vh] overflow-y-auto rounded border border-(--color-border) bg-(--color-elevated) py-1 shadow-lg"
+        className="fixed z-50 min-w-40 max-h-[80vh] overflow-y-auto rounded border border-(--color-border) bg-(--color-elevated) py-1 shadow-lg"
         style={{ left: position.left, top: position.top }}
       >
         {items.map((item) => (
