@@ -215,7 +215,7 @@ export function CollectionTree({
       }
     };
 
-    const onUp = async (e: PointerEvent) => {
+      const onUp = async (_e: PointerEvent) => {
       const fromIdx = draggingIdx;
       const toIdx = overIdx;
       setDraggingIdx(null);
