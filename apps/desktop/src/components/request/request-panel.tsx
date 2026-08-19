@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import type { ReactNode, ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useTabStore, useActiveTab } from "@/stores/tab-store";
 import { KeyValueEditor } from "./key-value-editor";
@@ -6,7 +7,7 @@ import type { AuthConfig, BodyType, RequestBody, KeyValuePair, OAuth2GrantType, 
 import { oauthStartFlow, oauthGetTokenStatus, oauthClearToken } from "@/lib/tauri-api";
 import { HintTooltip } from "@/components/ui/hint-tooltip";
 import { CodeEditor } from "@/components/ui/code-editor";
-import { Plus, Trash2, FileUp, Wand2, AlignJustify, LayoutList } from "lucide-react";
+import { Plus, Trash2, FileUp, Wand2, AlignJustify, LayoutList, Eye, EyeOff } from "lucide-react";
 
 /** Extract :paramName path variables from a URL */
 function extractPathVariables(url: string): string[] {
@@ -657,6 +658,56 @@ const INPUT_CLASS =
 const SELECT_CLASS =
   "rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-blue-500";
 
+/** Labeled wrapper: renders a visible title inline to the left of the field, e.g. "Username: ____". */
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="flex items-center gap-2">
+      <span className="w-28 shrink-0 text-xs text-(--color-text-secondary)">{label}</span>
+      <span className="min-w-0 flex-1">{children}</span>
+    </label>
+  );
+}
+
+/** Password input with a show/hide toggle. */
+function PasswordInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  className?: string;
+}) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete="off"
+        className={`${className ?? INPUT_CLASS} pr-8`}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        tabIndex={-1}
+        aria-label={visible ? "Hide password" : "Show password"}
+        title={visible ? "Hide password" : "Show password"}
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-(--color-text-muted) hover:text-(--color-text-primary)"
+      >
+        {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+      </button>
+    </div>
+  );
+}
+
+/** Fields that can be cached across auth type switches, keyed by field name. */
+type AuthFieldCache = Record<string, string | boolean | undefined>;
+
 function AuthEditor({
   auth,
   onChange,
@@ -665,6 +716,21 @@ function AuthEditor({
   onChange: (auth: AuthConfig) => void;
 }) {
   const { t } = useTranslation();
+  // Remembers every field value ever entered, across all auth types, so switching
+  // the auth type (and switching back) doesn't lose previously entered data.
+  const cacheRef = useRef<AuthFieldCache>({ ...auth } as AuthFieldCache);
+
+  const handleChange = useCallback(
+    (next: AuthConfig) => {
+      cacheRef.current = { ...cacheRef.current, ...(next as unknown as AuthFieldCache) };
+      onChange(next);
+    },
+    [onChange]
+  );
+
+  const cached = (key: string, fallback: string) =>
+    (cacheRef.current[key] as string | undefined) ?? fallback;
+
   return (
     <div className="space-y-3">
       {/* Auth type selector */}
@@ -672,74 +738,91 @@ function AuthEditor({
         value={auth.type}
         onChange={(e) => {
           const type = e.target.value as AuthConfig["type"];
+          const c = cacheRef.current;
           switch (type) {
             case "none":
-              onChange({ type: "none" });
+              handleChange({ type: "none" });
               break;
             case "bearer":
-              onChange({ type: "bearer", token: "" });
+              handleChange({ type: "bearer", token: cached("token", "") });
               break;
             case "basic":
-              onChange({ type: "basic", username: "", password: "" });
+              handleChange({
+                type: "basic",
+                username: cached("username", ""),
+                password: cached("password", ""),
+              });
               break;
             case "api-key":
-              onChange({ type: "api-key", key: "", value: "", addTo: "header" });
+              handleChange({
+                type: "api-key",
+                key: cached("key", ""),
+                value: cached("value", ""),
+                addTo: (c.addTo as "header" | "query" | undefined) ?? "header",
+              });
               break;
             case "oauth2":
-              onChange({
+              handleChange({
                 type: "oauth2",
-                grantType: "authorization_code",
-                authUrl: "",
-                tokenUrl: "",
-                clientId: "",
-                clientSecret: "",
-                scope: "",
-                callbackUrl: "http://localhost:9876/callback",
-                username: "",
-                password: "",
-                usePkce: true,
+                grantType: (c.grantType as OAuth2GrantType | undefined) ?? "authorization_code",
+                authUrl: cached("authUrl", ""),
+                tokenUrl: cached("tokenUrl", ""),
+                clientId: cached("clientId", ""),
+                clientSecret: cached("clientSecret", ""),
+                scope: cached("scope", ""),
+                callbackUrl: cached("callbackUrl", "http://localhost:9876/callback"),
+                username: cached("username", ""),
+                password: cached("password", ""),
+                usePkce: (c.usePkce as boolean | undefined) ?? true,
               });
               break;
             case "digest":
-              onChange({ type: "digest", username: "", password: "" });
+              handleChange({
+                type: "digest",
+                username: cached("username", ""),
+                password: cached("password", ""),
+              });
               break;
             case "aws-v4":
-              onChange({
+              handleChange({
                 type: "aws-v4",
-                accessKey: "",
-                secretKey: "",
-                region: "",
-                service: "",
-                sessionToken: "",
+                accessKey: cached("accessKey", ""),
+                secretKey: cached("secretKey", ""),
+                region: cached("region", ""),
+                service: cached("service", ""),
+                sessionToken: cached("sessionToken", ""),
               });
               break;
             case "jwt-bearer":
-              onChange({
+              handleChange({
                 type: "jwt-bearer",
-                secret: "",
-                algorithm: "HS256",
-                payload: '{\n  "sub": "1234567890",\n  "iat": 0\n}',
-                headerPrefix: "Bearer",
+                secret: cached("secret", ""),
+                algorithm: cached("algorithm", "HS256"),
+                payload: cached("payload", '{\n  "sub": "1234567890",\n  "iat": 0\n}'),
+                headerPrefix: cached("headerPrefix", "Bearer"),
               });
               break;
             case "ntlm":
-              onChange({
+              handleChange({
                 type: "ntlm",
-                username: "",
-                password: "",
-                domain: "",
-                workstation: "",
+                username: cached("username", ""),
+                password: cached("password", ""),
+                domain: cached("domain", ""),
+                workstation: cached("workstation", ""),
               });
               break;
             case "saml":
-              onChange({
+              handleChange({
                 type: "saml",
-                idpUrl: "",
-                entityId: "",
-                assertionConsumerUrl: "",
-                certificate: "",
-                nameIdFormat: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-                samlToken: "",
+                idpUrl: cached("idpUrl", ""),
+                entityId: cached("entityId", ""),
+                assertionConsumerUrl: cached("assertionConsumerUrl", ""),
+                certificate: cached("certificate", ""),
+                nameIdFormat: cached(
+                  "nameIdFormat",
+                  "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+                ),
+                samlToken: cached("samlToken", ""),
               });
               break;
           }
@@ -760,54 +843,63 @@ function AuthEditor({
 
       {/* Auth fields */}
       {auth.type === "bearer" && (
-        <input
-          type="text"
-          value={auth.token}
-          onChange={(e) => onChange({ ...auth, token: e.target.value })}
-          placeholder={t("auth.token")}
-          className={INPUT_CLASS}
-        />
+        <Field label={t("auth.token")}>
+          <input
+            type="text"
+            value={auth.token}
+            onChange={(e) => handleChange({ ...auth, token: e.target.value })}
+            placeholder={t("auth.token")}
+            className={INPUT_CLASS}
+          />
+        </Field>
       )}
 
       {auth.type === "basic" && (
         <div className="space-y-2">
-          <input
-            type="text"
-            value={auth.username}
-            onChange={(e) => onChange({ ...auth, username: e.target.value })}
-            placeholder={t("auth.username")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="password"
-            value={auth.password}
-            onChange={(e) => onChange({ ...auth, password: e.target.value })}
-            placeholder={t("auth.password")}
-            className={INPUT_CLASS}
-          />
+          <Field label={t("auth.username")}>
+            <input
+              type="text"
+              value={auth.username}
+              onChange={(e) => handleChange({ ...auth, username: e.target.value })}
+              placeholder={t("auth.username")}
+              className={INPUT_CLASS}
+              autoComplete="username"
+            />
+          </Field>
+          <Field label={t("auth.password")}>
+            <PasswordInput
+              value={auth.password}
+              onChange={(e) => handleChange({ ...auth, password: e.target.value })}
+              placeholder={t("auth.password")}
+            />
+          </Field>
         </div>
       )}
 
       {auth.type === "api-key" && (
         <div className="space-y-2">
-          <input
-            type="text"
-            value={auth.key}
-            onChange={(e) => onChange({ ...auth, key: e.target.value })}
-            placeholder="Key name (e.g. X-API-Key)"
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.value}
-            onChange={(e) => onChange({ ...auth, value: e.target.value })}
-            placeholder={t("request.value")}
-            className={INPUT_CLASS}
-          />
+          <Field label="Key">
+            <input
+              type="text"
+              value={auth.key}
+              onChange={(e) => handleChange({ ...auth, key: e.target.value })}
+              placeholder="Key name (e.g. X-API-Key)"
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("request.value")}>
+            <input
+              type="text"
+              value={auth.value}
+              onChange={(e) => handleChange({ ...auth, value: e.target.value })}
+              placeholder={t("request.value")}
+              className={INPUT_CLASS}
+            />
+          </Field>
           <select
             value={auth.addTo}
             onChange={(e) =>
-              onChange({ ...auth, addTo: e.target.value as "header" | "query" })
+              handleChange({ ...auth, addTo: e.target.value as "header" | "query" })
             }
             className={SELECT_CLASS}
           >
@@ -818,65 +910,76 @@ function AuthEditor({
       )}
 
       {auth.type === "oauth2" && (
-        <OAuth2Editor auth={auth} onChange={onChange} />
+        <OAuth2Editor auth={auth} onChange={handleChange} />
       )}
 
       {auth.type === "digest" && (
         <div className="space-y-2">
-          <input
-            type="text"
-            value={auth.username}
-            onChange={(e) => onChange({ ...auth, username: e.target.value })}
-            placeholder={t("auth.username")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="password"
-            value={auth.password}
-            onChange={(e) => onChange({ ...auth, password: e.target.value })}
-            placeholder={t("auth.password")}
-            className={INPUT_CLASS}
-          />
+          <Field label={t("auth.username")}>
+            <input
+              type="text"
+              value={auth.username}
+              onChange={(e) => handleChange({ ...auth, username: e.target.value })}
+              placeholder={t("auth.username")}
+              className={INPUT_CLASS}
+              autoComplete="username"
+            />
+          </Field>
+          <Field label={t("auth.password")}>
+            <PasswordInput
+              value={auth.password}
+              onChange={(e) => handleChange({ ...auth, password: e.target.value })}
+              placeholder={t("auth.password")}
+            />
+          </Field>
         </div>
       )}
 
       {auth.type === "aws-v4" && (
         <div className="space-y-2">
-          <input
-            type="text"
-            value={auth.accessKey}
-            onChange={(e) => onChange({ ...auth, accessKey: e.target.value })}
-            placeholder={t("auth.accessKey")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="password"
-            value={auth.secretKey}
-            onChange={(e) => onChange({ ...auth, secretKey: e.target.value })}
-            placeholder={t("auth.secretKey")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.region}
-            onChange={(e) => onChange({ ...auth, region: e.target.value })}
-            placeholder={t("auth.region")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.service}
-            onChange={(e) => onChange({ ...auth, service: e.target.value })}
-            placeholder={t("auth.service")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.sessionToken}
-            onChange={(e) => onChange({ ...auth, sessionToken: e.target.value })}
-            placeholder={t("auth.sessionToken")}
-            className={INPUT_CLASS}
-          />
+          <Field label={t("auth.accessKey")}>
+            <input
+              type="text"
+              value={auth.accessKey}
+              onChange={(e) => handleChange({ ...auth, accessKey: e.target.value })}
+              placeholder={t("auth.accessKey")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.secretKey")}>
+            <PasswordInput
+              value={auth.secretKey}
+              onChange={(e) => handleChange({ ...auth, secretKey: e.target.value })}
+              placeholder={t("auth.secretKey")}
+            />
+          </Field>
+          <Field label={t("auth.region")}>
+            <input
+              type="text"
+              value={auth.region}
+              onChange={(e) => handleChange({ ...auth, region: e.target.value })}
+              placeholder={t("auth.region")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.service")}>
+            <input
+              type="text"
+              value={auth.service}
+              onChange={(e) => handleChange({ ...auth, service: e.target.value })}
+              placeholder={t("auth.service")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.sessionToken")}>
+            <input
+              type="text"
+              value={auth.sessionToken}
+              onChange={(e) => handleChange({ ...auth, sessionToken: e.target.value })}
+              placeholder={t("auth.sessionToken")}
+              className={INPUT_CLASS}
+            />
+          </Field>
         </div>
       )}
 
@@ -884,7 +987,7 @@ function AuthEditor({
         <div className="space-y-2">
           <select
             value={auth.algorithm}
-            onChange={(e) => onChange({ ...auth, algorithm: e.target.value })}
+            onChange={(e) => handleChange({ ...auth, algorithm: e.target.value })}
             className={SELECT_CLASS}
           >
             <option value="HS256">HS256</option>
@@ -896,107 +999,128 @@ function AuthEditor({
             <option value="ES256">ES256</option>
             <option value="ES384">ES384</option>
           </select>
-          <input
-            type="password"
-            value={auth.secret}
-            onChange={(e) => onChange({ ...auth, secret: e.target.value })}
-            placeholder={auth.algorithm.startsWith("HS") ? "HMAC Secret" : "Private Key (PEM)"}
-            className={INPUT_CLASS}
-          />
+          <Field label={auth.algorithm.startsWith("HS") ? "HMAC Secret" : "Private Key (PEM)"}>
+            <PasswordInput
+              value={auth.secret}
+              onChange={(e) => handleChange({ ...auth, secret: e.target.value })}
+              placeholder={auth.algorithm.startsWith("HS") ? "HMAC Secret" : "Private Key (PEM)"}
+            />
+          </Field>
           <textarea
             value={auth.payload}
-            onChange={(e) => onChange({ ...auth, payload: e.target.value })}
+            onChange={(e) => handleChange({ ...auth, payload: e.target.value })}
             placeholder='{"sub": "user", "iat": 0}'
             rows={5}
             className={INPUT_CLASS + " resize-y font-mono"}
           />
-          <input
-            type="text"
-            value={auth.headerPrefix}
-            onChange={(e) => onChange({ ...auth, headerPrefix: e.target.value })}
-            placeholder={t("auth.headerPrefix")}
-            className={INPUT_CLASS}
-          />
+          <Field label={t("auth.headerPrefix")}>
+            <input
+              type="text"
+              value={auth.headerPrefix}
+              onChange={(e) => handleChange({ ...auth, headerPrefix: e.target.value })}
+              placeholder={t("auth.headerPrefix")}
+              className={INPUT_CLASS}
+            />
+          </Field>
         </div>
       )}
 
       {auth.type === "ntlm" && (
         <div className="space-y-2">
-          <input
-            type="text"
-            value={auth.username}
-            onChange={(e) => onChange({ ...auth, username: e.target.value })}
-            placeholder={t("auth.username")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="password"
-            value={auth.password}
-            onChange={(e) => onChange({ ...auth, password: e.target.value })}
-            placeholder={t("auth.password")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.domain}
-            onChange={(e) => onChange({ ...auth, domain: e.target.value })}
-            placeholder={t("auth.domain")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.workstation}
-            onChange={(e) => onChange({ ...auth, workstation: e.target.value })}
-            placeholder={t("auth.workstation")}
-            className={INPUT_CLASS}
-          />
+          <Field label={t("auth.username")}>
+            <input
+              type="text"
+              value={auth.username}
+              onChange={(e) => handleChange({ ...auth, username: e.target.value })}
+              placeholder={t("auth.username")}
+              className={INPUT_CLASS}
+              autoComplete="username"
+            />
+          </Field>
+          <Field label={t("auth.password")}>
+            <PasswordInput
+              value={auth.password}
+              onChange={(e) => handleChange({ ...auth, password: e.target.value })}
+              placeholder={t("auth.password")}
+            />
+          </Field>
+          <Field label={t("auth.domain")}>
+            <input
+              type="text"
+              value={auth.domain}
+              onChange={(e) => handleChange({ ...auth, domain: e.target.value })}
+              placeholder={t("auth.domain")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.workstation")}>
+            <input
+              type="text"
+              value={auth.workstation}
+              onChange={(e) => handleChange({ ...auth, workstation: e.target.value })}
+              placeholder={t("auth.workstation")}
+              className={INPUT_CLASS}
+            />
+          </Field>
         </div>
       )}
 
       {auth.type === "saml" && (
         <div className="space-y-2">
-          <input
-            type="text"
-            value={auth.idpUrl}
-            onChange={(e) => onChange({ ...auth, idpUrl: e.target.value })}
-            placeholder={t("auth.idpUrl")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.entityId}
-            onChange={(e) => onChange({ ...auth, entityId: e.target.value })}
-            placeholder={t("auth.entityId")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.assertionConsumerUrl}
-            onChange={(e) => onChange({ ...auth, assertionConsumerUrl: e.target.value })}
-            placeholder={t("auth.assertionConsumerUrl")}
-            className={INPUT_CLASS}
-          />
-          <textarea
-            value={auth.certificate}
-            onChange={(e) => onChange({ ...auth, certificate: e.target.value })}
-            placeholder={t("auth.certificate")}
-            rows={3}
-            className={INPUT_CLASS + " resize-y font-mono"}
-          />
-          <input
-            type="text"
-            value={auth.nameIdFormat}
-            onChange={(e) => onChange({ ...auth, nameIdFormat: e.target.value })}
-            placeholder={t("auth.nameIdFormat")}
-            className={INPUT_CLASS}
-          />
-          <input
-            type="text"
-            value={auth.samlToken}
-            onChange={(e) => onChange({ ...auth, samlToken: e.target.value })}
-            placeholder={t("auth.samlToken")}
-            className={INPUT_CLASS}
-          />
+          <Field label={t("auth.idpUrl")}>
+            <input
+              type="text"
+              value={auth.idpUrl}
+              onChange={(e) => handleChange({ ...auth, idpUrl: e.target.value })}
+              placeholder={t("auth.idpUrl")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.entityId")}>
+            <input
+              type="text"
+              value={auth.entityId}
+              onChange={(e) => handleChange({ ...auth, entityId: e.target.value })}
+              placeholder={t("auth.entityId")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.assertionConsumerUrl")}>
+            <input
+              type="text"
+              value={auth.assertionConsumerUrl}
+              onChange={(e) => handleChange({ ...auth, assertionConsumerUrl: e.target.value })}
+              placeholder={t("auth.assertionConsumerUrl")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.certificate")}>
+            <textarea
+              value={auth.certificate}
+              onChange={(e) => handleChange({ ...auth, certificate: e.target.value })}
+              placeholder={t("auth.certificate")}
+              rows={3}
+              className={INPUT_CLASS + " resize-y font-mono"}
+            />
+          </Field>
+          <Field label={t("auth.nameIdFormat")}>
+            <input
+              type="text"
+              value={auth.nameIdFormat}
+              onChange={(e) => handleChange({ ...auth, nameIdFormat: e.target.value })}
+              placeholder={t("auth.nameIdFormat")}
+              className={INPUT_CLASS}
+            />
+          </Field>
+          <Field label={t("auth.samlToken")}>
+            <input
+              type="text"
+              value={auth.samlToken}
+              onChange={(e) => handleChange({ ...auth, samlToken: e.target.value })}
+              placeholder={t("auth.samlToken")}
+              className={INPUT_CLASS}
+            />
+          </Field>
         </div>
       )}
     </div>
@@ -1123,12 +1247,10 @@ function OAuth2Editor({
         </label>
         <label className="block">
           <span className="text-xs text-(--color-text-secondary)">{t("auth.clientSecret")}</span>
-          <input
-            type="password"
+          <PasswordInput
             value={auth.clientSecret}
             onChange={(e) => onChange({ ...auth, clientSecret: e.target.value })}
             placeholder={t("auth.clientSecret")}
-            className={INPUT_CLASS}
           />
         </label>
       </div>
@@ -1160,12 +1282,10 @@ function OAuth2Editor({
           </label>
           <label className="block">
             <span className="text-xs text-(--color-text-secondary)">{t("auth.password")}</span>
-            <input
-              type="password"
+            <PasswordInput
               value={auth.password}
               onChange={(e) => onChange({ ...auth, password: e.target.value })}
               placeholder={t("auth.password")}
-              className={INPUT_CLASS}
             />
           </label>
         </div>

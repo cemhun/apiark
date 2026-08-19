@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useTabStore, useActiveTab } from "@/stores/tab-store";
 import { KeyValueEditor } from "@/components/request/key-value-editor";
@@ -11,6 +12,8 @@ import {
   Trash2,
   ArrowDown,
   Loader2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import type { AuthConfig } from "@apiark/types";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
@@ -445,6 +448,45 @@ function SubscriptionPanel({
   );
 }
 
+const GQL_INPUT_CLASS =
+  "w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500";
+
+type AuthFieldCache = Record<string, string | undefined>;
+
+function GqlPasswordInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+}) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete="off"
+        className={`${GQL_INPUT_CLASS} pr-8`}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        tabIndex={-1}
+        aria-label={visible ? "Hide password" : "Show password"}
+        title={visible ? "Hide password" : "Show password"}
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-(--color-text-muted) hover:text-(--color-text-primary)"
+      >
+        {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+      </button>
+    </div>
+  );
+}
+
 function AuthEditorCompact({
   auth,
   onChange,
@@ -453,28 +495,44 @@ function AuthEditorCompact({
   onChange: (auth: AuthConfig) => void;
 }) {
   const { t } = useTranslation();
+  // Remembers every field value ever entered, across all auth types, so switching
+  // the auth type (and switching back) doesn't lose previously entered data.
+  const cacheRef = useRef<AuthFieldCache>({ ...auth } as AuthFieldCache);
+
+  const handleChange = (next: AuthConfig) => {
+    cacheRef.current = { ...cacheRef.current, ...(next as unknown as AuthFieldCache) };
+    onChange(next);
+  };
+
+  const cached = (key: string, fallback: string) => cacheRef.current[key] ?? fallback;
+
   return (
     <div className="space-y-3">
       <select
         value={auth.type}
         onChange={(e) => {
           const type = e.target.value as AuthConfig["type"];
+          const c = cacheRef.current;
           switch (type) {
             case "none":
-              onChange({ type: "none" });
+              handleChange({ type: "none" });
               break;
             case "bearer":
-              onChange({ type: "bearer", token: "" });
+              handleChange({ type: "bearer", token: cached("token", "") });
               break;
             case "basic":
-              onChange({ type: "basic", username: "", password: "" });
+              handleChange({
+                type: "basic",
+                username: cached("username", ""),
+                password: cached("password", ""),
+              });
               break;
             case "api-key":
-              onChange({
+              handleChange({
                 type: "api-key",
-                key: "",
-                value: "",
-                addTo: "header",
+                key: cached("key", ""),
+                value: cached("value", ""),
+                addTo: (c.addTo as "header" | "query" | undefined) ?? "header",
               });
               break;
           }
@@ -488,35 +546,72 @@ function AuthEditorCompact({
       </select>
 
       {auth.type === "bearer" && (
-        <input
-          type="text"
-          value={auth.token}
-          onChange={(e) => onChange({ ...auth, token: e.target.value })}
-          placeholder={t("auth.token")}
-          className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-purple-500"
-        />
+        <label className="block">
+          <span className="mb-1 block text-xs text-(--color-text-secondary)">{t("auth.token")}</span>
+          <input
+            type="text"
+            value={auth.token}
+            onChange={(e) => handleChange({ ...auth, token: e.target.value })}
+            placeholder={t("auth.token")}
+            className={GQL_INPUT_CLASS}
+          />
+        </label>
       )}
 
       {auth.type === "basic" && (
         <div className="space-y-2">
-          <input
-            type="text"
-            value={auth.username}
-            onChange={(e) =>
-              onChange({ ...auth, username: e.target.value })
-            }
-            placeholder={t("auth.username")}
-            className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
-          />
-          <input
-            type="password"
-            value={auth.password}
-            onChange={(e) =>
-              onChange({ ...auth, password: e.target.value })
-            }
-            placeholder={t("auth.password")}
-            className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
-          />
+          <label className="block">
+            <span className="mb-1 block text-xs text-(--color-text-secondary)">{t("auth.username")}</span>
+            <input
+              type="text"
+              value={auth.username}
+              onChange={(e) => handleChange({ ...auth, username: e.target.value })}
+              placeholder={t("auth.username")}
+              className={GQL_INPUT_CLASS}
+              autoComplete="username"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs text-(--color-text-secondary)">{t("auth.password")}</span>
+            <GqlPasswordInput
+              value={auth.password}
+              onChange={(e) => handleChange({ ...auth, password: e.target.value })}
+              placeholder={t("auth.password")}
+            />
+          </label>
+        </div>
+      )}
+
+      {auth.type === "api-key" && (
+        <div className="space-y-2">
+          <label className="block">
+            <span className="mb-1 block text-xs text-(--color-text-secondary)">Key</span>
+            <input
+              type="text"
+              value={auth.key}
+              onChange={(e) => handleChange({ ...auth, key: e.target.value })}
+              placeholder="Key name (e.g. X-API-Key)"
+              className={GQL_INPUT_CLASS}
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs text-(--color-text-secondary)">{t("request.value")}</span>
+            <input
+              type="text"
+              value={auth.value}
+              onChange={(e) => handleChange({ ...auth, value: e.target.value })}
+              placeholder={t("request.value")}
+              className={GQL_INPUT_CLASS}
+            />
+          </label>
+          <select
+            value={auth.addTo}
+            onChange={(e) => handleChange({ ...auth, addTo: e.target.value as "header" | "query" })}
+            className="rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-purple-500"
+          >
+            <option value="header">{t("auth.addToHeader")}</option>
+            <option value="query">{t("auth.addToQuery")}</option>
+          </select>
         </div>
       )}
     </div>
