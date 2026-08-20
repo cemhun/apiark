@@ -211,20 +211,16 @@ function App() {
       const active = document.activeElement as HTMLElement | null;
       if (active?.closest(".xterm-helper-textarea, .xterm")) return;
 
-      // Don't fire shortcuts when focus is inside a dialog/modal or a plain text input
-      // (except for the URL bar and CodeMirror editors where we want capture-phase interception).
-      // This prevents e.g. Cmd+Enter in a "New Collection" name input from sending a request.
+      // Don't fire "send" when focus is inside a dialog/modal (e.g. a "New Collection" name
+      // input, Settings, etc.) — Cmd/Ctrl+Enter should only send when working within the
+      // request editor itself (URL bar, params/headers/body fields, auth fields, CodeMirror).
       if (action === "send") {
         const active = document.activeElement as HTMLElement | null;
         if (active) {
           const tag = active.tagName.toLowerCase();
           const inDialog = !!active.closest("[role='dialog']");
-          const isUrlBar = !!active.closest("[data-tour='url-bar']");
-          // Block send when focused on a plain input/textarea inside a dialog
+          // Block send when focused on a plain input/textarea/select inside a dialog
           if (inDialog && (tag === "input" || tag === "textarea" || tag === "select")) return;
-          // Block send when focused on a plain input that is NOT the URL bar or a CodeMirror editor
-          const isCodeMirror = !!active.closest(".cm-editor");
-          if (!isUrlBar && !isCodeMirror && (tag === "input" || tag === "textarea")) return;
         }
       }
 
