@@ -43,7 +43,7 @@ const BODY_TYPE_LABEL_KEYS: Record<BodyType, string> = {
 
 export function RequestPanel() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<Tab>("params");
+  const [activeTab, setActiveTab] = useState<Tab>("body");
   const tab = useActiveTab();
   const {
     setParams,
@@ -60,6 +60,11 @@ export function RequestPanel() {
   } = useTabStore();
 
   const pathVars = useMemo(() => tab ? extractPathVariables(tab.url) : [], [tab?.url]);
+
+  // Default to the "body" tab whenever the user opens/switches to a different request.
+  useEffect(() => {
+    setActiveTab("body");
+  }, [tab?.id]);
 
   if (!tab) return null;
 
