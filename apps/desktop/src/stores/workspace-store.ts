@@ -64,8 +64,17 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
       useCollectionStore.getState().openCollection(path).catch(() => {});
     }
 
+    // Reset stale environment state from the previous workspace before loading
+    // the new one, otherwise the environment selector keeps showing an
+    // environment name that doesn't belong to the newly active workspace.
+    const { useEnvironmentStore } = await import("@/stores/environment-store");
+    useEnvironmentStore.setState({
+      environments: [],
+      activeEnvironmentName: null,
+      activeCollectionPath: null,
+    });
+
     if (workspace.collectionPaths.length > 0) {
-      const { useEnvironmentStore } = await import("@/stores/environment-store");
       useEnvironmentStore.getState().loadEnvironments(workspace.collectionPaths[0]).catch(() => {});
     }
   },

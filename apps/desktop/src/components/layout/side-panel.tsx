@@ -5,8 +5,9 @@ import { useTabStore } from "@/stores/tab-store";
 import { CollectionTree } from "@/components/collection/collection-tree";
 import { EnvironmentSelector } from "@/components/environment/environment-selector";
 import { HistoryPanel } from "@/components/history/history-panel";
-import { FolderOpen, FolderPlus, Plus, Search, Trash2, X, Upload, FolderX, ChevronDown, ChevronRight, Folder, Globe, Pencil, Settings, Briefcase, Check } from "lucide-react";
+import { FolderOpen, FolderPlus, Plus, Search, Trash2, X, Upload, FolderX, ChevronDown, ChevronRight, Folder, Globe, Pencil, Settings, Briefcase, Check, Download } from "lucide-react";
 import { createCollection, saveEnvironment } from "@/lib/tauri-api";
+import { exportCollectionToFile } from "@/lib/export-collection";
 import { useEnvironmentStore } from "@/stores/environment-store";
 import { useSettingsStore } from "@/stores/settings-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -378,6 +379,50 @@ function CollectionsPanel({ onOpenImport }: { onOpenImport?: () => void }) {
                   <Settings className="h-3.5 w-3.5" />
                   Collection Defaults
                 </button>
+                <div className="my-1 border-t border-(--color-border)" />
+                <button
+                  onClick={() => {
+                    setCollectionMenu(null);
+                    exportCollectionToFile(collectionMenu.path, collectionMenu.name, "postman").catch((err: unknown) =>
+                      import("@/stores/toast-store").then(({ useToastStore }) =>
+                        useToastStore.getState().showError(`Export failed: ${err}`),
+                      ),
+                    );
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-(--color-text-primary) hover:bg-(--color-border)"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {t("sidebar.exportPostman", "Export as Postman")}
+                </button>
+                <button
+                  onClick={() => {
+                    setCollectionMenu(null);
+                    exportCollectionToFile(collectionMenu.path, collectionMenu.name, "openapi").catch((err: unknown) =>
+                      import("@/stores/toast-store").then(({ useToastStore }) =>
+                        useToastStore.getState().showError(`Export failed: ${err}`),
+                      ),
+                    );
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-(--color-text-primary) hover:bg-(--color-border)"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {t("sidebar.exportOpenapi", "Export as OpenAPI")}
+                </button>
+                <button
+                  onClick={() => {
+                    setCollectionMenu(null);
+                    exportCollectionToFile(collectionMenu.path, collectionMenu.name, "apiark").catch((err: unknown) =>
+                      import("@/stores/toast-store").then(({ useToastStore }) =>
+                        useToastStore.getState().showError(`Export failed: ${err}`),
+                      ),
+                    );
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-(--color-text-primary) hover:bg-(--color-border)"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {t("sidebar.exportApiark", "Export as apiark")}
+                </button>
+                <div className="my-1 border-t border-(--color-border)" />
                 <button
                   onClick={() => { removeCollection(collectionMenu.path); setCollectionMenu(null); }}
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-(--color-text-primary) hover:bg-(--color-border)"
