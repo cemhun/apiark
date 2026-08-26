@@ -10,7 +10,7 @@ import { createCollection, saveEnvironment } from "@/lib/tauri-api";
 import { exportCollectionToFile } from "@/lib/export-collection";
 import { useEnvironmentStore } from "@/stores/environment-store";
 import { useSettingsStore } from "@/stores/settings-store";
-import { useWorkspaceStore } from "@/stores/workspace-store";
+import { useWorkspaceStore, type Workspace } from "@/stores/workspace-store";
 import type { EnvironmentData, CollectionNode } from "@apiark/types";
 import * as Dialog from "@radix-ui/react-dialog";
 import type { ActivityView } from "./activity-bar";
@@ -148,14 +148,30 @@ function WorkspaceHeader() {
 
   if (!ws) return null;
 
+  const startRename = (w: Workspace) => {
+    setRenameValue(w.name);
+    setRenamingId(w.id);
+  };
+
+  const commitRename = () => {
+    if (renameValue.trim() && renamingId) renameWorkspace(renamingId, renameValue.trim());
+    setRenamingId(null);
+  };
+
   return (
     <div className="relative shrink-0 border-b border-(--color-border)">
       <button
         onClick={() => setMenuOpen((v) => !v)}
+        onDoubleClick={(e) => { e.stopPropagation(); setMenuOpen(true); startRename(ws); }}
+        title="Click to switch workspace, double-click to rename"
         className="flex h-11 w-full items-center gap-2 px-4 text-left hover:bg-(--color-elevated) transition-colors"
       >
         <Briefcase className="h-4 w-4 shrink-0 text-(--color-accent)" />
         <span className="flex-1 truncate text-sm font-semibold text-(--color-text-primary)">{ws.name}</span>
+        <Pencil
+          className="h-3 w-3 shrink-0 text-(--color-text-dimmed) hover:text-(--color-accent)"
+          onClick={(e) => { e.stopPropagation(); setMenuOpen(true); startRename(ws); }}
+        />
         <ChevronDown className="h-3.5 w-3.5 shrink-0 text-(--color-text-dimmed)" />
       </button>
 
@@ -173,9 +189,9 @@ function WorkspaceHeader() {
                     autoFocus
                     value={renameValue}
                     onChange={(e) => setRenameValue(e.target.value)}
-                    onBlur={() => { if (renameValue.trim()) renameWorkspace(w.id, renameValue.trim()); setRenamingId(null); }}
+                    onBlur={commitRename}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") { if (renameValue.trim()) renameWorkspace(w.id, renameValue.trim()); setRenamingId(null); }
+                      if (e.key === "Enter") commitRename();
                       else if (e.key === "Escape") setRenamingId(null);
                     }}
                     className="flex-1 rounded bg-(--color-surface) px-2 py-1 text-sm text-(--color-text-primary) outline-none focus:ring-1 focus:ring-(--color-accent)/50"
@@ -183,6 +199,8 @@ function WorkspaceHeader() {
                 ) : (
                   <button
                     onClick={async () => { setMenuOpen(false); await setActiveWorkspace(w.id); }}
+                    onDoubleClick={(e) => { e.stopPropagation(); startRename(w); }}
+                    title="Click to select, double-click to rename"
                     className="flex flex-1 items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-(--color-text-primary) hover:bg-(--color-border) transition-colors"
                   >
                     {w.id === activeWorkspaceId
@@ -192,15 +210,17 @@ function WorkspaceHeader() {
                   </button>
                 )}
                 <button
-                  onClick={() => { setRenameValue(w.name); setRenamingId(w.id); }}
-                  className="hidden rounded p-1 text-(--color-text-dimmed) hover:text-(--color-text-secondary) group-hover:flex"
+                  onClick={() => startRename(w)}
+                  title="Rename workspace"
+                  className="flex rounded p-1 text-(--color-text-dimmed) opacity-70 hover:opacity-100 hover:text-(--color-accent) transition-opacity"
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
                 {workspaces.length > 1 && (
                   <button
                     onClick={() => deleteWorkspace(w.id)}
-                    className="hidden rounded p-1 text-(--color-text-dimmed) hover:text-red-400 group-hover:flex"
+                    title="Delete workspace"
+                    className="flex rounded p-1 text-(--color-text-dimmed) opacity-70 hover:opacity-100 hover:text-red-400 transition-opacity"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>

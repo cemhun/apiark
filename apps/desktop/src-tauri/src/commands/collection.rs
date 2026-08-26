@@ -18,6 +18,87 @@ pub struct WorkspaceInfo {
     pub collection_paths: Vec<String>,
 }
 
+#[derive(serde::Serialize)]
+pub struct WorkspaceDirResult {
+    pub dir: String,
+    /// The persisted display name (trimmed user input, or a slug-derived
+    /// fallback if empty). The frontend should use this instead of the raw
+    /// input so it always matches what `scan_workspaces` reports after a
+    /// restart, since this exact string is what gets written to the
+    /// workspace's metadata file.
+    pub name: String,
+}
+
+/// lowercase, replace non-alphanumeric runs with '-', trim leading/trailing '-'
+fn slugify(name: &str) -> String {
+    let slug: String = name
+        .trim()
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect::<String>()
+        .trim_matches('-')
+        .to_string();
+    if slug.is_empty() {
+        "workspace".to_string()
+    } else {
+        slug
+    }
+}
+
+/// "my-workspace" → "My workspace"
+fn display_name_from_slug(slug: &str) -> String {
+    let s = slug.replace('-', " ");
+    let mut c = s.chars();
+    match c.next() {
+        None => String::new(),
+        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+    }
+}
+
+/// Find a unique folder name under `base`, skipping the collision check
+/// against `exclude` (used when renaming so the current directory doesn't
+/// count as a conflict with itself).
+fn unique_folder_name(base: &Path, slug: &str, exclude: Option<&Path>) -> String {
+    let mut folder = slug.to_string();
+    let mut suffix = 2u32;
+    loop {
+        let candidate = base.join(&folder);
+        let conflicts = candidate.exists() && exclude.map(|e| e != candidate).unwrap_or(true);
+        if !conflicts {
+            return folder;
+        }
+        folder = format!("{slug}-{suffix}");
+        suffix += 1;
+    }
+}
+
+const WORKSPACE_META_FILE: &str = ".apiark-workspace.json";
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct WorkspaceMeta {
+    /// The exact, non-slugified name the user chose for this workspace.
+    name: String,
+}
+
+/// Persist the user's exact display name alongside the (slugified) folder,
+/// so renaming/reading it back never loses casing/punctuation.
+fn write_workspace_meta(dir: &Path, name: &str) -> Result<(), String> {
+    let meta = WorkspaceMeta { name: name.to_string() };
+    let json = serde_json::to_string_pretty(&meta)
+        .map_err(|e| format!("Failed to serialize workspace metadata: {e}"))?;
+    std::fs::write(dir.join(WORKSPACE_META_FILE), json)
+        .map_err(|e| format!("Failed to write workspace metadata: {e}"))
+}
+
+/// Read the persisted display name for a workspace dir, if any.
+fn read_workspace_meta_name(dir: &Path) -> Option<String> {
+    let content = std::fs::read_to_string(dir.join(WORKSPACE_META_FILE)).ok()?;
+    serde_json::from_str::<WorkspaceMeta>(&content)
+        .ok()
+        .map(|m| m.name)
+}
+
 #[tauri::command]
 pub async fn scan_workspaces() -> Result<WorkspaceScanResult, String> {
     let home = dirs::home_dir().ok_or("Could not determine home directory")?;
@@ -74,15 +155,12 @@ pub async fn scan_workspaces() -> Result<WorkspaceScanResult, String> {
 
         collection_paths.sort();
 
-        // "my-workspace" → "My workspace"
-        let display_name = {
-            let s = ws_name.replace('-', " ");
-            let mut c = s.chars();
-            match c.next() {
-                None => String::new(),
-                Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
-            }
-        };
+        // Prefer the exact name persisted in the metadata file (survives
+        // casing/punctuation that slugification would otherwise lose).
+        // Fall back to deriving a display name from the folder itself for
+        // legacy workspaces created before the metadata file existed.
+        let display_name =
+            read_workspace_meta_name(&ws_dir).unwrap_or_else(|| display_name_from_slug(ws_name));
 
         workspaces.push(WorkspaceInfo {
             name: display_name,
@@ -95,60 +173,63 @@ pub async fn scan_workspaces() -> Result<WorkspaceScanResult, String> {
 }
 
 #[tauri::command]
-pub async fn create_workspace(name: String) -> Result<String, String> {
+pub async fn create_workspace(name: String) -> Result<WorkspaceDirResult, String> {
     let home = dirs::home_dir().ok_or("Could not determine home directory")?;
     let base = home.join("ApiArk");
     std::fs::create_dir_all(&base).map_err(|e| format!("Failed to create ApiArk dir: {e}"))?;
 
-    // slugify: lowercase, replace non-alphanum with '-', trim dashes
-    let slug: String = name
-        .trim()
-        .to_lowercase()
-        .chars()
-        .map(|c| if c.is_alphanumeric() { c } else { '-' })
-        .collect::<String>()
-        .trim_matches('-')
-        .to_string();
-    let slug = if slug.is_empty() { "workspace".to_string() } else { slug };
-
-    // Find a unique folder name
-    let mut folder = slug.clone();
-    let mut suffix = 2u32;
-    while base.join(&folder).exists() {
-        folder = format!("{slug}-{suffix}");
-        suffix += 1;
-    }
+    let slug = slugify(&name);
+    let folder = unique_folder_name(&base, &slug, None);
 
     let dir = base.join(&folder);
     std::fs::create_dir_all(&dir).map_err(|e| format!("Failed to create workspace dir: {e}"))?;
 
-    Ok(dir.to_string_lossy().into_owned())
+    let display_name = {
+        let trimmed = name.trim();
+        if trimmed.is_empty() {
+            display_name_from_slug(&folder)
+        } else {
+            trimmed.to_string()
+        }
+    };
+    write_workspace_meta(&dir, &display_name)?;
+
+    Ok(WorkspaceDirResult {
+        dir: dir.to_string_lossy().into_owned(),
+        name: display_name,
+    })
 }
 
 #[tauri::command]
-pub async fn rename_workspace(old_dir: String, new_name: String) -> Result<String, String> {
+pub async fn rename_workspace(old_dir: String, new_name: String) -> Result<WorkspaceDirResult, String> {
     let old_path = std::path::Path::new(&old_dir);
     let parent = old_path
         .parent()
         .ok_or("Could not determine parent directory")?;
 
-    let slug: String = new_name
-        .trim()
-        .to_lowercase()
-        .chars()
-        .map(|c| if c.is_alphanumeric() { c } else { '-' })
-        .collect::<String>()
-        .trim_matches('-')
-        .to_string();
-    let slug = if slug.is_empty() { "workspace".to_string() } else { slug };
+    let slug = slugify(&new_name);
+    let folder = unique_folder_name(parent, &slug, Some(old_path));
+    let new_path = parent.join(&folder);
 
-    let new_path = parent.join(&slug);
     if new_path != old_path {
         std::fs::rename(&old_path, &new_path)
             .map_err(|e| format!("Failed to rename workspace: {e}"))?;
     }
 
-    Ok(new_path.to_string_lossy().into_owned())
+    let display_name = {
+        let trimmed = new_name.trim();
+        if trimmed.is_empty() {
+            display_name_from_slug(&folder)
+        } else {
+            trimmed.to_string()
+        }
+    };
+    write_workspace_meta(&new_path, &display_name)?;
+
+    Ok(WorkspaceDirResult {
+        dir: new_path.to_string_lossy().into_owned(),
+        name: display_name,
+    })
 }
 
 #[tauri::command]

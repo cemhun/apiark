@@ -81,9 +81,9 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
 
   createWorkspace: async (name: string) => {
     const { createWorkspaceDir } = await import("@/lib/tauri-api");
-    const dir = await createWorkspaceDir(name);
+    const { dir, name: canonicalName } = await createWorkspaceDir(name);
 
-    const workspace: Workspace = { id: dir, name, dir, collectionPaths: [] };
+    const workspace: Workspace = { id: dir, name: canonicalName, dir, collectionPaths: [] };
     set((s) => ({ workspaces: [...s.workspaces, workspace] }));
     return workspace;
   },
@@ -102,7 +102,7 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
     if (!ws) return;
 
     const { renameWorkspaceDir } = await import("@/lib/tauri-api");
-    const newDir = await renameWorkspaceDir(ws.dir, newName);
+    const { dir: newDir, name: canonicalName } = await renameWorkspaceDir(ws.dir, newName);
 
     // Update all collection paths inside it
     const updatedCollectionPaths = ws.collectionPaths.map((p) =>
@@ -112,10 +112,11 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
     const updatedWs: Workspace = {
       ...ws,
       id: newDir,
-      name: newName,
+      name: canonicalName,
       dir: newDir,
       collectionPaths: updatedCollectionPaths,
     };
+
 
     const newActiveId = get().activeWorkspaceId === id ? newDir : get().activeWorkspaceId;
     set((s) => ({

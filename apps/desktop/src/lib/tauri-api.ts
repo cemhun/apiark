@@ -594,12 +594,18 @@ export async function createCollection(parentDir: string, name: string): Promise
   return await invoke<string>("create_collection", { parentDir, name });
 }
 
-export async function createWorkspaceDir(name: string): Promise<string> {
-  return await invoke<string>("create_workspace", { name });
+export interface WorkspaceDirResult {
+  dir: string;
+  /** Canonical display name derived from the folder name on disk. */
+  name: string;
 }
 
-export async function renameWorkspaceDir(oldDir: string, newName: string): Promise<string> {
-  return await invoke<string>("rename_workspace", { oldDir, newName });
+export async function createWorkspaceDir(name: string): Promise<WorkspaceDirResult> {
+  return await invoke<WorkspaceDirResult>("create_workspace", { name });
+}
+
+export async function renameWorkspaceDir(oldDir: string, newName: string): Promise<WorkspaceDirResult> {
+  return await invoke<WorkspaceDirResult>("rename_workspace", { oldDir, newName });
 }
 
 // ── Settings ──
