@@ -224,6 +224,23 @@ function App() {
         }
       }
 
+      // Undo/redo: when focus is inside a code editor (Monaco) or a plain text
+      // input/textarea/contenteditable, let the native editor handle undo/redo
+      // itself instead of triggering tab-level undo/redo. Otherwise, typing in
+      // the body editor and pressing Cmd/Ctrl+Z would both undo the editor's
+      // own text AND pop the tab-level history stack, producing incorrect
+      // results (or blocking the editor's undo entirely since we still call
+      // preventDefault below).
+      if (action === "undo" || action === "redo") {
+        const active = document.activeElement as HTMLElement | null;
+        if (active) {
+          const tag = active.tagName.toLowerCase();
+          const inEditor = !!active.closest(".monaco-editor");
+          const isEditable = tag === "input" || tag === "textarea" || active.isContentEditable;
+          if (inEditor || isEditable) return;
+        }
+      }
+
       e.preventDefault();
 
       switch (action) {
