@@ -8,8 +8,18 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Testing", "Other"],
-  "keywords": ["api", "rest", "http", "graphql", "grpc", "testing"],
+  "categories": [
+    "Testing",
+    "Other"
+  ],
+  "keywords": [
+    "api",
+    "rest",
+    "http",
+    "graphql",
+    "grpc",
+    "testing"
+  ],
   "activationEvents": [
     "workspaceContains:**/.apiark/apiark.yaml"
   ],
@@ -54,8 +64,12 @@
     "languages": [
       {
         "id": "apiark-yaml",
-        "aliases": ["ApiArk Request"],
-        "filenamePatterns": ["*.yaml"],
+        "aliases": [
+          "ApiArk Request"
+        ],
+        "filenamePatterns": [
+          "*.yaml"
+        ],
         "configuration": "./language-configuration.json"
       }
     ]
@@ -66,7 +80,7 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
-    "typescript": "^5.3.0"
+    "@types/vscode": "^1.134.0",
+    "typescript": "^5.9.3"
   }
 }

@@ -11,23 +11,23 @@
     "clean": "rm -rf .next out"
   },
   "dependencies": {
-    "@remotion/cli": "^4.0.0",
-    "@remotion/player": "^4.0.0",
+    "@remotion/cli": "^4.0.520",
+    "@remotion/player": "^4.0.520",
     "chart.js": "^4.5.1",
-    "framer-motion": "^12.0.0",
+    "framer-motion": "^12.43.0",
     "lucide-react": "^0.469.0",
-    "next": "^15.3.0",
-    "react": "^19.0.0",
+    "next": "^15.5.25",
+    "react": "^19.2.8",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^19.0.0",
-    "remotion": "^4.0.0"
+    "react-dom": "^19.2.8",
+    "remotion": "^4.0.520"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.0",
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.20.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "tailwindcss": "^4.3.3",
     "typescript": "5.9.3"
   }
 }
