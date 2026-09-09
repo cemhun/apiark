@@ -610,6 +610,17 @@ mod interpolation {
     }
 
     #[test]
+    fn test_dynamic_random_number() {
+        let vars = HashMap::new();
+        let result = interpolate("n={{$randomNumber}}", &vars);
+        let n_str = &result[2..];
+        assert_eq!(n_str.len(), 8);
+        let n: u32 = n_str.parse().expect("Not a valid number");
+        assert!((10_000_000..=99_999_999).contains(&n));
+        println!("  Dynamic {{{{$randomNumber}}}}: {}", n);
+    }
+
+    #[test]
     fn test_dynamic_random_email() {
         let vars = HashMap::new();
         let result = interpolate("e={{$randomEmail}}", &vars);

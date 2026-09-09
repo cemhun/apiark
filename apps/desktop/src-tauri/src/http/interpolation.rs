@@ -50,6 +50,12 @@ fn resolve_dynamic(name: &str) -> Option<String> {
             let val: f64 = rand::random();
             Some(format!("{:.6}", val))
         }
+        "$randomNumber" => {
+            use rand::Rng;
+            let mut rng = rand::rng();
+            let val: u32 = rng.random_range(10_000_000..=99_999_999);
+            Some(val.to_string())
+        }
         "$randomString" => {
             use rand::Rng;
             let mut rng = rand::rng();
@@ -116,5 +122,15 @@ mod tests {
         let result = interpolate("{{$uuid}}", &vars);
         assert_ne!(result, "{{$uuid}}");
         assert_eq!(result.len(), 36); // UUID v4 format
+    }
+
+    #[test]
+    fn test_dynamic_random_number() {
+        let vars = HashMap::new();
+        let result = interpolate("{{$randomNumber}}", &vars);
+        assert_ne!(result, "{{$randomNumber}}");
+        assert_eq!(result.len(), 8);
+        let n: u32 = result.parse().expect("should be a number");
+        assert!((10_000_000..=99_999_999).contains(&n));
     }
 }

@@ -31,6 +31,12 @@ fn resolve_dynamic(name: &str) -> Option<String> {
             let val: f64 = rand::random();
             Some(format!("{:.6}", val))
         }
+        "$randomNumber" => {
+            use rand::Rng;
+            let mut rng = rand::thread_rng();
+            let val: u32 = rng.gen_range(10_000_000..=99_999_999);
+            Some(val.to_string())
+        }
         "$randomString" => {
             use rand::Rng;
             let mut rng = rand::thread_rng();

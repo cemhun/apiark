@@ -321,6 +321,7 @@ Variables using `{{$name}}` syntax are resolved at send time:
 | `{{$isoTimestamp}}` | ISO 8601 timestamp |
 | `{{$randomInt}}` | Random integer 0-1000 |
 | `{{$randomFloat}}` | Random float 0-1 |
+| `{{$randomNumber}}` | Random 8-digit number |
 | `{{$randomString}}` | Random 16-char alphanumeric |
 | `{{$randomEmail}}` | Random email address |
 
