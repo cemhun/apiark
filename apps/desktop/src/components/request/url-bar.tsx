@@ -7,6 +7,9 @@ import { Loader2, Send, AlertCircle, Check } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 import { HintTooltip } from "@/components/ui/hint-tooltip";
 import { saveEnvironment } from "@/lib/tauri-api";
+import { useVariableSuggestions } from "@/lib/variables";
+import { useVariableAutocomplete } from "@/hooks/use-variable-autocomplete";
+import { VariableSuggestionList } from "@/components/ui/variable-suggestion-list";
 
 const METHODS: HttpMethod[] = [
   "GET",
@@ -242,6 +245,23 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
 
   const activeEnvName = useEnvironmentStore((s) => s.activeEnvironmentName);
 
+  // Autocomplete for `{{` variable references while typing the URL.
+  const variableSuggestions = useVariableSuggestions();
+  const {
+    isOpen: suggestOpen,
+    filtered: suggestFiltered,
+    highlightIndex: suggestHighlight,
+    setHighlightIndex: setSuggestHighlight,
+    handleValueChange: handleUrlAutocompleteChange,
+    handleKeyDown: handleSuggestKeyDown,
+    select: selectSuggestion,
+  } = useVariableAutocomplete({
+    value: tab?.url ?? "",
+    onChange: setUrl,
+    suggestions: variableSuggestions,
+    inputRef,
+  });
+
   // Resolve variables eagerly
   useEffect(() => {
     if (variableRefs.length === 0) {
@@ -297,6 +317,7 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
   if (!tab) return null;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (handleSuggestKeyDown(e)) return;
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       send();
     }
@@ -344,7 +365,9 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
           ref={setRefs}
           type="text"
           value={tab.url}
-          onChange={(e) => setUrl(e.target.value)}
+          onChange={(e) =>
+            handleUrlAutocompleteChange(e.target.value, e.target.selectionStart ?? e.target.value.length)
+          }
           onKeyDown={handleKeyDown}
           onFocus={() => setInputFocused(true)}
           onBlur={() => setInputFocused(false)}
@@ -356,6 +379,14 @@ export const UrlBar = forwardRef<HTMLInputElement, UrlBarProps>(function UrlBar(
               : "text-(--color-text-primary)"
           } placeholder-(--color-text-dimmed)`}
         />
+        {suggestOpen && (
+          <VariableSuggestionList
+            suggestions={suggestFiltered}
+            highlightIndex={suggestHighlight}
+            onHighlight={setSuggestHighlight}
+            onSelect={selectSuggestion}
+          />
+        )}
         {/* Colored overlay — visible when input is NOT focused and URL has variables */}
         {hasVariablesInUrl && !inputFocused && (
           <div

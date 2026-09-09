@@ -1,5 +1,6 @@
 import type { KeyValuePair } from "@apiark/types";
 import { Plus, Trash2 } from "lucide-react";
+import { VariableAutocompleteInput } from "@/components/ui/variable-autocomplete-input";
 
 let kvCounter = 0;
 const kvId = () => `kv_${Date.now()}_${++kvCounter}`;
@@ -65,12 +66,11 @@ export function KeyValueEditor({
             placeholder={keyPlaceholder}
             className="rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
           />
-          <input
-            type="text"
+          <VariableAutocompleteInput
             value={pair.value}
-            onChange={(e) => update(index, "value", e.target.value)}
+            onChange={(v) => update(index, "value", v)}
             placeholder={valuePlaceholder}
-            className="rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             onClick={() => removeRow(index)}

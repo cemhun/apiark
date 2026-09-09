@@ -3,6 +3,7 @@ import Editor, { type OnMount, loader } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
 import { useResolvedTheme } from "@/hooks/use-theme";
 import { useSettingsStore } from "@/stores/settings-store";
+import { getAllVariableSuggestions } from "@/lib/variables";
 
 // Configure Monaco to use the local monaco-editor package instead of fetching from CDN.
 // Workers are created via blob URLs automatically by Monaco in Vite 8+.
@@ -149,6 +150,70 @@ function registerGraphQL(monaco: typeof Monaco) {
 // Pre-register GraphQL language since Monaco doesn't include it by default.
 registerGraphQL(monacoEditor);
 
+let variableCompletionsRegistered = false;
+
+/** Languages that may contain `{{variable}}` interpolation in request fields. */
+const VARIABLE_COMPLETION_LANGUAGES = [
+  "json",
+  "xml",
+  "plaintext",
+  "graphql",
+  "javascript",
+  "typescript",
+  "yaml",
+];
+
+function registerVariableCompletions(monaco: typeof Monaco) {
+  if (variableCompletionsRegistered) return;
+  variableCompletionsRegistered = true;
+
+  for (const lang of VARIABLE_COMPLETION_LANGUAGES) {
+    monaco.languages.registerCompletionItemProvider(lang, {
+      triggerCharacters: ["{"],
+      provideCompletionItems: async (model, position) => {
+        const textUntilPosition = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+        const match = textUntilPosition.match(/\{\{([^{}]*)$/);
+        if (!match) return { suggestions: [] };
+
+        const query = match[1];
+        const startColumn = position.column - query.length;
+        const range = new monaco.Range(
+          position.lineNumber,
+          startColumn,
+          position.lineNumber,
+          position.column,
+        );
+
+        const lineContent = model.getLineContent(position.lineNumber);
+        const alreadyClosed = lineContent.slice(position.column - 1).startsWith("}}");
+
+        const items = await getAllVariableSuggestions();
+        const q = query.toLowerCase();
+        const suggestions: Monaco.languages.CompletionItem[] = items
+          .filter((v) => !q || v.name.toLowerCase().includes(q))
+          .map((v, idx) => ({
+            label: v.name,
+            kind:
+              v.kind === "dynamic"
+                ? monaco.languages.CompletionItemKind.Function
+                : monaco.languages.CompletionItemKind.Variable,
+            detail: v.description,
+            insertText: alreadyClosed ? v.name : `${v.name}}}`,
+            range,
+            sortText: String(idx).padStart(4, "0"),
+          }));
+
+        return { suggestions };
+      },
+    });
+  }
+}
+
 function getMonacoTheme(resolved: "light" | "dark" | "black"): string {
   switch (resolved) {
     case "light": return "apiark-light";
@@ -196,6 +261,7 @@ export function CodeEditor({
     monacoRef.current = monaco;
     registerGraphQL(monaco);
     registerThemes(monaco);
+    registerVariableCompletions(monaco);
     monaco.editor.setTheme(monacoTheme);
     setContentLeft(editor.getLayoutInfo().contentLeft);
     editor.onDidLayoutChange((layout) => {
