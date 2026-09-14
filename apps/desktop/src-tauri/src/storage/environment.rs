@@ -96,10 +96,20 @@ pub fn load_dotenv_secrets(collection_path: &Path) -> HashMap<String, String> {
     parse_dotenv(&env_path)
 }
 
-/// Resolve all variables for a given environment, merging:
-/// 1. Root .env variables (lowest priority)
-/// 2. Environment YAML variables
-/// 3. .apiark/.env secrets (declared in environment's secrets list) (highest priority)
+/// Load collection-scoped variables from `.apiark/apiark.yaml` (`defaults.variables`).
+/// Returns an empty map if the collection config can't be read (e.g. not a
+/// valid collection yet, or the file is missing).
+pub fn load_collection_variables(collection_path: &Path) -> HashMap<String, String> {
+    crate::storage::collection::load_collection_config(collection_path)
+        .map(|config| config.defaults.variables)
+        .unwrap_or_default()
+}
+
+/// Resolve all variables for a given environment, merging (lowest to highest priority):
+/// 1. Collection-scoped variables (`.apiark/apiark.yaml` -> `defaults.variables`)
+/// 2. Root .env variables
+/// 3. Environment YAML variables
+/// 4. .apiark/.env secrets (declared in environment's secrets list) (highest priority)
 pub fn get_resolved_variables(
     collection_path: &Path,
     environment_name: &str,
@@ -110,8 +120,11 @@ pub fn get_resolved_variables(
         .find(|e| e.name == environment_name)
         .ok_or_else(|| format!("Environment '{}' not found", environment_name))?;
 
-    // Start with root .env (lowest priority)
-    let mut variables = load_root_dotenv(collection_path);
+    // Start with collection-scoped variables (lowest priority)
+    let mut variables = load_collection_variables(collection_path);
+
+    // Override with root .env
+    variables.extend(load_root_dotenv(collection_path));
 
     // Override with environment YAML variables
     variables.extend(env.variables.clone());
@@ -157,3 +170,52 @@ pub fn save_environment(collection_path: &Path, env: &EnvironmentFile) -> Result
         format!("Failed to rename temp file: {e}")
     })
 }
+
+/// Load the persisted `ark.globals` store from `.apiark/globals.local.yaml`.
+/// This file is personal/local (gitignored) — it's a script-writable scratch
+/// space that survives app restarts, separate from committed collection
+/// variables (which are read-only from scripts).
+pub fn load_globals(collection_path: &Path) -> HashMap<String, String> {
+    let path = collection_path
+        .join(".apiark")
+        .join("globals.local.yaml");
+    let content = match fs::read_to_string(&path) {
+        Ok(c) => c,
+        Err(_) => return HashMap::new(),
+    };
+    serde_yaml::from_str(&content).unwrap_or_default()
+}
+
+/// Save the `ark.globals` store to `.apiark/globals.local.yaml` (atomic write).
+pub fn save_globals(
+    collection_path: &Path,
+    globals: &HashMap<String, String>,
+) -> Result<(), String> {
+    let apiark_dir = collection_path.join(".apiark");
+    fs::create_dir_all(&apiark_dir).map_err(|e| format!("Failed to create .apiark dir: {e}"))?;
+
+    // Ensure the file is gitignored, since it's script-mutated local state.
+    let gitignore = apiark_dir.join(".gitignore");
+    let gitignore_entry = "globals.local.yaml\n";
+    match fs::read_to_string(&gitignore) {
+        Ok(existing) if existing.contains("globals.local.yaml") => {}
+        Ok(existing) => {
+            let _ = fs::write(&gitignore, format!("{existing}{gitignore_entry}"));
+        }
+        Err(_) => {
+            let _ = fs::write(&gitignore, gitignore_entry);
+        }
+    }
+
+    let path = apiark_dir.join("globals.local.yaml");
+    let yaml =
+        serde_yaml::to_string(globals).map_err(|e| format!("Failed to serialize globals: {e}"))?;
+
+    let tmp_path = path.with_extension("apiark.tmp");
+    fs::write(&tmp_path, &yaml).map_err(|e| format!("Failed to write temp file: {e}"))?;
+    fs::rename(&tmp_path, &path).map_err(|e| {
+        let _ = fs::remove_file(&tmp_path);
+        format!("Failed to rename temp file: {e}")
+    })
+}
+

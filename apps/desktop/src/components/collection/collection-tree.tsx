@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import type { CollectionNode, CollectionDefaults, HttpMethod } from "@apiark/types";
+import type { CollectionNode, CollectionDefaults, HttpMethod, KeyValuePair } from "@apiark/types";
 import { useCollectionStore } from "@/stores/collection-store";
 import { useTabStore } from "@/stores/tab-store";
 import { useMockStore } from "@/stores/mock-store";
 import { useDocsStore } from "@/stores/docs-store";
+import { useEnvironmentStore } from "@/stores/environment-store";
+import { KeyValueEditor } from "@/components/request/key-value-editor";
 import {
   ChevronRight,
   ChevronDown,
@@ -873,6 +875,27 @@ function TreeNodeRow({
 
 // ── Cookie Settings Dialog ──
 
+let collectionVarCounter = 0;
+const collectionVarId = () => `cvar_${Date.now()}_${++collectionVarCounter}`;
+
+function variablesToPairs(variables: Record<string, string>): KeyValuePair[] {
+  const pairs = Object.entries(variables).map(([key, value]) => ({
+    id: collectionVarId(),
+    key,
+    value,
+    enabled: true,
+  }));
+  return pairs.length > 0 ? pairs : [{ id: collectionVarId(), key: "", value: "", enabled: true }];
+}
+
+function pairsToVariables(pairs: KeyValuePair[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const p of pairs) {
+    if (p.key.trim()) result[p.key.trim()] = p.value;
+  }
+  return result;
+}
+
 function CookieSettingsDialog({
   collectionPath,
   onClose,
@@ -883,10 +906,16 @@ function CookieSettingsDialog({
   const { t } = useTranslation();
   const [defaults, setDefaults] = useState<CollectionDefaults | null>(null);
   const [loading, setLoading] = useState(true);
+  const [variablePairs, setVariablePairs] = useState<KeyValuePair[]>([]);
+  const reloadCollectionVariables = useEnvironmentStore((s) => s.reloadCollectionVariables);
 
   useEffect(() => {
     getCollectionDefaults(collectionPath)
-      .then((d) => { setDefaults(d); setLoading(false); })
+      .then((d) => {
+        setDefaults(d);
+        setVariablePairs(variablesToPairs(d.variables ?? {}));
+        setLoading(false);
+      })
       .catch((e) => {
         import("@/stores/toast-store").then(({ useToastStore }) =>
           useToastStore.getState().showError(`Failed to load collection defaults: ${e}`),
@@ -908,11 +937,27 @@ function CookieSettingsDialog({
     }
   };
 
+  const saveVariables = async (pairs: KeyValuePair[]) => {
+    setVariablePairs(pairs);
+    if (!defaults) return;
+    const variables = pairsToVariables(pairs);
+    const updated = { ...defaults, variables };
+    setDefaults(updated);
+    try {
+      await updateCollectionDefaults(collectionPath, updated);
+      await reloadCollectionVariables(collectionPath);
+    } catch (e) {
+      import("@/stores/toast-store").then(({ useToastStore }) =>
+        useToastStore.getState().showError(`Failed to save collection variables: ${e}`),
+      );
+    }
+  };
+
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-95 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[30rem] max-w-[92vw] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-(--color-border) bg-(--color-surface) shadow-xl focus:outline-none">
           <div className="flex items-center justify-between border-b border-(--color-border) px-5 py-3">
             <Dialog.Title className="text-sm font-semibold text-(--color-text-primary)">
               {t("sidebar.cookieSettings")}
@@ -921,29 +966,53 @@ function CookieSettingsDialog({
               <X className="h-4 w-4" />
             </Dialog.Close>
           </div>
-          <div className="space-y-3 p-5">
+          <div className="max-h-[70vh] space-y-5 overflow-y-auto p-5">
             {loading ? (
               <p className="text-sm text-(--color-text-muted)">{t("common.loading")}</p>
             ) : defaults ? (
               <>
-                <ToggleRow
-                  label={t("cookies.sendCookies")}
-                  description={t("cookies.sendCookiesDesc")}
-                  checked={defaults.sendCookies}
-                  onChange={(v) => toggle("sendCookies", v)}
-                />
-                <ToggleRow
-                  label={t("cookies.storeCookies")}
-                  description={t("cookies.storeCookiesDesc")}
-                  checked={defaults.storeCookies}
-                  onChange={(v) => toggle("storeCookies", v)}
-                />
-                <ToggleRow
-                  label={t("cookies.persistCookies")}
-                  description={t("cookies.persistCookiesDesc")}
-                  checked={defaults.persistCookies}
-                  onChange={(v) => toggle("persistCookies", v)}
-                />
+                <div className="space-y-3">
+                  <ToggleRow
+                    label={t("cookies.sendCookies")}
+                    description={t("cookies.sendCookiesDesc")}
+                    checked={defaults.sendCookies}
+                    onChange={(v) => toggle("sendCookies", v)}
+                  />
+                  <ToggleRow
+                    label={t("cookies.storeCookies")}
+                    description={t("cookies.storeCookiesDesc")}
+                    checked={defaults.storeCookies}
+                    onChange={(v) => toggle("storeCookies", v)}
+                  />
+                  <ToggleRow
+                    label={t("cookies.persistCookies")}
+                    description={t("cookies.persistCookiesDesc")}
+                    checked={defaults.persistCookies}
+                    onChange={(v) => toggle("persistCookies", v)}
+                  />
+                </div>
+
+                <div className="border-t border-(--color-border) pt-4">
+                  <div className="mb-1 text-sm font-medium text-(--color-text-primary)">
+                    Collection Variables
+                  </div>
+                  <p className="mb-2 text-xs text-(--color-text-muted)">
+                    Shared <code className="rounded bg-(--color-elevated) px-1">{"{{variable}}"}</code> values
+                    available to every request and environment in this collection. Lowest priority — overridden
+                    by the root <code className="rounded bg-(--color-elevated) px-1">.env</code>, the active
+                    environment, and secrets. Read with{" "}
+                    <code className="rounded bg-(--color-elevated) px-1">ark.env.get(key)</code> or{" "}
+                    <code className="rounded bg-(--color-elevated) px-1">ark.collectionVariables.get(key)</code>{" "}
+                    in Scripts &amp; Tests; write with{" "}
+                    <code className="rounded bg-(--color-elevated) px-1">ark.collectionVariables.set(key, value)</code>.
+                  </p>
+                  <KeyValueEditor
+                    pairs={variablePairs}
+                    onChange={saveVariables}
+                    keyPlaceholder="Variable"
+                    valuePlaceholder="Value"
+                  />
+                </div>
               </>
             ) : (
               <p className="text-sm text-(--color-text-muted)">Failed to load settings.</p>

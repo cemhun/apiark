@@ -7,6 +7,7 @@ var __mutations = {
   env: {},
   globals: {},
   variables: {},
+  collectionVariables: {},
   tests: [],
   console: [],
   request: {
@@ -219,6 +220,7 @@ var ark = {
   env: __makeStore(__ctx.env, __mutations.env),
   globals: __makeStore(__ctx.globals, __mutations.globals),
   variables: __makeStore(__ctx.variables, __mutations.variables),
+  collectionVariables: __makeStore(__ctx.collectionVariables, __mutations.collectionVariables),
   test: function(name, fn) {
     try {
       fn();

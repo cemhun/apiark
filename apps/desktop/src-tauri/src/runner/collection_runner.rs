@@ -393,6 +393,7 @@ async fn run_single_request(
                 env: vars.clone(),
                 globals: HashMap::new(),
                 variables: HashMap::new(),
+                collection_variables: defaults.variables.clone(),
             };
             match execute_script(script, ctx, ScriptPhase::PostResponse) {
                 Ok(result) => {
@@ -438,6 +439,7 @@ async fn run_single_request(
                 env: vars.clone(),
                 globals: HashMap::new(),
                 variables: HashMap::new(),
+                collection_variables: defaults.variables.clone(),
             };
             match execute_script(script, ctx, ScriptPhase::PostResponse) {
                 Ok(result) => {

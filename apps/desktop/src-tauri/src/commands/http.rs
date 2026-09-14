@@ -50,6 +50,13 @@ pub struct ScriptedResponseData {
     pub assertion_results: Vec<AssertionResult>,
     pub console_output: Vec<ConsoleEntry>,
     pub env_mutations: HashMap<String, Option<String>>,
+    /// Changes made via `ark.globals.set()/.unset()`, persisted to `.apiark/globals.local.yaml`.
+    #[serde(default)]
+    pub global_mutations: HashMap<String, Option<String>>,
+    /// Changes made via `ark.collectionVariables.set()/.unset()`, persisted to
+    /// the collection's `defaults.variables` in `.apiark/apiark.yaml`.
+    #[serde(default)]
+    pub collection_variable_mutations: HashMap<String, Option<String>>,
 }
 
 #[tauri::command]
@@ -180,6 +187,8 @@ pub async fn send_request_with_scripts(
     plugin_manager: State<'_, PluginManager>,
     params: SendRequestParams,
     variables: Option<HashMap<String, String>>,
+    globals: Option<HashMap<String, String>>,
+    collection_variables: Option<HashMap<String, String>>,
     collection_path: Option<String>,
     request_name: Option<String>,
     pre_request_script: Option<String>,
@@ -188,6 +197,8 @@ pub async fn send_request_with_scripts(
     assertions_yaml: Option<String>,
 ) -> Result<ScriptedResponseData, String> {
     let mut vars = variables.unwrap_or_default();
+    let mut globals = globals.unwrap_or_default();
+    let mut collection_vars = collection_variables.unwrap_or_default();
     let mut interpolated = interpolate_params(&params, &vars);
     resolve_oauth_token(&mut interpolated, &oauth_store)?;
 
@@ -208,6 +219,8 @@ pub async fn send_request_with_scripts(
 
     let mut all_console: Vec<ConsoleEntry> = Vec::new();
     let mut all_tests: Vec<TestResult> = Vec::new();
+    let mut global_mutations: HashMap<String, Option<String>> = HashMap::new();
+    let mut collection_variable_mutations: HashMap<String, Option<String>> = HashMap::new();
 
     // 1. Execute pre-request script (if any)
     if let Some(ref script) = pre_request_script {
@@ -217,8 +230,9 @@ pub async fn send_request_with_scripts(
                 request: snapshot,
                 response: None,
                 env: vars.clone(),
-                globals: HashMap::new(),
+                globals: globals.clone(),
                 variables: HashMap::new(),
+                collection_variables: collection_vars.clone(),
             };
 
             let result = execute_script(script, ctx, ScriptPhase::PreRequest)
@@ -250,8 +264,12 @@ pub async fn send_request_with_scripts(
                 }
             }
 
-            // Apply env mutations
+            // Apply env/global/collection-variable mutations
             apply_env_mutations(&mut vars, &result.env_mutations);
+            apply_env_mutations(&mut globals, &result.global_mutations);
+            apply_env_mutations(&mut collection_vars, &result.collection_variable_mutations);
+            global_mutations.extend(result.global_mutations);
+            collection_variable_mutations.extend(result.collection_variable_mutations);
             all_console.extend(result.console_output);
             all_tests.extend(result.test_results);
         }
@@ -297,7 +315,7 @@ pub async fn send_request_with_scripts(
     // Build response snapshot for scripts
     let resp_snapshot = response_snapshot_from_data(&response);
 
-    // Collect env mutations from all post-response scripts
+    // Collect env mutations from all post-response scripts (global_mutations declared earlier, also used by the pre-request script above)
     let mut env_mutations: HashMap<String, Option<String>> = HashMap::new();
 
     // 3. Execute post-response script (if any)
@@ -308,14 +326,19 @@ pub async fn send_request_with_scripts(
                 request: snapshot,
                 response: Some(resp_snapshot.clone()),
                 env: vars.clone(),
-                globals: HashMap::new(),
+                globals: globals.clone(),
                 variables: HashMap::new(),
+                collection_variables: collection_vars.clone(),
             };
 
             match execute_script(script, ctx, ScriptPhase::PostResponse) {
                 Ok(result) => {
                     apply_env_mutations(&mut vars, &result.env_mutations);
+                    apply_env_mutations(&mut globals, &result.global_mutations);
+                    apply_env_mutations(&mut collection_vars, &result.collection_variable_mutations);
                     env_mutations.extend(result.env_mutations);
+                    global_mutations.extend(result.global_mutations);
+                    collection_variable_mutations.extend(result.collection_variable_mutations);
                     all_console.extend(result.console_output);
                     all_tests.extend(result.test_results);
                 }
@@ -364,14 +387,19 @@ pub async fn send_request_with_scripts(
                 request: snapshot,
                 response: Some(resp_snapshot.clone()),
                 env: vars.clone(),
-                globals: HashMap::new(),
+                globals: globals.clone(),
                 variables: HashMap::new(),
+                collection_variables: collection_vars.clone(),
             };
 
             match execute_script(script, ctx, ScriptPhase::PostResponse) {
                 Ok(result) => {
                     apply_env_mutations(&mut vars, &result.env_mutations);
+                    apply_env_mutations(&mut globals, &result.global_mutations);
+                    apply_env_mutations(&mut collection_vars, &result.collection_variable_mutations);
                     env_mutations.extend(result.env_mutations);
+                    global_mutations.extend(result.global_mutations);
+                    collection_variable_mutations.extend(result.collection_variable_mutations);
                     all_console.extend(result.console_output);
                     all_tests.extend(result.test_results);
                 }
@@ -400,6 +428,8 @@ pub async fn send_request_with_scripts(
         assertion_results,
         console_output: all_console,
         env_mutations,
+        global_mutations,
+        collection_variable_mutations,
     })
 }
 

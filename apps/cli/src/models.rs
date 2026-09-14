@@ -142,10 +142,24 @@ pub struct CollectionConfig {
     pub name: String,
     #[serde(default = "default_version")]
     pub version: u32,
+    #[serde(default)]
+    pub defaults: CollectionDefaults,
 }
 
 fn default_version() -> u32 {
     1
+}
+
+/// Collection-scoped settings from `.apiark/apiark.yaml` -> `defaults`.
+/// Only the fields the CLI actually needs are modeled here; unrecognized
+/// sibling fields written by the desktop app (e.g. `auth`, `sendCookies`)
+/// are simply ignored on deserialize.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CollectionDefaults {
+    /// Collection-scoped `{{variable}}` values, lowest priority when resolving variables.
+    #[serde(default)]
+    pub variables: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

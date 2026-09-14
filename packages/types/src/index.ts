@@ -200,6 +200,13 @@ export interface CollectionDefaults {
   sendCookies: boolean;
   storeCookies: boolean;
   persistCookies: boolean;
+  /**
+   * Collection-scoped `{{variable}}` values, shared by every request in this
+   * collection regardless of the active environment. Lowest-priority layer
+   * when resolving variables — overridden by the root `.env` file, the
+   * active environment's variables, and finally by secrets.
+   */
+  variables: Record<string, string>;
 }
 
 // ── Migration ──
@@ -237,6 +244,10 @@ export interface ScriptedResponseData extends ResponseData {
   assertionResults: AssertionResult[];
   consoleOutput: ConsoleEntry[];
   envMutations: Record<string, string | null>;
+  /** Changes made via `ark.globals.set()/.unset()`, persisted to `.apiark/globals.local.yaml`. */
+  globalMutations: Record<string, string | null>;
+  /** Changes made via `ark.collectionVariables.set()/.unset()`, persisted to the collection's `defaults.variables`. */
+  collectionVariableMutations: Record<string, string | null>;
 }
 
 // ── Request File (on-disk YAML format from Rust) ──
@@ -267,7 +278,7 @@ export interface EnvironmentData {
   scope?: "shared" | "personal";
 }
 
-// ── History Entry (matches Rust HistoryEntry) ──
+//── History Entry (matches Rust HistoryEntry) ──
 
 export interface HistoryEntry {
   id: number;
@@ -664,3 +675,4 @@ export interface TabSnapshot {
   testScript: string | null;
   assertions: string | null;
 }
+

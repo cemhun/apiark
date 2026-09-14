@@ -7,7 +7,7 @@ import type { AuthConfig, BodyType, RequestBody, KeyValuePair, OAuth2GrantType, 
 import { oauthStartFlow, oauthGetTokenStatus, oauthClearToken } from "@/lib/tauri-api";
 import { HintTooltip } from "@/components/ui/hint-tooltip";
 import { CodeEditor } from "@/components/ui/code-editor";
-import { Plus, Trash2, FileUp, Wand2, AlignJustify, LayoutList, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, FileUp, Wand2, AlignJustify, LayoutList, Eye, EyeOff, BookOpen, Sparkles, ChevronDown } from "lucide-react";
 
 /** Extract :paramName path variables from a URL */
 function extractPathVariables(url: string): string[] {
@@ -108,7 +108,7 @@ export function RequestPanel() {
       </div>
 
       {/* Tab content */}
-      <div className={`flex-1 p-3 ${activeTab === "body" ? "flex flex-col overflow-hidden" : "overflow-auto"}`}>
+      <div className={`flex-1 p-3 ${activeTab === "body" || activeTab === "scripts" ? "flex flex-col overflow-hidden" : "overflow-auto"}`}>
         {activeTab === "params" && (
           <div className="relative space-y-4">
             <PathVariablesEditor
@@ -118,11 +118,9 @@ export function RequestPanel() {
               onChange={setPathVariables}
               onUrlChange={setUrl}
             />
-            <KeyValueEditor
-              pairs={params}
+            <ParamsEditor
+              params={params}
               onChange={setParams}
-              keyPlaceholder="Parameter"
-              valuePlaceholder={t("request.value")}
             />
             <HintTooltip hintId="env-vars" message="Tip: Use {{variableName}} for dynamic values from environments" />
           </div>
@@ -384,6 +382,165 @@ function FormDataEditor({
   );
 }
 
+/** A single insertable code snippet shown in the "Insert snippet" menu. */
+interface ScriptSnippet {
+  label: string;
+  code: string;
+}
+
+const PRE_REQUEST_SNIPPETS: ScriptSnippet[] = [
+  { label: "Set an environment variable", code: "ark.env.set('token', 'abc123');" },
+  { label: "Read an environment variable", code: "const token = ark.env.get('token');" },
+  { label: "Set a shared collection variable", code: "ark.collectionVariables.set('apiVersion', 'v2');" },
+  { label: "Read a collection variable", code: "const apiVersion = ark.collectionVariables.get('apiVersion');" },
+  { label: "Add/override a request header", code: "ark.request.setHeader('Authorization', 'Bearer ' + ark.env.get('token'));" },
+  { label: "Change the request URL", code: "ark.request.setUrl(ark.request.url.replace('http://', 'https://'));" },
+  { label: "Change the HTTP method", code: "ark.request.setMethod('POST');" },
+  { label: "Modify the JSON request body", code: "const body = JSON.parse(ark.request.body || '{}');\nbody.timestamp = Date.now();\nark.request.setBody(JSON.stringify(body));" },
+  { label: "Store a value across requests (globals)", code: "ark.globals.set('requestCount', Number(ark.globals.get('requestCount') || 0) + 1);" },
+  { label: "Log to the console panel", code: "console.log('Sending request to', ark.request.url);" },
+];
+
+const POST_RESPONSE_SNIPPETS: ScriptSnippet[] = [
+  { label: "Save a response value to an env variable", code: "const body = ark.response.json();\nark.env.set('userId', body.id);" },
+  { label: "Save a response value as a shared collection variable", code: "const body = ark.response.json();\nark.collectionVariables.set('lastOrderId', body.id);" },
+  { label: "Log the response", code: "console.log('Status:', ark.response.status, ark.response.body);" },
+  { label: "Assert the status code", code: "ark.test('status is 200', function () {\n  ark.expect(ark.response.status).to.equal(200);\n});" },
+  { label: "Assert a response body field", code: "ark.test('has an id field', function () {\n  const body = ark.response.json();\n  ark.expect(body).to.have.property('id');\n});" },
+  { label: "Read a response header", code: "const contentType = ark.response.headers['content-type'];" },
+  { label: "Only run logic on success", code: "if (ark.response.status < 300) {\n  ark.env.set('lastSuccess', 'true');\n}" },
+];
+
+/** Dropdown button that inserts a ready-made ark script snippet into the editor. */
+function InsertSnippetMenu({
+  snippets,
+  onInsert,
+}: {
+  snippets: ScriptSnippet[];
+  onInsert: (code: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary) transition-colors"
+      >
+        <Sparkles className="h-3.5 w-3.5" />
+        Insert example
+        <ChevronDown className="h-3 w-3" />
+      </button>
+
+      {open && (
+        <>
+          {/* Backdrop to close the menu on outside click */}
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 z-20 mt-1 w-80 max-w-[90vw] rounded border border-(--color-border) bg-(--color-surface) py-1 shadow-lg">
+            {snippets.map((s) => (
+              <button
+                key={s.label}
+                onClick={() => {
+                  onInsert(s.code);
+                  setOpen(false);
+                }}
+                className="block w-full px-3 py-1.5 text-left text-xs text-(--color-text-secondary) hover:bg-(--color-elevated) hover:text-(--color-text-primary)"
+              >
+                <div>{s.label}</div>
+                <code className="mt-0.5 block truncate text-(--color-text-dimmed)">{s.code.split("\n")[0]}</code>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Reference entry rendered in the collapsible ark API cheat-sheet. */
+interface ApiRefItem {
+  code: string;
+  desc: string;
+}
+
+const ARK_API_GROUPS: { title: string; items: ApiRefItem[] }[] = [
+  {
+    title: "Variables",
+    items: [
+      { code: "ark.env.get(key)", desc: "Read a variable — sees collection, environment, and .env variables merged together" },
+      { code: "ark.env.set(key, value)", desc: "Set/override a variable for this run (does not edit any file on disk)" },
+      { code: "ark.env.unset(key)", desc: "Remove a variable for this run" },
+      { code: "ark.globals.get/set/unset(key)", desc: "Same as env, but persists across all requests in .apiark/globals.local.yaml (personal, gitignored)" },
+      { code: "ark.collectionVariables.get/set/unset(key)", desc: "Shared, committed variables for this collection — persisted to .apiark/apiark.yaml so teammates see the same values" },
+      { code: "ark.variables.get/set/unset(key)", desc: "Same as env, but only for this script run" },
+      { code: "Precedence (low → high)", desc: "Collection Variables < root .env < environment variables < secrets < ark.env.set()" },
+    ],
+  },
+  {
+    title: "Request (pre-request only)",
+    items: [
+      { code: "ark.request.url / .method / .headers / .body", desc: "Read the current request" },
+      { code: "ark.request.setUrl(url)", desc: "Change the request URL" },
+      { code: "ark.request.setMethod(method)", desc: "Change the HTTP method" },
+      { code: "ark.request.setHeader(key, value)", desc: "Add or override a header" },
+      { code: "ark.request.removeHeader(key)", desc: "Remove a header" },
+      { code: "ark.request.setBody(body)", desc: "Replace the request body (string)" },
+    ],
+  },
+  {
+    title: "Response (post-response only)",
+    items: [
+      { code: "ark.response.status / .statusText", desc: "HTTP status code and text" },
+      { code: "ark.response.headers", desc: "Response headers object" },
+      { code: "ark.response.time / .size", desc: "Response time (ms) and size (bytes)" },
+      { code: "ark.response.json()", desc: "Parse the response body as JSON" },
+      { code: "ark.response.text()", desc: "Get the raw response body string" },
+    ],
+  },
+  {
+    title: "Console & Tests",
+    items: [
+      { code: "console.log/warn/error/info(...)", desc: "Shown in the request's Console output" },
+      { code: "ark.test(name, fn)", desc: "Register a named test; a thrown error marks it failed" },
+      { code: "ark.expect(value).to.equal(x)", desc: "Chai-like assertions: .to.be.true, .to.have.property(), .to.include(), .to.match(re), ..." },
+    ],
+  },
+];
+
+/** Collapsible cheat-sheet documenting the full `ark` scripting API. */
+function ArkApiReference() {
+  return (
+    <details className="group shrink-0 rounded border border-(--color-border) bg-(--color-elevated)/40 text-xs">
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 px-3 py-2 font-medium text-(--color-text-secondary) hover:text-(--color-text-primary)">
+        <BookOpen className="h-3.5 w-3.5" />
+        ark scripting API reference
+        <ChevronDown className="h-3 w-3 transition-transform group-open:rotate-180" />
+        <span className="ml-auto font-normal text-(--color-text-dimmed)">
+          Available in Scripts &amp; Tests
+        </span>
+      </summary>
+      <div className="grid gap-3 border-t border-(--color-border) px-3 py-2 sm:grid-cols-2">
+        <p className="col-span-full -mt-0.5 mb-0.5 text-(--color-text-dimmed)">
+          Tip: define shared <strong className="text-(--color-text-secondary)">Collection Variables</strong> (available to every environment) via the collection&apos;s <strong className="text-(--color-text-secondary)">⚙ Collection Defaults</strong> menu in the sidebar, or set them straight from a script with <code className="rounded bg-(--color-elevated) px-1 text-blue-400">ark.collectionVariables.set(key, value)</code> — changes are saved automatically.
+        </p>
+        {ARK_API_GROUPS.map((group) => (
+          <div key={group.title}>
+            <div className="mb-1 font-semibold text-(--color-text-secondary)">{group.title}</div>
+            <ul className="space-y-1">
+              {group.items.map((item) => (
+                <li key={item.code}>
+                  <code className="rounded bg-(--color-elevated) px-1 py-0.5 text-blue-400">{item.code}</code>
+                  <span className="ml-1.5 text-(--color-text-dimmed)">{item.desc}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 function ScriptsEditor({
   preRequestScript,
   postResponseScript,
@@ -396,38 +553,65 @@ function ScriptsEditor({
   onPostResponseChange: (script: string | null) => void;
 }) {
   const { t } = useTranslation();
+
+  const insertInto = (
+    current: string | null,
+    onChange: (script: string | null) => void,
+    code: string,
+  ) => {
+    onChange(current ? `${current}\n${code}` : code);
+  };
+
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="mb-1.5 block text-xs font-medium text-(--color-text-secondary)">
-          {t("request.preRequest")}
-        </label>
-        <p className="mb-2 text-xs text-(--color-text-dimmed)">
+    <div className="flex h-full flex-col gap-3">
+      <ArkApiReference />
+
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-xs font-medium text-(--color-text-secondary)">
+            {t("request.preRequest")}
+          </label>
+          <InsertSnippetMenu
+            snippets={PRE_REQUEST_SNIPPETS}
+            onInsert={(code) => insertInto(preRequestScript, onPreRequestChange, code)}
+          />
+        </div>
+        <p className="text-xs text-(--color-text-dimmed)">
           Runs before the request is sent. Use <code className="rounded bg-(--color-elevated) px-1">ark.env.set()</code>, <code className="rounded bg-(--color-elevated) px-1">ark.request.setHeader()</code>, etc.
         </p>
-        <CodeEditor
-          value={preRequestScript ?? ""}
-          onChange={(v) => onPreRequestChange(v || null)}
-          language="javascript"
-          height="150px"
-          placeholder="// ark.env.set('token', 'abc123');"
-        />
+        <div className="min-h-0 flex-1">
+          <CodeEditor
+            value={preRequestScript ?? ""}
+            onChange={(v) => onPreRequestChange(v || null)}
+            language="javascript"
+            height="100%"
+            placeholder={"// e.g. attach an auth token from the environment:\nark.request.setHeader('Authorization', 'Bearer ' + ark.env.get('token'));"}
+          />
+        </div>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-xs font-medium text-(--color-text-secondary)">
-          {t("request.postResponse")}
-        </label>
-        <p className="mb-2 text-xs text-(--color-text-dimmed)">
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-xs font-medium text-(--color-text-secondary)">
+            {t("request.postResponse")}
+          </label>
+          <InsertSnippetMenu
+            snippets={POST_RESPONSE_SNIPPETS}
+            onInsert={(code) => insertInto(postResponseScript, onPostResponseChange, code)}
+          />
+        </div>
+        <p className="text-xs text-(--color-text-dimmed)">
           Runs after the response is received. Access response via <code className="rounded bg-(--color-elevated) px-1">ark.response.json()</code>, <code className="rounded bg-(--color-elevated) px-1">ark.response.status</code>, etc.
         </p>
-        <CodeEditor
-          value={postResponseScript ?? ""}
-          onChange={(v) => onPostResponseChange(v || null)}
-          language="javascript"
-          height="150px"
-          placeholder="// const body = ark.response.json();"
-        />
+        <div className="min-h-0 flex-1">
+          <CodeEditor
+            value={postResponseScript ?? ""}
+            onChange={(v) => onPostResponseChange(v || null)}
+            language="javascript"
+            height="100%"
+            placeholder={"// e.g. save an id from the response for later requests:\nconst body = ark.response.json();\nark.env.set('userId', body.id);"}
+          />
+        </div>
       </div>
     </div>
   );
@@ -486,22 +670,22 @@ let kvCounter2 = 0;
 const kvId2 = () => `kv_h_${Date.now()}_${++kvCounter2}`;
 
 /** Convert KeyValuePairs → bulk text (disabled lines prefixed with #) */
-function pairsToBulkText(pairs: KeyValuePair[]): string {
+function pairsToBulkText(pairs: KeyValuePair[], separator = ":"): string {
   return pairs
     .filter((p) => p.key)
-    .map((p) => `${p.enabled ? "" : "#"}${p.key}: ${p.value}`)
+    .map((p) => `${p.enabled ? "" : "#"}${p.key}${separator} ${p.value}`)
     .join("\n");
 }
 
 /** Parse bulk text → KeyValuePairs */
-function bulkTextToPairs(text: string, existingPairs: KeyValuePair[]): KeyValuePair[] {
+function bulkTextToPairs(text: string, existingPairs: KeyValuePair[], separator = ":"): KeyValuePair[] {
   const lines = text.split("\n").filter((l) => l.trim());
   const results: KeyValuePair[] = lines.map((line) => {
     const disabled = line.startsWith("#");
     const clean = disabled ? line.slice(1).trim() : line.trim();
-    const colonIdx = clean.indexOf(":");
-    const key = colonIdx >= 0 ? clean.slice(0, colonIdx).trim() : clean.trim();
-    const value = colonIdx >= 0 ? clean.slice(colonIdx + 1).trim() : "";
+    const sepIdx = clean.indexOf(separator);
+    const key = sepIdx >= 0 ? clean.slice(0, sepIdx).trim() : clean.trim();
+    const value = sepIdx >= 0 ? clean.slice(sepIdx + separator.length).trim() : "";
     // Reuse existing id if key matches
     const existing = existingPairs.find((p) => p.key === key);
     return { id: existing?.id ?? kvId2(), key, value, enabled: !disabled };
@@ -575,6 +759,71 @@ function HeadersEditor({
   );
 }
 
+function ParamsEditor({
+  params,
+  onChange,
+}: {
+  params: KeyValuePair[];
+  onChange: (pairs: KeyValuePair[]) => void;
+}) {
+  const { t } = useTranslation();
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+
+  // Sync bulk text when switching to bulk mode
+  const enterBulk = () => {
+    setBulkText(pairsToBulkText(params, "="));
+    setBulkMode(true);
+  };
+
+  const exitBulk = () => {
+    onChange(bulkTextToPairs(bulkText, params, "="));
+    setBulkMode(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      {/* Toolbar */}
+      <div className="flex items-center justify-end">
+        <button
+          onClick={bulkMode ? exitBulk : enterBulk}
+          title={bulkMode ? "Switch to key-value view" : "Bulk edit"}
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-(--color-text-primary) transition-colors"
+        >
+          {bulkMode ? (
+            <><LayoutList className="h-3.5 w-3.5" /> Key-Value</>
+          ) : (
+            <><AlignJustify className="h-3.5 w-3.5" /> Bulk Edit</>
+          )}
+        </button>
+      </div>
+
+      {bulkMode ? (
+        <div className="space-y-1">
+          <p className="text-xs text-(--color-text-dimmed)">
+            One param per line: <code className="rounded bg-(--color-elevated) px-1">key=value</code>. Prefix with <code className="rounded bg-(--color-elevated) px-1">#</code> to disable.
+          </p>
+          <textarea
+            value={bulkText}
+            onChange={(e) => setBulkText(e.target.value)}
+            rows={12}
+            spellCheck={false}
+            placeholder={"page=1\nlimit=20\n# disabledParam=value"}
+            className="w-full rounded bg-(--color-elevated) px-3 py-2 font-mono text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+          />
+        </div>
+      ) : (
+        <KeyValueEditor
+          pairs={params}
+          onChange={onChange}
+          keyPlaceholder="Parameter"
+          valuePlaceholder={t("request.value")}
+        />
+      )}
+    </div>
+  );
+}
+
 function BodyEditor({
   body,
   onChange,
@@ -585,6 +834,16 @@ function BodyEditor({
   onCmdEnter?: () => void;
 }) {
   const { t } = useTranslation();
+
+  // Stable id for the placeholder empty row shown when formData is empty.
+  // Must NOT be regenerated on every render (e.g. via `Date.now()` inline),
+  // otherwise its React `key` changes on every re-render (including ones
+  // unrelated to this row, like switching sub-tabs and back), which forces
+  // React to unmount/remount the input — dropping focus and any in-flight
+  // keystrokes, making it look like the user's input "disappeared".
+  // Uses a lazy useState initializer (runs once on mount only) instead of a
+  // ref, since reading ref values during render is not allowed here.
+  const [emptyFormDataId] = useState(() => `kv_formdata_${Date.now()}`);
 
   const handleBeautify = () => {
     try {
@@ -642,7 +901,7 @@ function BodyEditor({
 
       {body.type === "urlencoded" && (
         <KeyValueEditor
-          pairs={body.formData.length > 0 ? body.formData : [{ id: `kv_formdata_${Date.now()}`, key: "", value: "", enabled: true }]}
+          pairs={body.formData.length > 0 ? body.formData : [{ id: emptyFormDataId, key: "", value: "", enabled: true }]}
           onChange={(formData) => onChange({ ...body, formData })}
           keyPlaceholder="Field"
           valuePlaceholder={t("request.value")}
@@ -651,13 +910,14 @@ function BodyEditor({
 
       {body.type === "form-data" && (
         <FormDataEditor
-          pairs={body.formData.length > 0 ? body.formData : [{ id: `kv_formdata_${Date.now()}`, key: "", value: "", enabled: true }]}
+          pairs={body.formData.length > 0 ? body.formData : [{ id: emptyFormDataId, key: "", value: "", enabled: true }]}
           onChange={(formData) => onChange({ ...body, formData })}
         />
       )}
     </div>
   );
 }
+
 
 const INPUT_CLASS =
   "w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none focus:ring-1 focus:ring-blue-500";

@@ -76,6 +76,7 @@ fn import_postman(content: &str, output_dir: &Path) -> anyhow::Result<usize> {
     let config = CollectionConfig {
         name: name.to_string(),
         version: 1,
+        defaults: Default::default(),
     };
     fs::write(
         config_dir.join("apiark.yaml"),
@@ -248,6 +249,7 @@ fn import_insomnia(content: &str, output_dir: &Path) -> anyhow::Result<usize> {
     let config = CollectionConfig {
         name: ws_name.to_string(),
         version: 1,
+        defaults: Default::default(),
     };
     fs::write(
         config_dir.join("apiark.yaml"),

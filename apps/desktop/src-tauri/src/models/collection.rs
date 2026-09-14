@@ -28,6 +28,12 @@ pub struct CollectionDefaults {
     pub store_cookies: bool,
     #[serde(default)]
     pub persist_cookies: bool,
+    /// Collection-scoped `{{variable}}` values, shared by every request in this
+    /// collection (and every environment). Lowest-priority layer when resolving
+    /// variables — overridden by the root `.env` file, the active environment's
+    /// variables, and finally by secrets.
+    #[serde(default)]
+    pub variables: HashMap<String, String>,
 }
 
 impl Default for CollectionDefaults {
@@ -37,6 +43,7 @@ impl Default for CollectionDefaults {
             send_cookies: true,
             store_cookies: true,
             persist_cookies: false,
+            variables: HashMap::new(),
         }
     }
 }

@@ -528,7 +528,9 @@ function CollectionDefaultsDialog({
   const [password, setPassword] = useState("");
   const [apiKeyKey, setApiKeyKey] = useState("");
   const [apiKeyValue, setApiKeyValue] = useState("");
+  const [variables, setVariables] = useState<{ id: number; key: string; value: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const varIdCounter = useRef(0);
 
   useEffect(() => {
     import("@/lib/tauri-api").then(({ getCollectionDefaults }) => {
@@ -547,10 +549,28 @@ function CollectionDefaultsDialog({
             setApiKeyValue((auth.value as string) ?? "");
           }
         }
+        const entries = Object.entries(defaults.variables ?? {});
+        setVariables(
+          entries.length > 0
+            ? entries.map(([key, value]) => ({ id: varIdCounter.current++, key, value }))
+            : [{ id: varIdCounter.current++, key: "", value: "" }],
+        );
         setLoading(false);
       }).catch(() => setLoading(false));
     });
   }, [collectionPath]);
+
+  const updateVariable = (id: number, field: "key" | "value", value: string) => {
+    setVariables((vars) => vars.map((v) => (v.id === id ? { ...v, [field]: value } : v)));
+  };
+
+  const addVariable = () => {
+    setVariables((vars) => [...vars, { id: varIdCounter.current++, key: "", value: "" }]);
+  };
+
+  const removeVariable = (id: number) => {
+    setVariables((vars) => (vars.length <= 1 ? vars : vars.filter((v) => v.id !== id)));
+  };
 
   const handleSave = async () => {
     let auth: Record<string, unknown> = { type: "none" };
@@ -558,9 +578,18 @@ function CollectionDefaultsDialog({
     else if (authType === "basic") auth = { type: "basic", username, password };
     else if (authType === "api-key") auth = { type: "api-key", key: apiKeyKey, value: apiKeyValue, addTo: "header" };
 
+    const variablesRecord: Record<string, string> = {};
+    for (const v of variables) {
+      if (v.key.trim()) variablesRecord[v.key.trim()] = v.value;
+    }
+
     const { getCollectionDefaults, updateCollectionDefaults } = await import("@/lib/tauri-api");
     const current = await getCollectionDefaults(collectionPath);
-    await updateCollectionDefaults(collectionPath, { ...current, auth: auth as import("@apiark/types").AuthConfig });
+    await updateCollectionDefaults(collectionPath, {
+      ...current,
+      auth: auth as import("@apiark/types").AuthConfig,
+      variables: variablesRecord,
+    });
     onClose();
   };
 
@@ -568,7 +597,7 @@ function CollectionDefaultsDialog({
     <Dialog.Root open onOpenChange={(v) => { if (!v) onClose(); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/30" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--color-border) bg-(--color-card) p-6 shadow-2xl focus:outline-none">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-110 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-(--color-border) bg-(--color-card) p-6 shadow-2xl focus:outline-none">
           <Dialog.Title className="text-base font-semibold text-(--color-text-primary)">
             Collection Defaults
           </Dialog.Title>
@@ -616,6 +645,47 @@ function CollectionDefaultsDialog({
                     className="w-full rounded bg-(--color-elevated) px-3 py-1.5 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none" />
                 </div>
               )}
+
+              <div className="border-t border-(--color-border) pt-3">
+                <label className="mb-1 block text-xs font-medium text-(--color-text-muted)">
+                  Collection Variables
+                </label>
+                <p className="mb-2 text-xs text-(--color-text-dimmed)">
+                  Available as <code className="rounded bg-(--color-elevated) px-1">{"{{name}}"}</code> in every request in this collection, in any environment. Overridden by environment variables with the same name.
+                </p>
+                <div className="space-y-1.5">
+                  {variables.map((v) => (
+                    <div key={v.id} className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={v.key}
+                        onChange={(e) => updateVariable(v.id, "key", e.target.value)}
+                        placeholder="name"
+                        className="w-2/5 rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={v.value}
+                        onChange={(e) => updateVariable(v.id, "value", e.target.value)}
+                        placeholder="value"
+                        className="flex-1 rounded bg-(--color-elevated) px-2 py-1 text-sm text-(--color-text-primary) placeholder-(--color-text-dimmed) outline-none"
+                      />
+                      <button
+                        onClick={() => removeVariable(v.id)}
+                        className="shrink-0 rounded p-1 text-(--color-text-muted) hover:bg-(--color-elevated) hover:text-red-400"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={addVariable}
+                  className="mt-1.5 flex items-center gap-1 text-xs text-(--color-text-muted) hover:text-(--color-text-primary)"
+                >
+                  <Plus className="h-3 w-3" /> Add variable
+                </button>
+              </div>
 
               <div className="flex justify-end gap-2 pt-2">
                 <button onClick={onClose} className="rounded-lg px-4 py-1.5 text-sm text-(--color-text-muted) hover:bg-(--color-elevated)">

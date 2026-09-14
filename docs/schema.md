@@ -38,6 +38,9 @@ defaults:
   auth:                   # Default auth for all requests (optional)
     type: bearer
     token: "{{token}}"
+  variables:              # Collection-scoped variables, shared by every environment
+    baseUrl: "https://api.example.com"
+    apiVersion: "v2"
 ```
 
 ### JSON Schema
@@ -56,12 +59,29 @@ defaults:
         "sendCookies": { "type": "boolean", "default": true },
         "storeCookies": { "type": "boolean", "default": true },
         "persistCookies": { "type": "boolean", "default": false },
-        "auth": { "$ref": "#/$defs/AuthConfig" }
+        "auth": { "$ref": "#/$defs/AuthConfig" },
+        "variables": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Collection-scoped {{variable}} values, available in every environment"
+        }
       }
     }
   }
 }
 ```
+
+### Variable resolution precedence
+
+When a request runs, `{{variable}}` placeholders are resolved by merging the following sources, from **lowest to highest** priority (each layer overrides the previous one on key conflicts):
+
+1. **Collection variables** — `defaults.variables` in `apiark.yaml` (this file). Shared by every request, in every environment.
+2. **Root `.env`** — a `.env` file at the collection root (gitignored by convention; per-developer local overrides).
+3. **Environment variables** — the `variables` map of the active environment (see below).
+4. **Secrets** — values declared in the active environment's `secrets` list, sourced from `.apiark/.env` (highest priority).
+
+Scripts can also set additional runtime-only overrides via `ark.env.set()` (see the in-app Scripts tab reference), which take precedence over all of the above for the current run only.
+
 
 ## Request File (`*.yaml`)
 

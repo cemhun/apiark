@@ -667,6 +667,7 @@ mod scripting {
             env: HashMap::new(),
             globals: HashMap::new(),
             variables: HashMap::new(),
+            collection_variables: HashMap::new(),
         }
     }
 

@@ -64,6 +64,10 @@ pub struct ScriptContext {
     pub env: HashMap<String, String>,
     pub globals: HashMap<String, String>,
     pub variables: HashMap<String, String>,
+    /// Collection-scoped variables (`ark.collectionVariables`), backed by the
+    /// collection's `defaults.variables` (persisted to `.apiark/apiark.yaml`).
+    #[serde(default)]
+    pub collection_variables: HashMap<String, String>,
 }
 
 /// Result returned after script execution
@@ -74,6 +78,8 @@ pub struct ScriptResult {
     pub env_mutations: HashMap<String, Option<String>>,
     pub global_mutations: HashMap<String, Option<String>>,
     pub variable_mutations: HashMap<String, Option<String>>,
+    #[serde(default)]
+    pub collection_variable_mutations: HashMap<String, Option<String>>,
     pub test_results: Vec<TestResult>,
     pub console_output: Vec<ConsoleEntry>,
 }

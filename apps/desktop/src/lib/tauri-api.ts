@@ -98,11 +98,15 @@ export async function sendRequestWithScripts(
   postResponseScript?: string | null,
   testScript?: string | null,
   assertionsYaml?: string | null,
+  globals?: Record<string, string>,
+  collectionVariables?: Record<string, string>,
 ): Promise<ScriptedResponseData> {
   try {
     return await invoke<ScriptedResponseData>("send_request_with_scripts", {
       params,
       variables: variables ?? null,
+      globals: globals ?? null,
+      collectionVariables: collectionVariables ?? null,
       collectionPath: collectionPath ?? null,
       requestName: requestName ?? null,
       preRequestScript: preRequestScript ?? null,
@@ -248,6 +252,23 @@ export async function saveEnvironment(
   scope?: "shared" | "personal",
 ): Promise<void> {
   await invoke<void>("save_environment", { collectionPath, env, scope: scope ?? env.scope ?? null });
+}
+
+/** Load the persisted `ark.globals` store (`.apiark/globals.local.yaml`). */
+export async function loadGlobals(
+  collectionPath: string,
+): Promise<Record<string, string>> {
+  return await invoke<Record<string, string>>("load_globals", {
+    collectionPath,
+  });
+}
+
+/** Save the `ark.globals` store to disk. */
+export async function saveGlobals(
+  collectionPath: string,
+  globals: Record<string, string>,
+): Promise<void> {
+  await invoke<void>("save_globals", { collectionPath, globals });
 }
 
 // ── History ──

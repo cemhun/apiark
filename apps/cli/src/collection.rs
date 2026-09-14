@@ -177,8 +177,13 @@ pub fn resolve_variables(
         .find(|e| e.name.eq_ignore_ascii_case(environment_name))
         .ok_or_else(|| anyhow::anyhow!("Environment '{}' not found", environment_name))?;
 
-    // Start with root .env (lowest priority)
-    let mut variables = load_root_dotenv(collection_path);
+    // Start with collection-scoped variables (lowest priority)
+    let mut variables = load_config(collection_path)
+        .map(|c| c.defaults.variables)
+        .unwrap_or_default();
+
+    // Override with root .env
+    variables.extend(load_root_dotenv(collection_path));
 
     // Override with environment YAML variables
     variables.extend(env.variables.clone());

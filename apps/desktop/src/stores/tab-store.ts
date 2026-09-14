@@ -47,6 +47,7 @@ interface TabState {
   newMqttTab: () => void;
   newSocketIoTab: () => void;
 
+
   // GraphQL mutations
   setGraphQLQuery: (query: string) => void;
   setGraphQLVariables: (variables: string) => void;
@@ -790,10 +791,23 @@ export const useTabStore = create<TabState>((set, get) => ({
           tab.postResponseScript,
           tab.testScript,
           tab.assertions,
+          envStore.globals,
+          envStore.collectionVariables,
         );
         // Apply env mutations to the environment store
         if (scriptedResponse.envMutations && Object.keys(scriptedResponse.envMutations).length > 0) {
           envStore.applyMutations(scriptedResponse.envMutations);
+        }
+        // Apply global mutations (ark.globals.set/unset), persisted to disk
+        if (scriptedResponse.globalMutations && Object.keys(scriptedResponse.globalMutations).length > 0) {
+          envStore.applyGlobalMutations(scriptedResponse.globalMutations);
+        }
+        // Apply collection variable mutations (ark.collectionVariables.set/unset), persisted to disk
+        if (
+          scriptedResponse.collectionVariableMutations &&
+          Object.keys(scriptedResponse.collectionVariableMutations).length > 0
+        ) {
+          envStore.applyCollectionVariableMutations(scriptedResponse.collectionVariableMutations);
         }
         set({
           tabs: get().tabs.map((t) =>

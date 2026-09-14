@@ -52,4 +52,24 @@ describe("Environment Store", () => {
     const overrides = useEnvironmentStore.getState().runtimeOverrides;
     expect(overrides.newVar).toBe("newValue");
   });
+
+  it("resets a stale active environment that no longer exists after reload", async () => {
+    // Simulate a leftover selection from a different/previous collection
+    // (e.g. one that had an environment named "Collection Variables").
+    useEnvironmentStore.setState({ activeEnvironmentName: "Collection Variables" });
+    await useEnvironmentStore.getState().loadEnvironments("/test/collection");
+    const state = useEnvironmentStore.getState();
+    // Falls back to the first available environment instead of keeping the
+    // stale name around, which previously caused
+    // "Environment 'Collection Variables' not found" from getResolvedVariables().
+    expect(state.activeEnvironmentName).toBe("development");
+  });
+
+  it("keeps the active environment selected across reloads when it still exists", async () => {
+    await useEnvironmentStore.getState().loadEnvironments("/test/collection");
+    useEnvironmentStore.getState().setActiveEnvironment("production");
+    await useEnvironmentStore.getState().loadEnvironments("/test/collection");
+    expect(useEnvironmentStore.getState().activeEnvironmentName).toBe("production");
+  });
 });
+

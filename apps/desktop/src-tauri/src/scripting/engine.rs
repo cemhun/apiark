@@ -68,6 +68,7 @@ fn parse_mutations(json: &str, original_ctx: &ScriptContext) -> Result<ScriptRes
     let env_mutations = extract_store_mutations(raw.get("env"));
     let global_mutations = extract_store_mutations(raw.get("globals"));
     let variable_mutations = extract_store_mutations(raw.get("variables"));
+    let collection_variable_mutations = extract_store_mutations(raw.get("collectionVariables"));
 
     // Extract test results
     let test_results = raw
@@ -147,6 +148,7 @@ fn parse_mutations(json: &str, original_ctx: &ScriptContext) -> Result<ScriptRes
         env_mutations,
         global_mutations,
         variable_mutations,
+        collection_variable_mutations,
         test_results,
         console_output,
     })
@@ -186,6 +188,7 @@ mod tests {
             env: HashMap::new(),
             globals: HashMap::new(),
             variables: HashMap::new(),
+            collection_variables: HashMap::new(),
         }
     }
 
@@ -492,6 +495,33 @@ mod tests {
         assert_eq!(
             result.variable_mutations.get("requestId"),
             Some(&Some("req_123".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_collection_variables() {
+        let mut ctx = empty_context();
+        ctx.collection_variables
+            .insert("apiHost".to_string(), "api.example.com".to_string());
+        let result = execute_script(
+            r#"
+            var host = ark.collectionVariables.get("apiHost");
+            console.log(host);
+            ark.collectionVariables.set("apiVersion", "v3");
+            ark.collectionVariables.unset("apiHost");
+            "#,
+            ctx,
+            ScriptPhase::PreRequest,
+        )
+        .unwrap();
+        assert_eq!(result.console_output[0].message, "api.example.com");
+        assert_eq!(
+            result.collection_variable_mutations.get("apiVersion"),
+            Some(&Some("v3".to_string()))
+        );
+        assert_eq!(
+            result.collection_variable_mutations.get("apiHost"),
+            Some(&None)
         );
     }
 

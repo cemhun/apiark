@@ -13,6 +13,7 @@ import { SSEView } from "@/components/sse/sse-view";
 import { MqttView } from "@/components/mqtt/mqtt-view";
 import { SocketIoView } from "@/components/socketio/socketio-view";
 import { ProxyCaptureViewer } from "@/components/proxy/proxy-panel";
+import { AllVariablesView } from "@/components/environment/all-variables-view";
 import type { TabProtocol } from "@apiark/types";
 import { useTabStore, useActiveTab, initWindowStateTracker } from "@/stores/tab-store";
 import { useConsoleStore } from "@/stores/console-store";
@@ -38,6 +39,7 @@ import { useTranslation } from "react-i18next";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { StatusBar } from "@/components/layout/status-bar";
 import { PanelDivider } from "@/components/ui/panel-divider";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 // Lazy-load dialogs — only downloaded when first opened
 const SettingsDialog = lazy(() => import("@/components/settings/settings-dialog").then(m => ({ default: m.SettingsDialog })));
@@ -409,16 +411,20 @@ function App() {
 
         {/* Main Panel */}
         <main id="main-content" className="flex flex-1 flex-col overflow-hidden bg-(--color-card)" role="main">
-          {/* Tab Bar */}
-          {!zenMode && <TabBar />}
+          {/* Tab Bar — hidden on the full-page Environments view (not a request tab) */}
+          {!zenMode && activeView !== "environments" && <TabBar />}
 
-          {activeView === "proxy" ? (
-            <ProxyCaptureViewer />
-          ) : activeTab ? (
-            <ProtocolView protocol={activeTab.protocol} urlBarRef={urlBarRef} />
-          ) : (
-            <EmptyState />
-          )}
+          <ErrorBoundary label={activeView === "environments" ? "Environments view" : undefined}>
+            {activeView === "proxy" ? (
+              <ProxyCaptureViewer />
+            ) : activeView === "environments" ? (
+              <AllVariablesView />
+            ) : activeTab ? (
+              <ProtocolView protocol={activeTab.protocol} urlBarRef={urlBarRef} />
+            ) : (
+              <EmptyState />
+            )}
+          </ErrorBoundary>
         </main>
       </div>
 
@@ -984,3 +990,4 @@ function MigrationDialog() {
 }
 
 export default App;
+
