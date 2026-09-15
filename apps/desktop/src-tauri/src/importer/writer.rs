@@ -144,6 +144,7 @@ fn convert_body(body: &Option<ImportBody>) -> Option<RequestBodyFile> {
     body.as_ref().map(|b| RequestBodyFile {
         body_type: b.body_type.clone(),
         content: b.content.clone(),
+        form_data: Vec::new(),
     })
 }
 

@@ -61,7 +61,7 @@ fn request_file_to_params(file: &RequestFile) -> SendRequestParams {
         RequestBody {
             body_type,
             content: b.content.clone(),
-            form_data: Vec::new(),
+            form_data: b.form_data.clone(),
         }
     });
 

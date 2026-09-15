@@ -159,23 +159,23 @@ describe("Tab Store", () => {
     expect(tabs[1].id).not.toBe(tabs[0].id);
   });
 
-  it("closes other tabs", () => {
+  it("closes other tabs", async () => {
     useTabStore.getState().newTab();
     useTabStore.getState().newTab();
     useTabStore.getState().newTab();
     const keepId = useTabStore.getState().tabs[1].id;
 
-    useTabStore.getState().closeOtherTabs(keepId);
+    await useTabStore.getState().closeOtherTabs(keepId);
     const tabs = useTabStore.getState().tabs;
     expect(tabs).toHaveLength(1);
     expect(tabs[0].id).toBe(keepId);
   });
 
-  it("closes all tabs", () => {
+  it("closes all tabs", async () => {
     useTabStore.getState().newTab();
     useTabStore.getState().newTab();
 
-    useTabStore.getState().closeAllTabs();
+    await useTabStore.getState().closeAllTabs();
     expect(useTabStore.getState().tabs).toHaveLength(0);
     expect(useTabStore.getState().activeTabId).toBeNull();
   });

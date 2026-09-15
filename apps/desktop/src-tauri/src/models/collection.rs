@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use super::auth::AuthConfig;
-use super::request::HttpMethod;
+use super::request::{HttpMethod, KeyValuePair};
 
 /// On-disk collection config (.apiark/apiark.yaml)
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -91,6 +91,9 @@ pub struct RequestBodyFile {
     pub body_type: String,
     #[serde(default)]
     pub content: String,
+    /// Form-data / urlencoded fields (used when body_type is "form-data" or "urlencoded")
+    #[serde(default, skip_serializing_if = "Vec::is_empty", rename = "formData")]
+    pub form_data: Vec<KeyValuePair>,
 }
 
 /// Optional folder config (_folder.yaml)

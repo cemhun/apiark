@@ -33,9 +33,9 @@ interface TabState {
   // Tab management
   newTab: () => void;
   openTab: (filePath: string, collectionPath: string) => Promise<void>;
-  closeTab: (id: string) => void;
-  closeOtherTabs: (id: string) => void;
-  closeAllTabs: () => void;
+  closeTab: (id: string) => Promise<void>;
+  closeOtherTabs: (id: string) => Promise<void>;
+  closeAllTabs: () => Promise<void>;
   setActiveTab: (id: string) => void;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
 
@@ -71,6 +71,8 @@ interface TabState {
   send: () => Promise<void>;
   save: () => Promise<void>;
   autoSave: () => Promise<void>;
+  /** Save a specific tab by id (used when closing/switching away from a tab that isn't active), regardless of body type. */
+  saveTabById: (tabId: string) => Promise<void>;
   clearAutoSaveError: () => void;
   clearResponse: () => void;
   updateResponse: (tabId: string, updates: Partial<ResponseData>) => void;
@@ -302,7 +304,7 @@ function requestFileToTab(
     ? {
         type: file.body.type as RequestBody["type"],
         content: file.body.content || "",
-        formData: [],
+        formData: (file.body.formData || []).map((kv) => ({ ...kv, id: kv.id || kvId() })),
       }
     : { type: "none", content: "", formData: [] };
 
@@ -418,7 +420,7 @@ function tabToRequestFile(tab: Tab): RequestFile {
 
   // For GraphQL tabs, serialize the query/variables into a JSON body
   // so it's detected as GraphQL when loaded back (requestFileToTab checks for body.content with "query")
-  let body: { type: string; content: string } | undefined;
+  let body: { type: string; content: string; formData?: KeyValuePair[] } | undefined;
   if (tab.protocol === "graphql" && tab.graphql) {
     const gqlBody: Record<string, unknown> = { query: tab.graphql.query };
     try {
@@ -433,6 +435,9 @@ function tabToRequestFile(tab: Tab): RequestFile {
     }
   } else if (tab.body.type !== "none") {
     body = { type: tab.body.type, content: tab.body.content };
+    if (tab.body.type === "form-data" || tab.body.type === "urlencoded") {
+      body.formData = tab.body.formData;
+    }
   }
 
   return {
@@ -586,7 +591,14 @@ export const useTabStore = create<TabState>((set, get) => ({
     }
   },
 
-  closeTab: (id) => {
+  closeTab: async (id) => {
+    // Persist unsaved edits (any body type) before the tab disappears — but
+    // only when there's no unresolved external conflict, since in that case
+    // the user is explicitly discarding the tab in favor of the on-disk file.
+    const tab = get().tabs.find((t) => t.id === id);
+    if (tab && tab.filePath && tab.isDirty && !tab.conflictState) {
+      await get().saveTabById(id);
+    }
     set((state) => {
       const idx = state.tabs.findIndex((t) => t.id === id);
       const newTabs = state.tabs.filter((t) => t.id !== id);
@@ -604,14 +616,20 @@ export const useTabStore = create<TabState>((set, get) => ({
     });
   },
 
-  closeOtherTabs: (id) => {
+  closeOtherTabs: async (id) => {
+    const { tabs, saveTabById } = get();
+    const tabsToClose = tabs.filter((t) => t.id !== id && t.isDirty);
+    await Promise.all(tabsToClose.map((t) => saveTabById(t.id)));
     set((state) => ({
       tabs: state.tabs.filter((t) => t.id === id),
       activeTabId: id,
     }));
   },
 
-  closeAllTabs: () => {
+  closeAllTabs: async () => {
+    const { tabs, saveTabById } = get();
+    const tabsToClose = tabs.filter((t) => t.isDirty);
+    await Promise.all(tabsToClose.map((t) => saveTabById(t.id)));
     set({ tabs: [], activeTabId: null });
   },
 
@@ -866,6 +884,26 @@ export const useTabStore = create<TabState>((set, get) => ({
       const reqLabel = tab.name || tab.url || "Request";
       const httpErr = err as HttpError;
       useConsoleStore.getState().log(reqLabel, httpErr?.message || String(err), "error");
+    }
+  },
+
+  saveTabById: async (tabId: string) => {
+    const tab = get().tabs.find((t) => t.id === tabId);
+    if (!tab || !tab.filePath || !tab.isDirty) return;
+
+    try {
+      const requestFile = tabToRequestFile(tab);
+      markRecentlySaved(tab.filePath);
+      await saveRequestFile(tab.filePath, requestFile);
+      set({
+        tabs: get().tabs.map((t) =>
+          t.id === tabId ? { ...t, isDirty: false } : t,
+        ),
+      });
+    } catch (err) {
+      import("@/stores/toast-store").then(({ useToastStore }) =>
+        useToastStore.getState().showError(`Failed to save request: ${String(err)}`)
+      );
     }
   },
 

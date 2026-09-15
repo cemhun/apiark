@@ -215,7 +215,7 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
     // watcher doesn't show a "file deleted externally" conflict.
     const tabStore = (await import("@/stores/tab-store")).useTabStore;
     const openTab = tabStore.getState().tabs.find((t) => t.filePath === path);
-    if (openTab) tabStore.getState().closeTab(openTab.id);
+    if (openTab) await tabStore.getState().closeTab(openTab.id);
 
     const trashPath = await deleteItemApi(path, collectionName);
     useUndoStore.getState().pushUndo({
@@ -233,7 +233,7 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
     const tabStore = (await import("@/stores/tab-store")).useTabStore;
     const tabsToClose = tabStore.getState().tabs.filter((t) => t.collectionPath === path);
     for (const tab of tabsToClose) {
-      tabStore.getState().closeTab(tab.id);
+      await tabStore.getState().closeTab(tab.id);
     }
     // 2. Stop the file watcher and remove from sidebar
     get().closeCollection(path);

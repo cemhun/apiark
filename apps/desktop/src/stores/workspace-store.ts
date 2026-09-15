@@ -53,8 +53,18 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
     }
 
     const { useTabStore } = await import("@/stores/tab-store");
-    for (const tab of useTabStore.getState().tabs) {
-      if (tab.filePath) useTabStore.getState().closeTab(tab.id);
+    // Persist any unsaved edits before the tabs are torn down — this must
+    // happen for every body type (json, xml, raw, form-data, urlencoded, ...),
+    // not just the currently-focused tab, otherwise in-flight edits that
+    // haven't been auto-saved yet (debounced ~1s) are silently discarded.
+    const tabsToClose = useTabStore.getState().tabs.filter((t) => t.filePath);
+    await Promise.all(
+      tabsToClose
+        .filter((t) => t.isDirty)
+        .map((t) => useTabStore.getState().saveTabById(t.id)),
+    );
+    for (const tab of tabsToClose) {
+      useTabStore.getState().closeTab(tab.id);
     }
 
     set({ activeWorkspaceId: id });
@@ -163,9 +173,15 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
     import("@/stores/collection-store").then(({ useCollectionStore }) => {
       useCollectionStore.getState().closeCollection(path);
     });
-    import("@/stores/tab-store").then(({ useTabStore }) => {
-      for (const tab of useTabStore.getState().tabs) {
-        if (tab.collectionPath === path) useTabStore.getState().closeTab(tab.id);
+    import("@/stores/tab-store").then(async ({ useTabStore }) => {
+      const tabsToClose = useTabStore.getState().tabs.filter((t) => t.collectionPath === path);
+      await Promise.all(
+        tabsToClose
+          .filter((t) => t.isDirty)
+          .map((t) => useTabStore.getState().saveTabById(t.id)),
+      );
+      for (const tab of tabsToClose) {
+        useTabStore.getState().closeTab(tab.id);
       }
     });
   },
