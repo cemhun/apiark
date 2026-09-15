@@ -144,6 +144,13 @@ function buildUrlWithParams(baseUrl: string, params: KeyValuePair[]): string {
 }
 
 /**
+ * Guards against restoreTabs() running more than once per app session.
+ * React 18 StrictMode (dev mode) intentionally double-invokes mount effects,
+ * which would otherwise call restoreTabs() twice and duplicate every tab.
+ */
+let hasRestoredTabs = false;
+
+/**
  * Tracks file paths that were recently saved by us (save/autoSave).
  * The file watcher checks this set to avoid reloading tabs that we just wrote.
  */
@@ -1146,6 +1153,8 @@ export const useTabStore = create<TabState>((set, get) => ({
   },
 
   restoreTabs: async () => {
+    if (hasRestoredTabs) return;
+    hasRestoredTabs = true;
     try {
       const persisted = await loadPersistedState();
 
@@ -1187,10 +1196,13 @@ export const useTabStore = create<TabState>((set, get) => ({
         }
         return;
       }
-      const seenPaths = new Set<string>();
+      const seenPaths = new Set<string>(
+        get().tabs.filter((t) => t.filePath).map((t) => t.filePath!),
+      );
 
       for (const pt of persisted.tabs) {
-        // Deduplicate — only restore one tab per file path
+        // Deduplicate — only restore one tab per file path, and skip any
+        // file that's already open (e.g. injected via cross-window tab transfer).
         if (seenPaths.has(pt.filePath)) continue;
         seenPaths.add(pt.filePath);
 
