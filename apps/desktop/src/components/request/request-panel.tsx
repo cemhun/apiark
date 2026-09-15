@@ -3,6 +3,7 @@ import type { ReactNode, ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useTabStore, useActiveTab } from "@/stores/tab-store";
 import { KeyValueEditor } from "./key-value-editor";
+import { VariableAutocompleteInput } from "@/components/ui/variable-autocomplete-input";
 import type { AuthConfig, BodyType, RequestBody, KeyValuePair, OAuth2GrantType, OAuthTokenStatus } from "@apiark/types";
 import { oauthStartFlow, oauthGetTokenStatus, oauthClearToken } from "@/lib/tauri-api";
 import { HintTooltip } from "@/components/ui/hint-tooltip";
@@ -949,12 +950,15 @@ function PasswordInput({
   const [visible, setVisible] = useState(false);
   return (
     <div className="relative">
-      <input
+      <VariableAutocompleteInput
         type={visible ? "text" : "password"}
         value={value}
-        onChange={onChange}
+        onChange={(v) => onChange({ target: { value: v } } as ChangeEvent<HTMLInputElement>)}
         placeholder={placeholder}
         autoComplete="off"
+        // Only highlight {{variables}} while the value is revealed — otherwise
+        // the plain-text overlay would defeat the password masking.
+        showHighlight={visible}
         className={`${className ?? INPUT_CLASS} pr-8`}
       />
       <button
@@ -1110,10 +1114,9 @@ function AuthEditor({
       {/* Auth fields */}
       {auth.type === "bearer" && (
         <Field label={t("auth.token")}>
-          <input
-            type="text"
+          <VariableAutocompleteInput
             value={auth.token}
-            onChange={(e) => handleChange({ ...auth, token: e.target.value })}
+            onChange={(v) => handleChange({ ...auth, token: v })}
             placeholder={t("auth.token")}
             className={INPUT_CLASS}
           />
@@ -1123,10 +1126,9 @@ function AuthEditor({
       {auth.type === "basic" && (
         <div className="space-y-2">
           <Field label={t("auth.username")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.username}
-              onChange={(e) => handleChange({ ...auth, username: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, username: v })}
               placeholder={t("auth.username")}
               className={INPUT_CLASS}
               autoComplete="username"
@@ -1145,19 +1147,17 @@ function AuthEditor({
       {auth.type === "api-key" && (
         <div className="space-y-2">
           <Field label="Key">
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.key}
-              onChange={(e) => handleChange({ ...auth, key: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, key: v })}
               placeholder="Key name (e.g. X-API-Key)"
               className={INPUT_CLASS}
             />
           </Field>
           <Field label={t("request.value")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.value}
-              onChange={(e) => handleChange({ ...auth, value: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, value: v })}
               placeholder={t("request.value")}
               className={INPUT_CLASS}
             />
@@ -1182,10 +1182,9 @@ function AuthEditor({
       {auth.type === "digest" && (
         <div className="space-y-2">
           <Field label={t("auth.username")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.username}
-              onChange={(e) => handleChange({ ...auth, username: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, username: v })}
               placeholder={t("auth.username")}
               className={INPUT_CLASS}
               autoComplete="username"
@@ -1204,10 +1203,9 @@ function AuthEditor({
       {auth.type === "aws-v4" && (
         <div className="space-y-2">
           <Field label={t("auth.accessKey")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.accessKey}
-              onChange={(e) => handleChange({ ...auth, accessKey: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, accessKey: v })}
               placeholder={t("auth.accessKey")}
               className={INPUT_CLASS}
             />
@@ -1220,28 +1218,25 @@ function AuthEditor({
             />
           </Field>
           <Field label={t("auth.region")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.region}
-              onChange={(e) => handleChange({ ...auth, region: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, region: v })}
               placeholder={t("auth.region")}
               className={INPUT_CLASS}
             />
           </Field>
           <Field label={t("auth.service")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.service}
-              onChange={(e) => handleChange({ ...auth, service: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, service: v })}
               placeholder={t("auth.service")}
               className={INPUT_CLASS}
             />
           </Field>
           <Field label={t("auth.sessionToken")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.sessionToken}
-              onChange={(e) => handleChange({ ...auth, sessionToken: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, sessionToken: v })}
               placeholder={t("auth.sessionToken")}
               className={INPUT_CLASS}
             />
@@ -1280,10 +1275,9 @@ function AuthEditor({
             className={INPUT_CLASS + " resize-y font-mono"}
           />
           <Field label={t("auth.headerPrefix")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.headerPrefix}
-              onChange={(e) => handleChange({ ...auth, headerPrefix: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, headerPrefix: v })}
               placeholder={t("auth.headerPrefix")}
               className={INPUT_CLASS}
             />
@@ -1294,10 +1288,9 @@ function AuthEditor({
       {auth.type === "ntlm" && (
         <div className="space-y-2">
           <Field label={t("auth.username")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.username}
-              onChange={(e) => handleChange({ ...auth, username: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, username: v })}
               placeholder={t("auth.username")}
               className={INPUT_CLASS}
               autoComplete="username"
@@ -1311,19 +1304,17 @@ function AuthEditor({
             />
           </Field>
           <Field label={t("auth.domain")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.domain}
-              onChange={(e) => handleChange({ ...auth, domain: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, domain: v })}
               placeholder={t("auth.domain")}
               className={INPUT_CLASS}
             />
           </Field>
           <Field label={t("auth.workstation")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.workstation}
-              onChange={(e) => handleChange({ ...auth, workstation: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, workstation: v })}
               placeholder={t("auth.workstation")}
               className={INPUT_CLASS}
             />
@@ -1334,28 +1325,25 @@ function AuthEditor({
       {auth.type === "saml" && (
         <div className="space-y-2">
           <Field label={t("auth.idpUrl")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.idpUrl}
-              onChange={(e) => handleChange({ ...auth, idpUrl: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, idpUrl: v })}
               placeholder={t("auth.idpUrl")}
               className={INPUT_CLASS}
             />
           </Field>
           <Field label={t("auth.entityId")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.entityId}
-              onChange={(e) => handleChange({ ...auth, entityId: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, entityId: v })}
               placeholder={t("auth.entityId")}
               className={INPUT_CLASS}
             />
           </Field>
           <Field label={t("auth.assertionConsumerUrl")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.assertionConsumerUrl}
-              onChange={(e) => handleChange({ ...auth, assertionConsumerUrl: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, assertionConsumerUrl: v })}
               placeholder={t("auth.assertionConsumerUrl")}
               className={INPUT_CLASS}
             />
@@ -1370,19 +1358,17 @@ function AuthEditor({
             />
           </Field>
           <Field label={t("auth.nameIdFormat")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.nameIdFormat}
-              onChange={(e) => handleChange({ ...auth, nameIdFormat: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, nameIdFormat: v })}
               placeholder={t("auth.nameIdFormat")}
               className={INPUT_CLASS}
             />
           </Field>
           <Field label={t("auth.samlToken")}>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.samlToken}
-              onChange={(e) => handleChange({ ...auth, samlToken: e.target.value })}
+              onChange={(v) => handleChange({ ...auth, samlToken: v })}
               placeholder={t("auth.samlToken")}
               className={INPUT_CLASS}
             />
@@ -1475,10 +1461,9 @@ function OAuth2Editor({
       {showAuthUrl && (
         <label className="block">
           <span className="text-xs text-(--color-text-secondary)">{t("auth.authUrl")}</span>
-          <input
-            type="text"
+          <VariableAutocompleteInput
             value={auth.authUrl}
-            onChange={(e) => onChange({ ...auth, authUrl: e.target.value })}
+            onChange={(v) => onChange({ ...auth, authUrl: v })}
             placeholder="https://provider.com/oauth/authorize"
             className={INPUT_CLASS}
           />
@@ -1489,10 +1474,9 @@ function OAuth2Editor({
       {showTokenUrl && (
         <label className="block">
           <span className="text-xs text-(--color-text-secondary)">{t("auth.tokenUrl")}</span>
-          <input
-            type="text"
+          <VariableAutocompleteInput
             value={auth.tokenUrl}
-            onChange={(e) => onChange({ ...auth, tokenUrl: e.target.value })}
+            onChange={(v) => onChange({ ...auth, tokenUrl: v })}
             placeholder="https://provider.com/oauth/token"
             className={INPUT_CLASS}
           />
@@ -1503,10 +1487,9 @@ function OAuth2Editor({
       <div className="grid grid-cols-2 gap-2">
         <label className="block">
           <span className="text-xs text-(--color-text-secondary)">{t("auth.clientId")}</span>
-          <input
-            type="text"
+          <VariableAutocompleteInput
             value={auth.clientId}
-            onChange={(e) => onChange({ ...auth, clientId: e.target.value })}
+            onChange={(v) => onChange({ ...auth, clientId: v })}
             placeholder={t("auth.clientId")}
             className={INPUT_CLASS}
           />
@@ -1524,10 +1507,9 @@ function OAuth2Editor({
       {/* Scope */}
       <label className="block">
         <span className="text-xs text-(--color-text-secondary)">{t("auth.scope")}</span>
-        <input
-          type="text"
+        <VariableAutocompleteInput
           value={auth.scope}
-          onChange={(e) => onChange({ ...auth, scope: e.target.value })}
+          onChange={(v) => onChange({ ...auth, scope: v })}
           placeholder="openid profile email"
           className={INPUT_CLASS}
         />
@@ -1538,10 +1520,9 @@ function OAuth2Editor({
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
             <span className="text-xs text-(--color-text-secondary)">{t("auth.username")}</span>
-            <input
-              type="text"
+            <VariableAutocompleteInput
               value={auth.username}
-              onChange={(e) => onChange({ ...auth, username: e.target.value })}
+              onChange={(v) => onChange({ ...auth, username: v })}
               placeholder={t("auth.username")}
               className={INPUT_CLASS}
             />
@@ -1561,10 +1542,9 @@ function OAuth2Editor({
       {showAuthUrl && (
         <label className="block">
           <span className="text-xs text-(--color-text-secondary)">{t("auth.callbackUrl")}</span>
-          <input
-            type="text"
+          <VariableAutocompleteInput
             value={auth.callbackUrl}
-            onChange={(e) => onChange({ ...auth, callbackUrl: e.target.value })}
+            onChange={(v) => onChange({ ...auth, callbackUrl: v })}
             placeholder="http://localhost:9876/callback"
             className={INPUT_CLASS}
           />

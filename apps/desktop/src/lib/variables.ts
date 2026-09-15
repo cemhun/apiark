@@ -95,3 +95,67 @@ export function filterVariableSuggestions(
   return suggestions.filter((s) => s.name.toLowerCase().includes(q));
 }
 
+/**
+ * Returns the currently resolved `{{variable}}` map (collection variables,
+ * root .env, active environment, secrets, globals, and session overrides
+ * merged together — see environment-store.getResolvedVariables()).
+ * Automatically refreshes whenever the active environment/collection or any
+ * variable layer changes. Used to determine whether a `{{name}}` reference
+ * used in a request field is defined (for highlighting).
+ */
+export function useResolvedVariables(): Record<string, string> {
+  const activeCollectionPath = useEnvironmentStore((s) => s.activeCollectionPath);
+  const activeEnvironmentName = useEnvironmentStore((s) => s.activeEnvironmentName);
+  const environments = useEnvironmentStore((s) => s.environments);
+  const runtimeOverrides = useEnvironmentStore((s) => s.runtimeOverrides);
+  const globals = useEnvironmentStore((s) => s.globals);
+  const collectionVariables = useEnvironmentStore((s) => s.collectionVariables);
+  const [resolved, setResolved] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    useEnvironmentStore
+      .getState()
+      .getResolvedVariables()
+      .then((vars) => {
+        if (!cancelled) setResolved(vars);
+      })
+      .catch(() => {
+        if (!cancelled) setResolved({});
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeCollectionPath, activeEnvironmentName, environments, runtimeOverrides, globals, collectionVariables]);
+
+  return resolved;
+}
+
+/** Extract all unique `{{variableName}}` references from arbitrary text. */
+export function extractVariableRefs(text: string): string[] {
+  const matches = text.match(/\{\{([^}]+)\}\}/g);
+  if (!matches) return [];
+  return [...new Set(matches.map((m) => m.slice(2, -2)))];
+}
+
+/** Split text into alternating plain-text and `{{variable}}` segments. */
+export function splitTextSegments(
+  text: string,
+): { type: "text" | "var"; value: string }[] {
+  const segments: { type: "text" | "var"; value: string }[] = [];
+  const regex = /\{\{([^}]+)\}\}/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({ type: "text", value: text.slice(lastIndex, match.index) });
+    }
+    segments.push({ type: "var", value: match[1] });
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    segments.push({ type: "text", value: text.slice(lastIndex) });
+  }
+  return segments;
+}
