@@ -232,6 +232,42 @@ fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// Move a file or folder into a different directory (keeps the same basename).
+pub fn move_item(path: &Path, dest_dir: &Path) -> Result<PathBuf, String> {
+    if !path.exists() {
+        return Err(format!("Item does not exist: {}", path.display()));
+    }
+    if !dest_dir.is_dir() {
+        return Err(format!("Destination is not a directory: {}", dest_dir.display()));
+    }
+
+    let file_name = path
+        .file_name()
+        .ok_or("Cannot determine item name")?
+        .to_os_string();
+    let new_path = dest_dir.join(&file_name);
+
+    if new_path == path {
+        return Ok(new_path);
+    }
+
+    // Prevent moving a folder into itself or a descendant
+    if path.is_dir() {
+        let src = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+        let dest = dest_dir.canonicalize().unwrap_or_else(|_| dest_dir.to_path_buf());
+        if dest == src || dest.starts_with(&src) {
+            return Err("Cannot move a folder into itself or a descendant".to_string());
+        }
+    }
+
+    if new_path.exists() {
+        return Err("A file or folder with that name already exists in the destination".to_string());
+    }
+
+    fs::rename(path, &new_path).map_err(|e| format!("Failed to move: {e}"))?;
+    Ok(new_path)
+}
+
 /// Rename a file or folder.
 pub fn rename_item(path: &Path, new_name: &str) -> Result<PathBuf, String> {
     let parent = path.parent().ok_or("Cannot get parent directory")?;

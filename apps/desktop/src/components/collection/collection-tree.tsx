@@ -32,6 +32,12 @@ import { CookieJarDialog } from "@/components/collection/cookie-jar-dialog";
 import { exportCollectionToFile } from "@/lib/export-collection";
 import { saveFolderOrder } from "@/lib/tauri-api";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import {
+  useCollectionDndStore,
+  resolveDropTarget,
+  type DndDragItem,
+  type DndDropTarget,
+} from "@/stores/collection-dnd-store";
 
 // Global event to ensure only one context menu is open at a time
 const CLOSE_ALL_MENUS = "collection-tree:close-all-menus";
@@ -106,22 +112,109 @@ function flattenTree(
 ): void {
   const filtered = searchQuery ? nodes.filter((n) => nodeMatchesSearch(n, searchQuery)) : nodes;
   for (const node of filtered) {
-    if (node.type === "folder") {
-      flattenTree(node.children, expandedPaths, collectionPath, collectionName, searchQuery, depth, parentDir, result);
-      continue;
-    }
     result.push({ node, depth, collectionPath, collectionName, parentDir });
     if (node.type !== "request") {
       const isExpanded = expandedPaths.has(node.path) || !!searchQuery;
       if (isExpanded && node.children.length > 0) {
         flattenTree(
-          node.children, expandedPaths, collectionPath,
+          node.children,
+          expandedPaths,
+          collectionPath,
           node.type === "collection" ? node.name : collectionName,
-          searchQuery, depth + 1, node.path, result,
+          searchQuery,
+          depth + 1,
+          node.path,
+          result,
         );
       }
     }
   }
+}
+
+function orderKeyFromPath(path: string): string {
+  const name = path.substring(path.lastIndexOf("/") + 1);
+  return name.replace(/\.(yaml|yml)$/, "");
+}
+
+function findDirChildren(
+  collections: CollectionNode[],
+  dirPath: string,
+): CollectionNode[] | null {
+  for (const col of collections) {
+    if (col.type !== "collection" && col.type !== "folder") continue;
+    if (col.path === dirPath) return col.children;
+    const nested = findDirChildrenInNodes(col.children, dirPath);
+    if (nested) return nested;
+  }
+  return null;
+}
+
+function findDirChildrenInNodes(
+  nodes: CollectionNode[],
+  dirPath: string,
+): CollectionNode[] | null {
+  for (const node of nodes) {
+    if (node.type === "folder" || node.type === "collection") {
+      if (node.path === dirPath) return node.children;
+      const nested = findDirChildrenInNodes(node.children, dirPath);
+      if (nested) return nested;
+    }
+  }
+  return null;
+}
+
+async function commitDrop(drag: DndDragItem, drop: DndDropTarget): Promise<void> {
+  const collectionStore = useCollectionStore.getState();
+
+  // Already inside this folder and dropping "into" it — no-op
+  if (drop.kind === "into" && drag.parentDir === drop.destDir) return;
+
+  const sameParent = drag.parentDir === drop.destDir;
+
+  if (sameParent && drop.kind === "before") {
+    const siblings =
+      findDirChildren(collectionStore.collections, drag.parentDir) ?? [];
+    const from = siblings.findIndex((n) => n.path === drag.path);
+    if (from === -1) return;
+
+    const reordered = [...siblings];
+    const [moved] = reordered.splice(from, 1);
+    const newTo = reordered.findIndex((n) => n.path === drop.path);
+    if (newTo === -1) return;
+    reordered.splice(newTo, 0, moved);
+
+    await saveFolderOrder(
+      drag.parentDir,
+      reordered.map((n) => getOrderKey(n)),
+    );
+    await collectionStore.refreshCollection(drag.collectionPath);
+    return;
+  }
+
+  // Cross-folder / cross-collection move
+  await collectionStore.moveItem(
+    drag.path,
+    drop.destDir,
+    drag.collectionPath,
+    drop.collectionPath,
+  );
+
+  // Place the item at the intended index in the destination folder order
+  const destChildren =
+    findDirChildren(useCollectionStore.getState().collections, drop.destDir) ?? [];
+  const keys = destChildren
+    .map((n) => getOrderKey(n))
+    .filter((k) => k !== drag.orderKey);
+
+  let insertAt = keys.length;
+  if (drop.kind === "before") {
+    const targetKey = orderKeyFromPath(drop.path);
+    const idx = keys.indexOf(targetKey);
+    insertAt = idx === -1 ? keys.length : idx;
+  }
+  keys.splice(insertAt, 0, drag.orderKey);
+  await saveFolderOrder(drop.destDir, keys);
+  await collectionStore.refreshCollection(drop.collectionPath);
 }
 
 // ── Main component ──
@@ -143,7 +236,7 @@ export function CollectionTree({
   searchQuery = "",
   parentRef: externalParentRef,
 }: CollectionTreeProps) {
-  const { expandedPaths, refreshCollection } = useCollectionStore();
+  const { expandedPaths } = useCollectionStore();
   const internalParentRef = useRef<HTMLDivElement>(null);
   const scrollRef = externalParentRef ?? internalParentRef;
 
@@ -160,95 +253,61 @@ export function CollectionTree({
     overscan: 15,
   });
 
-  // ── Manual drag state ──
-  // draggingIdx: index in flatNodes of the item being dragged
-  // overIdx: index where the drop indicator should appear (item the cursor is over)
+  // ── Manual drag state (shared store enables cross-collection drops) ──
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
-  const [overIdx, setOverIdx] = useState<number | null>(null);
-  // Overlay position (follows mouse)
   const [overlayPos, setOverlayPos] = useState({ x: 0, y: 0 });
-
-  const dragStateRef = useRef<{
-    idx: number;
-    startY: number;
-    scrollTop: number;
-  } | null>(null);
+  const dropTarget = useCollectionDndStore((s) => s.dropTarget);
 
   const flatNodesRef = useRef(flatNodes);
   flatNodesRef.current = flatNodes;
 
-  // Compute which flatNode index the mouse Y corresponds to
-  const getIdxFromClientY = useCallback((clientY: number): number | null => {
-    const scroll = scrollRef.current;
-    if (!scroll) return null;
-    const rect = scroll.getBoundingClientRect();
-    const relativeY = clientY - rect.top + scroll.scrollTop;
-    const idx = Math.floor(relativeY / ROW_HEIGHT);
-    const clamped = Math.max(0, Math.min(flatNodesRef.current.length - 1, idx));
-    return clamped;
-  }, [scrollRef]);
-
   const handleDragStart = useCallback((idx: number, e: React.PointerEvent) => {
+    const flat = flatNodesRef.current[idx];
+    if (!flat || flat.node.type === "collection") return;
     e.preventDefault();
+    e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragStateRef.current = {
-      idx,
-      startY: e.clientY,
-      scrollTop: scrollRef.current?.scrollTop ?? 0,
-    };
     setDraggingIdx(idx);
-    setOverIdx(idx);
     setOverlayPos({ x: e.clientX, y: e.clientY });
-  }, [scrollRef]);
+    useCollectionDndStore.getState().startDrag(
+      {
+        path: flat.node.path,
+        type: flat.node.type === "folder" ? "folder" : "request",
+        parentDir: flat.parentDir,
+        collectionPath: flat.collectionPath,
+        orderKey: getOrderKey(flat.node),
+        name: flat.node.name,
+      },
+      { x: e.clientX, y: e.clientY },
+    );
+  }, []);
 
   useEffect(() => {
     if (draggingIdx === null) return;
 
     const onMove = (e: PointerEvent) => {
       setOverlayPos({ x: e.clientX, y: e.clientY });
-      const idx = getIdxFromClientY(e.clientY);
-      if (idx === null) return;
-      const nodes = flatNodesRef.current;
-      const dragFlat = nodes[draggingIdx];
-      const overFlat = nodes[idx];
-      // Only allow within same parent
-      if (dragFlat && overFlat && dragFlat.parentDir === overFlat.parentDir) {
-        setOverIdx(idx);
-      }
+      const dnd = useCollectionDndStore.getState();
+      dnd.setOverlayPos({ x: e.clientX, y: e.clientY });
+      if (!dnd.dragItem) return;
+      dnd.setDropTarget(resolveDropTarget(e.clientX, e.clientY, dnd.dragItem));
     };
 
-      const onUp = async (_e: PointerEvent) => {
-      const fromIdx = draggingIdx;
-      const toIdx = overIdx;
+    const onUp = async () => {
+      const dnd = useCollectionDndStore.getState();
+      const drag = dnd.dragItem;
+      const drop = dnd.dropTarget;
       setDraggingIdx(null);
-      setOverIdx(null);
-      dragStateRef.current = null;
+      dnd.endDrag();
 
-      if (toIdx === null || fromIdx === toIdx) return;
+      if (!drag || !drop) return;
+      if (drag.path === drop.path) return;
 
-      const nodes = flatNodesRef.current;
-      const dragFlat = nodes[fromIdx];
-      const overFlat = nodes[toIdx];
-      if (!dragFlat || !overFlat || dragFlat.parentDir !== overFlat.parentDir) return;
-
-      const siblings = nodes.filter(
-        (f) => f.parentDir === dragFlat.parentDir && f.depth === dragFlat.depth,
-      );
-      const from = siblings.findIndex((f) => f.node.path === dragFlat.node.path);
-      const to = siblings.findIndex((f) => f.node.path === overFlat.node.path);
-      if (from === -1 || to === -1 || from === to) return;
-
-      const reordered = [...siblings];
-      const [moved] = reordered.splice(from, 1);
-      reordered.splice(to, 0, moved);
-
-      const order = reordered.map((f) => getOrderKey(f.node));
       try {
-        await saveFolderOrder(dragFlat.parentDir, order);
-        await refreshCollection(collectionPath);
+        await commitDrop(drag, drop);
       } catch (err) {
         import("@/stores/toast-store").then(({ useToastStore }) =>
-          useToastStore.getState().showError(`Failed to reorder items: ${err}`),
+          useToastStore.getState().showError(`Failed to move item: ${err}`),
         );
       }
     };
@@ -259,7 +318,7 @@ export function CollectionTree({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-  }, [draggingIdx, overIdx, getIdxFromClientY, refreshCollection, collectionPath]);
+  }, [draggingIdx]);
 
   if (flatNodes.length === 0) return null;
 
@@ -278,10 +337,17 @@ export function CollectionTree({
       {virtualizer.getVirtualItems().map((virtualRow) => {
         const flat = flatNodes[virtualRow.index];
         const isDragging = draggingIdx === virtualRow.index;
-        const isOver = overIdx === virtualRow.index && draggingIdx !== null && draggingIdx !== virtualRow.index;
+        const isDropBefore =
+          dropTarget?.kind === "before" && dropTarget.path === flat.node.path;
+        const isDropInto =
+          dropTarget?.kind === "into" && dropTarget.path === flat.node.path;
         return (
           <div
             key={flat.node.path}
+            data-drop-path={flat.node.path}
+            data-drop-parent={flat.parentDir}
+            data-drop-collection={flat.collectionPath}
+            data-drop-type={flat.node.type}
             style={{
               position: "absolute",
               top: 0,
@@ -290,10 +356,13 @@ export function CollectionTree({
               height: `${virtualRow.size}px`,
               transform: `translateY(${virtualRow.start}px)`,
               opacity: isDragging ? 0 : 1,
+              outline: isDropInto ? "1px solid var(--color-accent)" : undefined,
+              outlineOffset: isDropInto ? -1 : undefined,
+              borderRadius: isDropInto ? 4 : undefined,
+              background: isDropInto ? "color-mix(in srgb, var(--color-accent) 12%, transparent)" : undefined,
             }}
           >
-            {/* Drop indicator */}
-            {isOver && (
+            {isDropBefore && (
               <div style={{
                 position: "absolute",
                 top: 0, left: 8, right: 8,

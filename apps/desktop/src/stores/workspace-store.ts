@@ -45,12 +45,9 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
     if (!workspace) return;
 
     const { useCollectionStore } = await import("@/stores/collection-store");
-    const currentCollections = useCollectionStore.getState().collections
-      .filter((c) => c.type === "collection")
-      .map((c) => c.path);
-    for (const path of currentCollections) {
-      useCollectionStore.getState().closeCollection(path);
-    }
+    // Clear all collections in one update so EnvironmentSelector / EnvironmentsPanel
+    // don't fire loadEnvironments for intermediate leftover paths from the old workspace.
+    useCollectionStore.getState().closeAllCollections();
 
     const { useTabStore } = await import("@/stores/tab-store");
     // Persist any unsaved edits before the tabs are torn down — this must
@@ -67,12 +64,10 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
       useTabStore.getState().closeTab(tab.id);
     }
 
+    // Switch the active workspace *before* loading environments so the
+    // environment store's stale-path guard sees the new workspace membership.
     set({ activeWorkspaceId: id });
     localStorage.setItem("apiark-active-workspace-dir", workspace.dir);
-
-    for (const path of workspace.collectionPaths) {
-      useCollectionStore.getState().openCollection(path).catch(() => {});
-    }
 
     // Reset stale environment state from the previous workspace before loading
     // the new one, otherwise the environment selector keeps showing an
@@ -82,10 +77,19 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
       environments: [],
       activeEnvironmentName: null,
       activeCollectionPath: null,
+      runtimeOverrides: {},
+      globals: {},
+      collectionVariables: {},
     });
 
+    // Load environments for the new workspace first (awaited) so the header
+    // dropdown reflects the correct list even if collection trees are still opening.
     if (workspace.collectionPaths.length > 0) {
-      useEnvironmentStore.getState().loadEnvironments(workspace.collectionPaths[0]).catch(() => {});
+      await useEnvironmentStore.getState().loadEnvironments(workspace.collectionPaths[0]);
+    }
+
+    for (const path of workspace.collectionPaths) {
+      useCollectionStore.getState().openCollection(path).catch(() => {});
     }
   },
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useCollectionStore } from "@/stores/collection-store";
+import { useCollectionDndStore } from "@/stores/collection-dnd-store";
 import { useTabStore } from "@/stores/tab-store";
 import { CollectionTree } from "@/components/collection/collection-tree";
 import { EnvironmentSelector } from "@/components/environment/environment-selector";
@@ -719,6 +720,9 @@ function CollectionHeader({
   const { expandedPaths, toggleExpand, renameItem, createRequest, refreshCollection } = useCollectionStore();
   const { openTab } = useTabStore();
   const isExpanded = expandedPaths.has(collection.path);
+  const dropTarget = useCollectionDndStore((s) => s.dropTarget);
+  const isDropInto =
+    dropTarget?.kind === "into" && dropTarget.path === collection.path;
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const [newRequestName, setNewRequestName] = useState("");
@@ -771,10 +775,16 @@ function CollectionHeader({
       <div
         role="button"
         tabIndex={0}
+        data-drop-path={collection.path}
+        data-drop-parent={collection.path}
+        data-drop-collection={collection.path}
+        data-drop-type="collection"
         onClick={() => toggleExpand(collection.path)}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") toggleExpand(collection.path); }}
         onContextMenu={onContextMenu}
-        className="group flex w-full cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-left text-sm hover:bg-(--color-elevated)"
+        className={`group flex w-full cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-left text-sm hover:bg-(--color-elevated) ${
+          isDropInto ? "bg-(--color-accent)/15 ring-1 ring-(--color-accent)" : ""
+        }`}
       >
         {isExpanded ? (
           <ChevronDown className="h-3.5 w-3.5 shrink-0 text-(--color-text-muted)" />
@@ -974,19 +984,20 @@ function EnvironmentsPanel({
   const { t } = useTranslation();
   const { environments, activeEnvironmentName, setActiveEnvironment, loadEnvironments } =
     useEnvironmentStore();
-  const { collections } = useCollectionStore();
   const [editingEnv, setEditingEnv] = useState<EnvironmentData | null>(null);
   const [newEnvOpen, setNewEnvOpen] = useState(false);
 
-  const collectionPath =
-    collections.find((c) => c.type === "collection")?.path ?? null;
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+  const collectionPath = useWorkspaceStore(
+    (s) => s.workspaces.find((w) => w.id === s.activeWorkspaceId)?.collectionPaths[0] ?? null,
+  );
 
-  // Load environments when panel mounts with a collection
+  // Load environments when the active workspace's first collection changes
   useEffect(() => {
     if (collectionPath) {
       loadEnvironments(collectionPath);
     }
-  }, [collectionPath, loadEnvironments]);
+  }, [activeWorkspaceId, collectionPath, loadEnvironments]);
 
   const handleSave = async (env: EnvironmentData) => {
     if (!collectionPath) return;
@@ -1059,7 +1070,9 @@ function EnvironmentsPanel({
         const { open: openDialog } = await import("@tauri-apps/plugin-dialog");
         const selected = await openDialog({ directory: true, multiple: false });
         if (selected) {
-          await useCollectionStore.getState().openCollection(selected as string);
+          // Add to the active workspace so the env panel (which keys off
+          // workspace.collectionPaths) picks it up and reloads environments.
+          await useWorkspaceStore.getState().addCollection(selected as string);
         }
       } catch (err) {
         import("@/stores/toast-store").then(({ useToastStore }) =>

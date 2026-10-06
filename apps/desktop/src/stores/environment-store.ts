@@ -37,6 +37,22 @@ interface EnvironmentState {
   applyCollectionVariableMutations: (mutations: Record<string, string | null>) => void;
 }
 
+/** Monotonic counter so in-flight loads from a previous workspace/collection are ignored. */
+let loadGeneration = 0;
+
+/** Returns false when `collectionPath` is no longer part of the active workspace. */
+async function isPathStillActive(collectionPath: string): Promise<boolean> {
+  try {
+    const { useWorkspaceStore } = await import("@/stores/workspace-store");
+    const ws = useWorkspaceStore.getState().activeWorkspace();
+    // Before workspaces finish scanning, allow the load through.
+    if (!ws || !useWorkspaceStore.getState().loaded) return true;
+    return ws.collectionPaths.includes(collectionPath);
+  } catch {
+    return true;
+  }
+}
+
 export const useEnvironmentStore = create<EnvironmentState>((set, get) => ({
   environments: [],
   activeEnvironmentName: null,
@@ -46,8 +62,13 @@ export const useEnvironmentStore = create<EnvironmentState>((set, get) => ({
   collectionVariables: {},
 
   loadEnvironments: async (collectionPath) => {
+    const generation = ++loadGeneration;
     try {
       const envs = await loadEnvironmentsApi(collectionPath);
+      // A newer loadEnvironments call started (e.g. workspace switch) — discard this result.
+      if (generation !== loadGeneration) return;
+      if (!(await isPathStillActive(collectionPath))) return;
+
       const { activeEnvironmentName } = get();
       // Re-validate the currently selected environment against the freshly
       // loaded list. If it no longer exists (e.g. it belonged to a different
@@ -67,18 +88,22 @@ export const useEnvironmentStore = create<EnvironmentState>((set, get) => ({
             : null,
       });
     } catch (err) {
+      if (generation !== loadGeneration) return;
       import("@/stores/toast-store").then(({ useToastStore }) =>
         useToastStore.getState().showError(`Failed to load environments: ${err}`),
       );
     }
+    if (generation !== loadGeneration) return;
     try {
       const globals = await loadGlobalsApi(collectionPath);
+      if (generation !== loadGeneration) return;
       set({ globals });
     } catch {
       // Not fatal - globals just start empty for this session.
     }
     try {
       const defaults = await getCollectionDefaults(collectionPath);
+      if (generation !== loadGeneration) return;
       set({ collectionVariables: defaults.variables ?? {} });
     } catch {
       // Not fatal - collection variables just start empty for this session.

@@ -352,6 +352,15 @@ pub async fn rename_item(path: String, new_name: String) -> Result<String, Strin
 }
 
 #[tauri::command]
+pub async fn move_item(path: String, dest_dir: String) -> Result<String, String> {
+    let item_path = Path::new(&path);
+    let dest = Path::new(&dest_dir);
+    tracing::info!(path = %path, dest_dir = %dest_dir, "Moving item");
+    let new_path = collection::move_item(item_path, dest)?;
+    Ok(new_path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
 pub async fn create_sample_collection(parent_dir: Option<String>) -> Result<String, String> {
     let base_parent = if let Some(dir) = parent_dir {
         std::path::PathBuf::from(dir)

@@ -6,6 +6,7 @@ import {
   createFolder as createFolderApi,
   deleteItem as deleteItemApi,
   renameItem as renameItemApi,
+  moveItem as moveItemApi,
   watchCollection,
   unwatchCollection,
   restoreFromTrash,
@@ -29,6 +30,8 @@ interface CollectionState {
 
   openCollection: (path: string) => Promise<void>;
   closeCollection: (path: string) => void;
+  /** Close every open collection in a single state update (avoids intermediate UI effects). */
+  closeAllCollections: () => void;
   refreshCollection: (path: string) => Promise<void>;
   toggleExpand: (path: string) => void;
   createRequest: (
@@ -51,6 +54,13 @@ interface CollectionState {
     path: string,
     newName: string,
     collectionPath: string,
+  ) => Promise<string>;
+  /** Move a request or folder into destDir. Refreshes source and destination collections. */
+  moveItem: (
+    path: string,
+    destDir: string,
+    sourceCollectionPath: string,
+    destCollectionPath: string,
   ) => Promise<string>;
   undoLastAction: () => Promise<void>;
   dismissMigration: () => void;
@@ -163,6 +173,16 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
         (c) => !(c.type === "collection" && c.path === path),
       ),
     }));
+  },
+
+  closeAllCollections: () => {
+    const { collections } = get();
+    for (const c of collections) {
+      if (c.type === "collection") {
+        unwatchCollection(c.path).catch(() => {});
+      }
+    }
+    set({ collections: [], expandedPaths: new Set() });
   },
 
   refreshCollection: async (path) => {
@@ -318,6 +338,51 @@ export const useCollectionStore = create<CollectionState>((set, get) => ({
       newName,
       collectionPath,
     });
+    return newPath;
+  },
+
+  moveItem: async (path, destDir, sourceCollectionPath, destCollectionPath) => {
+    const newPath = await moveItemApi(path, destDir);
+
+    // Update open tabs whose paths were affected
+    const { useTabStore } = await import("@/stores/tab-store");
+    useTabStore.setState((state) => ({
+      tabs: state.tabs.map((t) => {
+        if (!t.filePath) return t;
+        if (t.filePath === path) {
+          return {
+            ...t,
+            filePath: newPath,
+            collectionPath: destCollectionPath,
+            conflictState: null,
+          };
+        }
+        // Folder move: rewrite nested paths
+        if (t.filePath.startsWith(path + "/")) {
+          return {
+            ...t,
+            filePath: newPath + t.filePath.slice(path.length),
+            collectionPath: destCollectionPath,
+            conflictState: null,
+          };
+        }
+        return t;
+      }),
+    }));
+    useTabStore.getState().persistTabs();
+
+    // Expand destination so the moved item is visible
+    set((state) => {
+      const next = new Set(state.expandedPaths);
+      next.add(destDir);
+      next.add(destCollectionPath);
+      return { expandedPaths: next };
+    });
+
+    await get().refreshCollection(sourceCollectionPath);
+    if (destCollectionPath !== sourceCollectionPath) {
+      await get().refreshCollection(destCollectionPath);
+    }
     return newPath;
   },
 

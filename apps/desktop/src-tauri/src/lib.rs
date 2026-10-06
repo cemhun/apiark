@@ -25,8 +25,8 @@ use commands::audit::{audit_clear, audit_get_logs, audit_log_action, AuditState}
 use commands::backup::{export_app_state, import_app_state};
 use commands::collection::{
     create_collection, create_folder, create_request, create_sample_collection, create_workspace,
-    delete_item, get_collection_defaults, open_collection, read_request_file, rename_item,
-    rename_workspace, save_folder_order, save_request_file, scan_workspaces,
+    delete_item, get_collection_defaults, move_item, open_collection, read_request_file,
+    rename_item, rename_workspace, save_folder_order, save_request_file, scan_workspaces,
     update_collection_defaults,
 };
 use commands::cookies::{clear_cookie_jar, delete_cookie, get_cookie_jar};
@@ -272,6 +272,7 @@ pub fn run() {
             create_folder,
             delete_item,
             rename_item,
+            move_item,
             save_folder_order,
             create_sample_collection,
             create_collection,

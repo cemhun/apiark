@@ -1,24 +1,26 @@
 import { useEffect, forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useEnvironmentStore } from "@/stores/environment-store";
-import { useCollectionStore } from "@/stores/collection-store";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 export const EnvironmentSelector = forwardRef<HTMLSelectElement>(
   function EnvironmentSelector(_props, ref) {
     const { t } = useTranslation();
     const { environments, activeEnvironmentName, setActiveEnvironment, loadEnvironments } =
       useEnvironmentStore();
-    const { collections } = useCollectionStore();
+    // Prefer the active workspace's declared collection paths over the live
+    // collections tree — the tree updates asynchronously as collections open,
+    // which previously caused stale loads during workspace switches.
+    const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+    const collectionPaths = useWorkspaceStore(
+      (s) => s.workspaces.find((w) => w.id === s.activeWorkspaceId)?.collectionPaths,
+    );
 
-    // Load environments when collections change
     useEffect(() => {
-      if (collections.length > 0) {
-        const firstCollection = collections[0];
-        if (firstCollection.type === "collection") {
-          loadEnvironments(firstCollection.path);
-        }
+      if (collectionPaths && collectionPaths.length > 0) {
+        loadEnvironments(collectionPaths[0]);
       }
-    }, [collections, loadEnvironments]);
+    }, [activeWorkspaceId, collectionPaths, loadEnvironments]);
 
     if (environments.length === 0) {
       return (

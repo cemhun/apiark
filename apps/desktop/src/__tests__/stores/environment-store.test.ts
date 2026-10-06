@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useEnvironmentStore } from "@/stores/environment-store";
+import { loadEnvironments as loadEnvironmentsApi } from "@/lib/tauri-api";
 
 // Mock the Tauri API
 vi.mock("@/lib/tauri-api", () => ({
@@ -12,15 +13,28 @@ vi.mock("@/lib/tauri-api", () => ({
     apiKey: "dev-key",
   }),
   loadRootDotenv: vi.fn().mockResolvedValue({}),
+  loadGlobals: vi.fn().mockResolvedValue({}),
+  saveGlobals: vi.fn().mockResolvedValue(undefined),
+  getCollectionDefaults: vi.fn().mockResolvedValue({ variables: {} }),
+  updateCollectionDefaults: vi.fn().mockResolvedValue(undefined),
 }));
+
+const mockedLoadEnvironments = vi.mocked(loadEnvironmentsApi);
 
 describe("Environment Store", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+    mockedLoadEnvironments.mockResolvedValue([
+      { name: "development", variables: { baseUrl: "http://localhost:3000", apiKey: "dev-key" }, secrets: [] },
+      { name: "production", variables: { baseUrl: "https://api.prod.com" }, secrets: ["apiKey"] },
+    ]);
     useEnvironmentStore.setState({
       environments: [],
       activeEnvironmentName: null,
       activeCollectionPath: null,
       runtimeOverrides: {},
+      globals: {},
+      collectionVariables: {},
     });
   });
 
@@ -71,5 +85,33 @@ describe("Environment Store", () => {
     await useEnvironmentStore.getState().loadEnvironments("/test/collection");
     expect(useEnvironmentStore.getState().activeEnvironmentName).toBe("production");
   });
-});
 
+  it("ignores a stale load that finishes after a newer workspace load", async () => {
+    let resolveOld!: (value: unknown) => void;
+    const oldLoad = new Promise((resolve) => {
+      resolveOld = resolve;
+    });
+
+    mockedLoadEnvironments
+      .mockImplementationOnce(() => oldLoad as Promise<never>)
+      .mockResolvedValueOnce([
+        { name: "staging", variables: { baseUrl: "https://staging.example" }, secrets: [] },
+      ]);
+
+    const stale = useEnvironmentStore.getState().loadEnvironments("/old/workspace/collection");
+    const fresh = useEnvironmentStore.getState().loadEnvironments("/new/workspace/collection");
+
+    await fresh;
+    expect(useEnvironmentStore.getState().environments.map((e) => e.name)).toEqual(["staging"]);
+    expect(useEnvironmentStore.getState().activeCollectionPath).toBe("/new/workspace/collection");
+
+    // Old response arrives late — must not overwrite the new workspace's environments.
+    resolveOld([
+      { name: "legacy", variables: {}, secrets: [] },
+    ]);
+    await stale;
+
+    expect(useEnvironmentStore.getState().environments.map((e) => e.name)).toEqual(["staging"]);
+    expect(useEnvironmentStore.getState().activeCollectionPath).toBe("/new/workspace/collection");
+  });
+});

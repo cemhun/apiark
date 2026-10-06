@@ -182,6 +182,13 @@ export async function renameItem(
   return await invoke<string>("rename_item", { path, newName });
 }
 
+export async function moveItem(
+  path: string,
+  destDir: string,
+): Promise<string> {
+  return await invoke<string>("move_item", { path, destDir });
+}
+
 // ── Collection Defaults ──
 
 export async function getCollectionDefaults(
